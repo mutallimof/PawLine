@@ -33,9 +33,16 @@ export default function HomePage() {
   }, []);
 
   const filtered = useMemo(() => {
-    if (filter === 'all') return cases;
-    if (filter === 'resolved') return cases.filter((c) => c.status === 'resolved');
-    return cases.filter((c) => c.status !== 'resolved');
+    let list = cases;
+    if (filter === 'resolved') list = cases.filter((c) => c.status === 'resolved');
+    else if (filter === 'active') list = cases.filter((c) => c.status !== 'resolved');
+    // Escalated-and-still-open cases have waited longest — they lead the feed.
+    return [...list].sort((a, b) => {
+      const ae = a.status === 'open' && a.escalated_at ? 1 : 0;
+      const be = b.status === 'open' && b.escalated_at ? 1 : 0;
+      if (ae !== be) return be - ae;
+      return b.created_at.localeCompare(a.created_at);
+    });
   }, [cases, filter]);
 
   return (

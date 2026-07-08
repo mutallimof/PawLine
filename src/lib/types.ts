@@ -35,6 +35,7 @@ export interface Profile {
   role: ProfileRole;
   xp: number;
   cases_helped: number;
+  partner_org?: string | null;
   /* Private fields below exist only on YOUR OWN profile (get_my_profile
      RPC); other users' directory entries omit them — see api.ts S1 note. */
   locale?: string;
@@ -75,6 +76,7 @@ export interface RescueCase {
   rescuer_lng: number | null;
   rescuer_loc_at: string | null;
   hidden: boolean;
+  escalated_at: string | null;
   created_at: string;
   accepted_at: string | null;
   resolved_at: string | null;

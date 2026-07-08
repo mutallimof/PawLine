@@ -109,7 +109,18 @@ export async function createCase(input: NewCaseInput): Promise<string> {
   // also gets a perceptual hash (computed on-device, milliseconds) so the
   // duplicate scan below can compare images.
   for (const file of input.photos) {
-    const url = await uploadCasePhoto(file, caseId);
+    // Bad-signal resilience (audit P1): each photo gets three attempts with
+    // backoff before we declare the network dead.
+    let url = '';
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        url = await uploadCasePhoto(file, caseId);
+        break;
+      } catch (e) {
+        if (attempt === 3) throw e;
+        await new Promise((r) => setTimeout(r, 700 * attempt));
+      }
+    }
     const phash = await computeDHash(file).catch(() => null);
     const { error: photoErr } = await supabase
       .from('case_photos')
@@ -507,3 +518,41 @@ export async function adminDeleteSponsor(id: string): Promise<void> {
   const { error } = await supabase.from('sponsors').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
+
+
+// ---------------------------------------------------------------------------
+// Metrics & partners (migration 006)
+// ---------------------------------------------------------------------------
+
+export interface AdminStats {
+  cases_total: number;
+  cases_open_now: number;
+  cases_resolved_30d: number;
+  median_accept_min: number | null;
+  median_resolve_min: number | null;
+  active_rescuers_30d: number;
+  reports_by_guests_7d: number;
+}
+
+export async function fetchAdminStats(): Promise<AdminStats> {
+  const { data, error } = await supabase.rpc('admin_get_stats');
+  if (error) throw new Error(error.message);
+  return (data as AdminStats[])[0];
+}
+
+export interface PublicImpact {
+  helped_this_month: number;
+  helped_total: number;
+  median_accept_min: number | null;
+  rescuers_30d: number;
+  clinics: number;
+}
+
+export async function fetchPublicImpact(): Promise<PublicImpact> {
+  const { data, error } = await supabase.rpc('get_public_impact');
+  if (error) throw new Error(error.message);
+  return (data as PublicImpact[])[0];
+}
+
+export const adminSetPartner = (profileId: string, org: string | null) =>
+  rpc('admin_set_partner', { p_profile: profileId, p_org: org });

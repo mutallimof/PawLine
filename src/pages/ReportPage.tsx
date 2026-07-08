@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createCase } from '../lib/api';
+import { isNetworkError, queueReport } from '../lib/offlineQueue';
 import { PinDropMap } from '../components/maps';
 import { useToast } from '../components/ui';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
@@ -27,12 +28,31 @@ export default function ReportPage() {
   const [addressHint, setAddressHint] = useState('');
   const [guestName, setGuestName] = useState('');
   const [location, setLocation] = useState<LatLng>(DEFAULT_CENTER);
+  // Audit P2: DEFAULT_CENTER is a plausible-looking wrong location. Track
+  // whether the user (or GPS/search) ever actually set the pin; the map's
+  // automatic first emit doesn't count.
+  const [locationTouched, setLocationTouched] = useState(false);
+  const firstEmit = useRef(true);
+  const onPinChange = (p: LatLng) => {
+    setLocation(p);
+    if (firstEmit.current) {
+      firstEmit.current = false;
+      return;
+    }
+    setLocationTouched(true);
+  };
   const [submitting, setSubmitting] = useState(false);
 
   // Center the pin on the reporter's location as soon as the page opens —
   // in the field, the reporter is almost always standing next to the animal.
   useEffect(() => {
-    getCurrentPosition().then(setLocation).catch(() => {});
+    getCurrentPosition()
+      .then((p) => {
+        setLocation(p);
+        setLocationTouched(true);
+        firstEmit.current = false;
+      })
+      .catch(() => {});
   }, []);
 
   const addPhotos = (files: FileList | null) => {
@@ -55,23 +75,47 @@ export default function ReportPage() {
     if (photos.length === 0) return toast(t('report.needPhoto'));
     if (description.trim().length < 3) return toast(t('report.needDescription'));
 
+    if (submitting) return; // double-tap guard (audit P1)
+    // Audit P2: don't let a never-touched default pin ship silently.
+    if (!locationTouched && !window.confirm(t('report.confirmDefaultLoc'))) return;
+
+    const input = {
+      animal,
+      description: description.trim(),
+      lat: location.lat,
+      lng: location.lng,
+      addressHint: addressHint.trim(),
+      guestName: user ? null : guestName.trim() || null,
+      reporterId: user?.id ?? null,
+      photos: photos.map((p) => p.file),
+    };
+
+    // Fully offline? Queue immediately — don't make the person watch a
+    // spinner fail next to an injured animal.
+    if (!navigator.onLine) {
+      await queueReport(input);
+      photos.forEach((p) => URL.revokeObjectURL(p.url));
+      toast(t('report.queuedOffline'));
+      navigate('/');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const caseId = await createCase({
-        animal,
-        description: description.trim(),
-        lat: location.lat,
-        lng: location.lng,
-        addressHint: addressHint.trim(),
-        guestName: user ? null : guestName.trim() || null,
-        reporterId: user?.id ?? null,
-        photos: photos.map((p) => p.file),
-      });
+      const caseId = await createCase(input);
       photos.forEach((p) => URL.revokeObjectURL(p.url));
       toast(t('report.success'));
       navigate(`/case/${caseId}`);
     } catch (e) {
-      toast(e instanceof Error ? e.message : t('common.error'));
+      if (isNetworkError(e)) {
+        // Signal died mid-flight (audit P1) — persist and reassure.
+        await queueReport(input);
+        photos.forEach((p) => URL.revokeObjectURL(p.url));
+        toast(t('report.queuedOffline'));
+        navigate('/');
+      } else {
+        toast(e instanceof Error ? e.message : t('common.error'));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -157,7 +201,7 @@ export default function ReportPage() {
         {t('report.locationHelp')}
       </p>
       <div style={{ marginBottom: 16 }}>
-        <PinDropMap value={location} onChange={setLocation} />
+        <PinDropMap value={location} onChange={onPinChange} />
       </div>
 
       <label className="field">

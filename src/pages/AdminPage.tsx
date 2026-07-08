@@ -13,6 +13,10 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   adminBanUser,
+  adminSetPartner,
+  fetchAdminStats,
+  searchProfiles,
+  type AdminStats,
   adminDeleteSponsor,
   adminHideCase,
   adminHideCaseMessage,
@@ -26,16 +30,21 @@ import {
 import { useToast } from '../components/ui';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
-import type { ContentReport, Sponsor, Vet } from '../lib/types';
+import type { ContentReport, Profile, Sponsor, Vet } from '../lib/types';
 
-type Tab = 'vets' | 'reports' | 'sponsors';
+type Tab = 'stats' | 'vets' | 'reports' | 'sponsors';
 
 export default function AdminPage() {
   const { profile } = useAuth();
-  const [tab, setTab] = useState<Tab>('vets');
+  const [tab, setTab] = useState<Tab>('stats');
   const [pendingVets, setPendingVets] = useState<Vet[]>([]);
   const [reports, setReports] = useState<ContentReport[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  // Partner badge management
+  const [partnerQuery, setPartnerQuery] = useState('');
+  const [partnerResults, setPartnerResults] = useState<Profile[]>([]);
+  const [partnerOrg, setPartnerOrg] = useState('');
   const [busy, setBusy] = useState(false);
   const toast = useToast();
 
@@ -47,14 +56,16 @@ export default function AdminPage() {
 
   const reload = useCallback(async () => {
     try {
-      const [v, r, s] = await Promise.all([
+      const [v, r, s, st] = await Promise.all([
         fetchPendingVets(),
         fetchOpenReports(),
         fetchSponsors(),
+        fetchAdminStats(),
       ]);
       setPendingVets(v);
       setReports(r);
       setSponsors(s);
+      setStats(st);
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
     }
@@ -90,7 +101,7 @@ export default function AdminPage() {
       <h1 className="page-title">{t('admin.title')}</h1>
 
       <div className="segmented" style={{ margin: '12px 0 16px' }}>
-        {(['vets', 'reports', 'sponsors'] as Tab[]).map((tb) => (
+        {(['stats', 'vets', 'reports', 'sponsors'] as Tab[]).map((tb) => (
           <button
             key={tb}
             className={`segmented__option${tab === tb ? ' active' : ''}`}
@@ -102,6 +113,49 @@ export default function AdminPage() {
           </button>
         ))}
       </div>
+
+      {/* ---- Stats: the survival metric front and center ---- */}
+      {tab === 'stats' && (
+        <>
+          {!stats && <div className="spinner" />}
+          {stats && (
+            <div className="impact-grid">
+              <div className="impact-stat" style={{ gridColumn: '1 / -1' }}>
+                <div className="impact-stat__value impact-stat__value--big">
+                  {stats.median_accept_min !== null ? `${stats.median_accept_min} min` : '—'}
+                </div>
+                <div className="impact-stat__label">{t('admin.statMedianAccept')}</div>
+              </div>
+              <div className="impact-stat">
+                <div className="impact-stat__value">{stats.cases_open_now}</div>
+                <div className="impact-stat__label">{t('admin.statOpen')}</div>
+              </div>
+              <div className="impact-stat">
+                <div className="impact-stat__value">{stats.cases_resolved_30d}</div>
+                <div className="impact-stat__label">{t('admin.statResolved30')}</div>
+              </div>
+              <div className="impact-stat">
+                <div className="impact-stat__value">
+                  {stats.median_resolve_min !== null ? `${stats.median_resolve_min} min` : '—'}
+                </div>
+                <div className="impact-stat__label">{t('admin.statMedianResolve')}</div>
+              </div>
+              <div className="impact-stat">
+                <div className="impact-stat__value">{stats.active_rescuers_30d}</div>
+                <div className="impact-stat__label">{t('admin.statRescuers')}</div>
+              </div>
+              <div className="impact-stat">
+                <div className="impact-stat__value">{stats.reports_by_guests_7d}</div>
+                <div className="impact-stat__label">{t('admin.statGuest7')}</div>
+              </div>
+              <div className="impact-stat">
+                <div className="impact-stat__value">{stats.cases_total}</div>
+                <div className="impact-stat__label">{t('home.filter.all')}</div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {/* ---- Vet approvals ---- */}
       {tab === 'vets' && (
@@ -246,6 +300,48 @@ export default function AdminPage() {
             >
               {t('admin.add')}
             </button>
+          </div>
+
+          {/* Partner badge: mark a user account as a verified org rep */}
+          <div className="card" style={{ padding: 14, marginBottom: 16 }}>
+            <div className="section-label" style={{ marginTop: 0 }}>{t('admin.partnerTitle')}</div>
+            <label className="field">
+              <span className="field__label">{t('dm.searchPeople')}</span>
+              <input
+                value={partnerQuery}
+                onChange={(e) => {
+                  setPartnerQuery(e.target.value);
+                  if (e.target.value.trim().length >= 2 && profile) {
+                    void searchProfiles(e.target.value.trim(), profile.id)
+                      .then((r) => setPartnerResults(r.slice(0, 5)))
+                      .catch(() => {});
+                  } else setPartnerResults([]);
+                }}
+              />
+            </label>
+            <label className="field">
+              <span className="field__label">{t('admin.partnerOrg')}</span>
+              <input value={partnerOrg} onChange={(e) => setPartnerOrg(e.target.value)} maxLength={60} />
+            </label>
+            {partnerResults.map((p) => (
+              <div key={p.id} className="list-row">
+                <div className="list-row__main">
+                  <div className="list-row__title">{p.display_name}</div>
+                  {p.partner_org && <div className="list-row__sub">🤝 {p.partner_org}</div>}
+                </div>
+                <button
+                  className="btn btn--secondary btn--small"
+                  disabled={busy}
+                  onClick={run(async () => {
+                    await adminSetPartner(p.id, partnerOrg.trim() || null);
+                    setPartnerResults([]);
+                    setPartnerQuery('');
+                  })}
+                >
+                  {t('admin.partnerSet')}
+                </button>
+              </div>
+            ))}
           </div>
 
           {sponsors.map((sp) => (

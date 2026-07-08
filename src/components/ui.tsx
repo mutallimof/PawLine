@@ -231,6 +231,9 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
         <IconBell /> {t('nav.alerts')}
         {unreadAlerts > 0 && <span className="nav-badge">{Math.min(unreadAlerts, 99)}</span>}
       </NavLink>
+      <NavLink to="/impact" className={({ isActive }) => item(isActive)}>
+        <span className="side-nav__emoji">💚</span> {t('impact.title')}
+      </NavLink>
       <NavLink to="/profile" className={({ isActive }) => item(isActive)}>
         <IconUser /> {t('nav.profile')}
       </NavLink>

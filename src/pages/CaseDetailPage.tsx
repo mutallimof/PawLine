@@ -88,7 +88,15 @@ export default function CaseDetailPage() {
     try {
       await fn();
     } catch (e) {
-      toast(e instanceof Error ? e.message : t('common.error'));
+      const msg = e instanceof Error ? e.message : '';
+      // Audit P4: a double-tap or a race with another actor lands here with a
+      // scary server message; the honest translation is "someone got there
+      // first" — the realtime refresh shows the new state momentarily.
+      if (/no pending request|already accepted/i.test(msg)) {
+        toast(t('case.alreadyHandled'));
+      } else {
+        toast(msg || t('common.error'));
+      }
     } finally {
       setBusy(false);
     }

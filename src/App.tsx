@@ -8,8 +8,9 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useNotifications } from './hooks/useRealtime';
-import { BottomNav, SideNav, ToastProvider } from './components/ui';
+import { BottomNav, SideNav, ToastProvider, useToast } from './components/ui';
 import { getLocale, subscribeLocale, t } from './i18n';
+import { flushQueue } from './lib/offlineQueue';
 
 import HomePage from './pages/HomePage';
 import ReportPage from './pages/ReportPage';
@@ -21,6 +22,7 @@ import DmThreadPage from './pages/DmThreadPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AuthPage from './pages/AuthPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ImpactPage from './pages/ImpactPage';
 import VetsPage from './pages/VetsPage';
 import AdminPage from './pages/AdminPage';
 import { PrivacyPage } from './components/extras';
@@ -43,6 +45,19 @@ function Shell() {
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+
+  // Offline-queued reports (audit P1): submit on start and on reconnect.
+  const toast = useToast();
+  useEffect(() => {
+    const flush = () =>
+      void flushQueue().then((n) => {
+        if (n > 0) toast(t('report.queuedSent'));
+      });
+    flush();
+    window.addEventListener('online', flush);
+    return () => window.removeEventListener('online', flush);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const up = () => setOnline(true);
@@ -96,6 +111,7 @@ function Shell() {
         <Route path="/vet-dashboard" element={<VetDashboardPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/impact" element={<ImpactPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
         {!hideNav && <BottomNav unreadAlerts={unread} />}
