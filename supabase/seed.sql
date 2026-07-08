@@ -1,0 +1,30 @@
+-- ============================================================================
+-- PawLine — optional demo seed
+-- ----------------------------------------------------------------------------
+-- Vets sign up through the app, but for local testing you can create a few
+-- demo clinics around Baku. This requires auth users to exist first, so the
+-- easiest flow is:
+--
+--   1. Sign up 2–3 accounts in the app with role "Vet clinic"
+--      (the sign-up form has a toggle).
+--   2. Complete the clinic form in the app, OR run an UPDATE like the one
+--      below with the real profile ids.
+--
+-- Example (replace the UUID with a real vet profile id):
+--
+-- insert into public.vets (id, clinic_name, address, phone, lat, lng)
+-- values (
+--   '00000000-0000-0000-0000-000000000000',
+--   'Baku Central Veterinary Clinic',
+--   'Nizami St 203, Baku',
+--   '+994 12 555 01 23',
+--   40.3755, 49.8328
+-- );
+--
+-- Useful Baku coordinates for testing:
+--   City centre     40.3777, 49.8920
+--   28 May area     40.3797, 49.8482
+--   Yasamal         40.3872, 49.8143
+--   Ganjlik         40.4008, 49.8501
+-- ============================================================================
+select 'See comments in this file for how to seed demo vets.' as note;
