@@ -296,4 +296,17 @@ export const tr: Dict = {
   'onboard.next': 'İleri',
   'onboard.start': 'Başlayalım',
   'onboard.skip': 'Geç',
+
+  // Onboarding + feed states (excellence pass UI completion)
+  'onb.1title': 'Zor durumda bir hayvan mı gördünüz?',
+  'onb.1body': 'Fotoğraf çekin, olduğu yere pin bırakın, birkaç kelime yazın. Bildirim bundan ibaret — hesap gerekmez.',
+  'onb.2title': 'Yakındaki bir kurtarıcı devreye girer',
+  'onb.2body': 'Yakındaki insanlar uyarılır ve biri yardım etmeyi üstlenir. Her adımı canlı takip edebilirsiniz.',
+  'onb.3title': 'Onaylı bir veterinerde güvende',
+  'onb.3body': 'Kurtarıcı hayvanı onaylı bir kliniğe götürür. Herkes tedaviye katkıda bulunabilir — doğrudan veterinerle, asla uygulama üzerinden değil.',
+  'onb.next': 'İleri',
+  'onb.skip': 'Geç',
+  'onb.start': 'Başlayalım 🐾',
+  'home.stillWaiting': 'Hâlâ kurtarıcı bekleniyor',
+  'home.loadError': 'Vakalar yüklenemedi — bağlantınızı kontrol edin.',
 };

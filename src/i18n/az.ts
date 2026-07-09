@@ -296,4 +296,17 @@ export const az: Dict = {
   'onboard.next': 'İrəli',
   'onboard.start': 'Başlayaq',
   'onboard.skip': 'Ötür',
+
+  // Onboarding + feed states (excellence pass UI completion)
+  'onb.1title': 'Çətinlikdə olan heyvan gördünüz?',
+  'onb.1body': 'Foto çəkin, olduğu yerə nişan qoyun, bir neçə söz yazın. Bildiriş elə budur — hesab tələb olunmur.',
+  'onb.2title': 'Yaxınlıqdakı xilasedici köməyə gəlir',
+  'onb.2body': 'Yaxınlıqdakı insanlar xəbərdar edilir və onlardan biri kömək etməyi öhdəsinə götürür. Hər addımı canlı izləyə bilərsiniz.',
+  'onb.3title': 'Təsdiqlənmiş baytarda təhlükəsizdir',
+  'onb.3body': 'Xilasedici heyvanı təsdiqlənmiş klinikaya aparır. Hər kəs müalicəyə dəstək ola bilər — birbaşa baytarla, heç vaxt tətbiq üzərindən yox.',
+  'onb.next': 'Növbəti',
+  'onb.skip': 'Ötür',
+  'onb.start': 'Başlayaq 🐾',
+  'home.stillWaiting': 'Hələ də xilasedici gözlənilir',
+  'home.loadError': 'Hadisələri yükləmək mümkün olmadı — bağlantınızı yoxlayın.',
 };

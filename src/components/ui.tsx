@@ -100,7 +100,15 @@ export function CaseCard({
     : null;
 
   return (
-    <Link to={`/case/${caseData.id}`} className="card case-card">
+    <Link
+      to={`/case/${caseData.id}`}
+      className={`card case-card case-card--${
+        caseData.status === 'resolved' ? 'resolved'
+        : caseData.status === 'en_route' ? 'enroute'
+        : caseData.status === 'open' ? 'open'
+        : 'progress'
+      }${caseData.status === 'open' && caseData.escalated_at ? ' case-card--escalated' : ''}`}
+    >
       <div className={`case-card__photo${photo ? '' : ' case-card__photo--empty'}`}>
         {photo ? (
           <img src={photo.url} alt={`${caseData.animal} — ${statusLabel(caseData.status)}`} />
@@ -120,6 +128,9 @@ export function CaseCard({
               <span>·</span>
               <span>{distance}</span>
             </>
+          )}
+          {caseData.status === 'open' && caseData.escalated_at && (
+            <span className="case-card__waiting">{t('home.stillWaiting')}</span>
           )}
           {caseData.address_hint && (
             <>

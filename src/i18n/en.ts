@@ -294,4 +294,17 @@ export const en = {
   'onboard.next': 'Next',
   'onboard.start': 'Let’s go',
   'onboard.skip': 'Skip',
+
+  // Onboarding + feed states (excellence pass UI completion)
+  'onb.1title': 'See an animal in trouble?',
+  'onb.1body': 'Take a photo, drop a pin where it is, add a few words. That’s the whole report — no account needed.',
+  'onb.2title': 'A nearby rescuer steps up',
+  'onb.2body': 'People close by get alerted and one of them commits to help. You can follow every step live.',
+  'onb.3title': 'Safe at a verified vet',
+  'onb.3body': 'The rescuer brings the animal to a verified clinic. Anyone can chip in for treatment — directly with the vet, never through the app.',
+  'onb.next': 'Next',
+  'onb.skip': 'Skip',
+  'onb.start': 'Let’s go 🐾',
+  'home.stillWaiting': 'Still waiting for a rescuer',
+  'home.loadError': 'Couldn’t load cases — check your connection.',
 };

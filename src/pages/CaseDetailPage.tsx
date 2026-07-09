@@ -47,6 +47,10 @@ export default function CaseDetailPage() {
 
   const [watching, setWatching] = useState(false);
   const [dupFlags, setDupFlags] = useState<DuplicateFlag[]>([]);
+  // The emotional peak: celebrate only a LIVE transition to resolved, not
+  // every visit to an already-resolved case.
+  const [justResolved, setJustResolved] = useState(false);
+  const prevStatus = useRef<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [vetNote, setVetNote] = useState('');
   const deliveryPhotoInput = useRef<HTMLInputElement>(null);
@@ -54,6 +58,14 @@ export default function CaseDetailPage() {
   useEffect(() => {
     if (id && user) isWatching(id, user.id).then(setWatching).catch(() => {});
   }, [id, user]);
+
+  useEffect(() => {
+    const status = caseData?.status ?? null;
+    if (prevStatus.current && prevStatus.current !== 'resolved' && status === 'resolved') {
+      setJustResolved(true);
+    }
+    prevStatus.current = status;
+  }, [caseData?.status]);
 
   // Possible-duplicate flags (soft, advisory — see migration 003 §6).
   useEffect(() => {
@@ -218,7 +230,25 @@ export default function CaseDetailPage() {
         })}
 
         {caseData.status === 'resolved' && (
-          <div className="banner banner--success">{t('case.resolvedBanner')}</div>
+          <div className={`banner banner--success${justResolved ? ' celebrate' : ''}`}>
+            {t('case.resolvedBanner')}
+            {justResolved &&
+              ['-70px','-30px','25px','65px'].map((dx, i) => (
+                <span
+                  key={i}
+                  className="paw-burst"
+                  aria-hidden="true"
+                  style={{
+                    ['--dx' as string]: dx,
+                    ['--dy' as string]: `${-46 - i * 10}px`,
+                    ['--rot' as string]: `${i % 2 ? 24 : -20}deg`,
+                    animationDelay: `${i * 90}ms`,
+                  }}
+                >
+                  🐾
+                </span>
+              ))}
+          </div>
         )}
 
         {/* People involved */}

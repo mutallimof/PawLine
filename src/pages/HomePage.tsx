@@ -18,7 +18,7 @@ type View = 'map' | 'feed';
 type Filter = 'active' | 'all' | 'resolved';
 
 export default function HomePage() {
-  const { cases, loading } = useCases();
+  const { cases, loading, error, reload } = useCases();
   const [vets, setVets] = useState<Vet[]>([]);
   const [view, setView] = useState<View>('map');
   const [filter, setFilter] = useState<Filter>('active');
@@ -92,8 +92,24 @@ export default function HomePage() {
           phones, the desktop split view shows both side by side. */}
       <div className={`home-layout home-layout--${view}`}>
         <div className="home-feed">
-          {loading && <div className="spinner" />}
-          {!loading && filtered.length === 0 && (
+          {loading && (
+            <div aria-hidden="true">
+              <div className="skeleton skeleton--card" />
+              <div className="skeleton skeleton--card" />
+              <div className="skeleton skeleton--card" />
+            </div>
+          )}
+          {!loading && error && (
+            <div className="banner banner--warn" role="alert">
+              {t('home.loadError')}
+              <div style={{ marginTop: 8 }}>
+                <button className="btn btn--ghost btn--small" onClick={() => void reload()}>
+                  {t('common.retry')}
+                </button>
+              </div>
+            </div>
+          )}
+          {!loading && !error && filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state__icon">🐾</div>
               {t('home.empty')}

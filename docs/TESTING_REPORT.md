@@ -185,6 +185,18 @@ trilingual 3-step onboarding.
   (S4 coalesce, S8 NULL-logic) — fixed and re-verified. Client rewritten
   to column-scoped profile queries + own-profile RPC; production build
   green.
-- **Pass 3 (after features + UI overhaul):** logged in the commits that
-  introduce them — see git history and §C addendum at the bottom of this
-  file after those commits.
+- **Pass 3 (features + UI completion, executed):**
+  - 006 replayed on the scratch database on top of 001→005; then
+    functionally tested: `escalate_stale_cases()` escalated a seeded
+    45-minute open case exactly once (idempotent on re-run) and created the
+    widened notification for a nearby user; `get_public_impact()` returns
+    aggregates to anon; `admin_get_stats()` correctly rejects non-admins.
+  - UI re-trace of all six personas on the new surfaces: onboarding →
+    (simulated offline) report queue path; escalated cases sort first and
+    render the "still waiting" pulse in feed and photo-pin pulse on map;
+    skeletons replace the bare feed spinner; feed error path shows retry;
+    resolution celebration fires only on a live status transition (not on
+    revisits — guarded by previous-status tracking).
+  - Found during re-trace: maps.tsx's new pin system referenced CSS classes
+    that didn't exist yet (pins would have rendered unstyled) — the pin
+    design-system layer (§14) was written and verified in the build.

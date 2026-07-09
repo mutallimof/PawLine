@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { useNotifications } from './hooks/useRealtime';
 import { BottomNav, SideNav, ToastProvider, useToast } from './components/ui';
 import { getLocale, subscribeLocale, t } from './i18n';
+import Onboarding, { shouldShowOnboarding } from './components/Onboarding';
 import { flushQueue } from './lib/offlineQueue';
 
 import HomePage from './pages/HomePage';
@@ -39,6 +40,7 @@ function Shell() {
   const { unread } = useNotifications(user?.id);
   const location = useLocation();
   const [online, setOnline] = useState(navigator.onLine);
+  const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
   // Re-render the whole tree when the language changes so every t() call
   // re-evaluates. Also keep <html lang> in sync for accessibility.
   const locale = useSyncExternalStore(subscribeLocale, getLocale);
@@ -81,6 +83,10 @@ function Shell() {
   // Full-screen chat routes replace the tab bar with their composer.
   const hideNav =
     /^\/messages\/.+/.test(location.pathname) || /\/chat$/.test(location.pathname);
+
+  if (showOnboarding) {
+    return <Onboarding onDone={() => setShowOnboarding(false)} />;
+  }
 
   return (
     <div className="app-frame">

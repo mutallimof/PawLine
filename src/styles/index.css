@@ -1480,3 +1480,228 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================================
+   14. EXCELLENCE PASS — pins, wallet cards, skeletons, celebration, onboarding
+   ============================================================================ */
+
+/* ---- Status color families (tints for card surfaces, solids for rings) ---- */
+:root {
+  --open-50: #fdeae7;  --open-100: #fbd9d4;  --open-500: #d93a2b;  --open-700: #a82415;
+  --prog-50: #fdf3e2;  --prog-100: #fae6c3;  --prog-500: #e09b26;  --prog-700: #9c6a12;
+  --route-50: #e9f2f8; --route-100: #d5e6f1; --route-500: #3f7fae; --route-700: #2b5c81;
+  --done-50: #e8f5ee;  --done-100: #d2ebdd;  --done-500: #3f9b6c;  --done-700: #2b7350;
+}
+
+/* ---- §pins: the case IS the pin --------------------------------------------
+   Photo pin = circular photo + status ring + pointer tip. Sizes chosen so a
+   thumb can hit it (44px visual, larger hit area via padding). */
+.pin-photo {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3.5px solid var(--open-500);
+  background: var(--card);
+  box-shadow: 0 3px 10px rgba(51, 36, 31, 0.35);
+  cursor: pointer;
+  transform: translate(-50%, -100%); /* anchor: pointer tip at latlng */
+  transition: transform var(--t-fast);
+}
+.pin-photo::after { /* pointer tip, inherits ring color */
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border: inherit;
+  border-top: none;
+  border-left: none;
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 0 0 3px 0;
+  background: currentColor;
+}
+.pin-photo img,
+.pin-photo .pin-photo__emoji {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background: var(--coral-soft);
+  z-index: 1; /* photo covers the tip's top half */
+}
+.pin-photo:hover { transform: translate(-50%, -100%) scale(1.08); }
+.pin-photo--open     { border-color: var(--open-500);  color: var(--open-500); }
+.pin-photo--progress { border-color: var(--prog-500);  color: var(--prog-500); }
+.pin-photo--enroute  { border-color: var(--route-500); color: var(--route-500); }
+.pin-photo--resolved { border-color: var(--done-500);  color: var(--done-500); opacity: 0.78; }
+.pin-photo--escalated { animation: pulse-ring 1.6s ease-out infinite; }
+.pin-photo__check { /* resolved: small green check badge */
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--done-500);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  z-index: 2;
+}
+
+/* Compact dots (high-density degradation, bikeshare-style) */
+.pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 1px 5px rgba(51, 36, 31, 0.4);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: transform var(--t-fast);
+}
+.pin-dot:hover { transform: translate(-50%, -50%) scale(1.35); }
+.pin-dot--open     { background: var(--open-500); }
+.pin-dot--progress { background: var(--prog-500); }
+.pin-dot--enroute  { background: var(--route-500); }
+.pin-dot--resolved { background: var(--done-500); opacity: 0.75; }
+
+/* Cluster bubbles — tinted urgent if any member is open */
+.pin-cluster {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 3px solid var(--ink-soft);
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(51, 36, 31, 0.3);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: transform var(--t-fast);
+}
+.pin-cluster:hover { transform: translate(-50%, -50%) scale(1.08); }
+.pin-cluster--open { border-color: var(--open-500); color: var(--open-700); }
+
+/* Vet pin — unmistakably different: white rounded square, coral cross */
+.pin-vet {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: #fff;
+  border: 2.5px solid var(--route-500);
+  color: var(--route-500);
+  font-size: 19px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 9px rgba(51, 36, 31, 0.3);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+.pin-rescuer {
+  font-size: 24px;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* ---- Wallet-style status-colored case cards --------------------------------
+   The card surface itself carries the status family (reference: modern
+   banking-app home feeds) — status readable before a single word is. */
+.case-card { border-width: 1.5px; }
+.case-card--open     { background: var(--open-50);  border-color: var(--open-100); }
+.case-card--progress { background: var(--prog-50);  border-color: var(--prog-100); }
+.case-card--enroute  { background: var(--route-50); border-color: var(--route-100); }
+.case-card--resolved { background: var(--done-50);  border-color: var(--done-100); }
+.case-card--escalated { box-shadow: 0 0 0 2px var(--open-100), var(--shadow-soft); }
+
+.case-card__waiting {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--open-700);
+  margin-top: 6px;
+}
+.case-card__waiting::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--open-500);
+  animation: pulse-dot 1.6s ease-out infinite;
+}
+
+/* ---- Skeleton loading (no bare spinners on the feed) ---- */
+@keyframes shimmer {
+  from { background-position: -400px 0; }
+  to   { background-position: 400px 0; }
+}
+.skeleton {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, #f1e7df 25%, #faf3ee 50%, #f1e7df 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+.skeleton--card { height: 108px; margin-bottom: 12px; }
+
+/* ---- Resolution celebration (the emotional peak) ----
+   Paw prints burst gently from the success banner — once, then calm. */
+@keyframes paw-pop {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+  25%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.15) rotate(var(--rot)); }
+}
+.celebrate { position: relative; overflow: visible; }
+.celebrate .paw-burst {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  font-size: 20px;
+  pointer-events: none;
+  animation: paw-pop 1.3s cubic-bezier(0.2, 0.8, 0.4, 1) both;
+}
+.banner--success.celebrate { animation: page-enter 400ms both; }
+.paw-trail--complete .paw-trail__icon { animation: pulse-ring 1.8s ease-out 2; }
+
+/* ---- Onboarding (first run) ---- */
+.onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: var(--sand);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  text-align: center;
+  animation: page-enter var(--t-med) both;
+}
+.onboarding__icon { font-size: 76px; margin-bottom: 18px; animation: float-paw 3.6s ease-in-out infinite; }
+.onboarding__title { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin: 0 0 10px; }
+.onboarding__body { color: var(--ink-soft); font-size: 15.5px; max-width: 420px; margin: 0 0 26px; }
+.onboarding__dots { display: flex; gap: 8px; margin-bottom: 26px; }
+.onboarding__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); transition: background var(--t-fast), transform var(--t-fast); }
+.onboarding__dot.active { background: var(--coral); transform: scale(1.25); }
+.onboarding__actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 340px; }
