@@ -200,3 +200,12 @@ trilingual 3-step onboarding.
   - Found during re-trace: maps.tsx's new pin system referenced CSS classes
     that didn't exist yet (pins would have rendered unstyled) — the pin
     design-system layer (§14) was written and verified in the build.
+- **Pass 4 (final, executed):** brand-new database → full chain 001→006
+  replayed clean in order; production build green; 258 i18n keys ×3 locales
+  (compiler-enforced parity); every third-party origin grepped from the
+  built bundle matches the CSP allowlist (zero strays); git history reviewed
+  — findings were committed BEFORE fixes, and each fix commit names its
+  findings. Figma note: the connected account authenticated (view-only
+  seat); file creation required an interactive approval that this
+  environment couldn't grant — docs/DESIGN_SYSTEM.md is the committed
+  design source of truth, written for 1:1 Figma recreation.

@@ -57,8 +57,8 @@ docs/ARCHITECTURE.md        ← state machine & notification design, read this n
 1. Go to [supabase.com](https://supabase.com) → New project (pick a region
    close to Azerbaijan, e.g. Frankfurt `eu-central-1`).
 2. Open **SQL Editor** → run `supabase/migrations/001_init.sql`, then
-   `002_locale.sql`, `003_production.sql`, and `004_grants.sql` (in that
-   order). Together
+   `002_locale.sql`, `003_production.sql`, `004_grants.sql`, `005_security.sql`, and
+   `006_features.sql` (in that order). Together
    they create every table, policy, function, trigger, the realtime
    publication, the `case-photos` storage bucket, language preferences,
    and the production layer: admin/moderation, guest rate limiting, vet
