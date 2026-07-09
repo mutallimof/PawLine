@@ -4,6 +4,19 @@ How to run the platform day to day, and where mistakes can cause real harm.
 Written for an operator who is still learning the stack — every routine task
 has an in-app screen; SQL is only for rare one-time actions.
 
+## Security audit status (excellence pass)
+
+A full adversarial audit was performed — every RLS policy and SECURITY
+DEFINER function attacked with impersonated identities against a live
+Postgres replay of the migration chain. Findings, fixes, and the honest
+test log live in `docs/TESTING_REPORT.md`; incident response procedures in
+`docs/OPERATOR_GUIDE.md` Part B. Headline outcomes: user home locations
+are no longer publicly readable (public directory columns only), photos
+can only be attached by a case's own participants, report identity is
+server-forced, guests have a platform-wide spam circuit breaker, rescuer
+live location is erased at delivery, and strict CSP/security headers ship
+with the app.
+
 ## Your routine tasks (all in-app: Profile → 🛠 Admin)
 
 ### Vet approvals (do within ~24h of a signup)
@@ -32,6 +45,23 @@ Possible-duplicate banners resolve themselves on the case pages (reporter,
 rescuer, or you can confirm/dismiss). Nothing to do centrally — but if two
 rescuers head to the same animal, the confirmed-duplicate timeline note
 tells them to coordinate.
+
+### Stats (the health check)
+**Admin → Stats** shows the number that decides whether PawLine survives:
+**median time-to-acceptance** over 30 days, plus resolved counts, active
+rescuers, and approved clinics. Under ~30 minutes = healthy liquidity;
+climbing = recruit rescuers/partners in that area before anything else.
+Escalation runs automatically (open >30 min → wider alert radius + "still
+waiting" treatment) — no action needed from you, but a feed full of
+escalated cases IS the signal to act on supply.
+
+### Partner organizations
+Verified NGOs/shelters get a partner badge and org label: find their
+profile id (`select id, display_name from profiles where display_name
+ilike '%name%';`) then, in SQL editor,
+`select admin_set_partner('THEIR-ID', 'Org Name');` (null to remove).
+Partners see the same public cases everyone does — the badge is trust
+plus the relationship per MONETIZATION.md; no extra data access is granted.
 
 ### Sponsors & partners
 **Admin → Sponsors**: name + logo URL + website. `Partner` entries (shelters,
