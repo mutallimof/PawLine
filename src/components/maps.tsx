@@ -1,20 +1,22 @@
 /**
- * Map components — Google Maps JavaScript API (+ Places for search).
+ * Map components — Google Maps JS API with a custom marker system.
  *
- * Replaced Leaflet/OpenStreetMap in the final pre-deployment pass, primarily
- * for ACCURACY in the launch markets: Google's geocoding/places coverage of
- * Baku and Turkish cities is far stronger than OSM/Nominatim's, and its
- * positioning UX (tiles, gestures) is what local users already trust.
+ * DESIGN (excellence pass): pins ARE the cases.
+ *  - Normal density: each case renders its animal's PHOTO in a circular
+ *    pin with a status-colored ring (open = urgent red, in-progress =
+ *    amber, en-route = blue, resolved = green + dimmed). Escalated open
+ *    cases pulse. Instantly recognizable which case is which.
+ *  - High density: greedy pixel clustering (56px grid). A cluster renders
+ *    as a compact count bubble tinted by "does it contain open cases?";
+ *    tapping zooms to its bounds. Above ~60 visible singles the map
+ *    degrades photo pins to compact status dots (bikeshare-style) so it
+ *    stays legible; tapping any dot still opens the case.
+ *  - Vets are a visually distinct white pin with a coral cross, never
+ *    clustered with cases.
  *
- * Requires VITE_GOOGLE_MAPS_API_KEY (setup: README "Google Maps setup").
- * Without a key every component renders a friendly placeholder — the rest
- * of the app keeps working.
- *
- * Same public API as the previous Leaflet version:
- *   <CasesMap cases vets userLocation focus onRequestLocation />
- *   <PinDropMap value onChange height />
- *   <EnRouteMap caseData />
- *   <LocationSearch onSelect bias? />
+ * Implementation: google.maps.OverlayView-based HTML markers (no mapId /
+ * AdvancedMarker requirement, full CSS control — pin styles live in the
+ * design system, styles/index.css §pins).
  */
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -30,17 +32,11 @@ import { BASE_MAP_OPTIONS, GMAPS_KEY, loadGoogleMaps } from '../lib/gmaps';
 import { t } from '../i18n';
 import { IconCrosshair, animalEmoji } from './Icons';
 
-const STATUS_HEX: Record<string, string> = {
-  open: '#d93a2b',
-  accepted: '#e09b26',
-  vet_selected: '#e09b26',
-  vet_confirmed: '#e09b26',
-  en_route: '#3f7fae',
-  resolved: '#3f9b6c',
-};
+const CLUSTER_PX = 56;   // pins closer than this merge into a cluster
+const DENSITY_LIMIT = 60; // above this many visible singles → compact dots
 
 // ---------------------------------------------------------------------------
-// Shared: create a map inside a ref'd div. Returns null until ready.
+// Base map hook + unavailable state
 // ---------------------------------------------------------------------------
 function useGoogleMap(
   ref: React.RefObject<HTMLDivElement | null>,
@@ -48,7 +44,7 @@ function useGoogleMap(
 ) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [failed, setFailed] = useState(!GMAPS_KEY);
-  const optionsRef = useRef(options); // initial options only
+  const optionsRef = useRef(options);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,42 +73,167 @@ function MapUnavailable({ height }: { height?: number | string }) {
   );
 }
 
-/** Circle marker with an emoji/text glyph — shared look for all pins. */
-function makeMarker(
-  g: typeof google,
-  map: google.maps.Map,
-  position: LatLng,
-  fill: string,
-  glyph: string,
-  onClick?: () => void
-): google.maps.Marker {
-  const marker = new g.maps.Marker({
-    position,
-    map,
-    icon: {
-      path: g.maps.SymbolPath.CIRCLE,
-      scale: 14,
-      fillColor: fill,
-      fillOpacity: 1,
-      strokeColor: '#ffffff',
-      strokeWeight: 2.5,
-    },
-    label: { text: glyph, fontSize: '14px', color: '#ffffff' },
-    optimized: true,
-    clickable: !!onClick,
-  });
-  if (onClick) marker.addListener('click', onClick);
-  return marker;
+// ---------------------------------------------------------------------------
+// HTML overlay marker (factory — the class needs the loaded google object)
+// ---------------------------------------------------------------------------
+interface HtmlMarkerInstance {
+  setMap(map: google.maps.Map | null): void;
 }
 
-function clearMarkers(markers: google.maps.Marker[]) {
-  markers.forEach((m) => m.setMap(null));
-  markers.length = 0;
+type HtmlMarkerCtor = new (
+  position: LatLng,
+  el: HTMLElement
+) => HtmlMarkerInstance & google.maps.OverlayView;
+
+let MarkerClass: HtmlMarkerCtor | null = null;
+
+function getMarkerClass(g: typeof google): HtmlMarkerCtor {
+  if (MarkerClass) return MarkerClass;
+  class HtmlMarker extends g.maps.OverlayView {
+    private el: HTMLElement;
+    private position: LatLng;
+    constructor(position: LatLng, el: HTMLElement) {
+      super();
+      this.position = position;
+      this.el = el;
+      this.el.style.position = 'absolute';
+      this.el.style.transform = 'translate(-50%, -50%)';
+      this.el.style.cursor = 'pointer';
+    }
+    onAdd() {
+      this.getPanes()?.overlayMouseTarget.appendChild(this.el);
+    }
+    draw() {
+      const proj = this.getProjection();
+      if (!proj) return;
+      const pt = proj.fromLatLngToDivPixel(
+        new g.maps.LatLng(this.position.lat, this.position.lng)
+      );
+      if (pt) {
+        this.el.style.left = `${pt.x}px`;
+        this.el.style.top = `${pt.y}px`;
+      }
+    }
+    onRemove() {
+      this.el.remove();
+    }
+  }
+  MarkerClass = HtmlMarker as unknown as HtmlMarkerCtor;
+  return MarkerClass;
 }
 
 // ---------------------------------------------------------------------------
-// Location search — Google Places Text Search, biased to the current map
-// area. Debounced; selecting a result jumps the parent map there.
+// Pin element builders (styles: index.css "Map pins" section)
+// ---------------------------------------------------------------------------
+function statusClass(c: CaseWithDetails): string {
+  if (c.status === 'resolved') return 'resolved';
+  if (c.status === 'en_route') return 'enroute';
+  if (c.status === 'open') return 'open';
+  return 'progress';
+}
+
+function photoPinEl(c: CaseWithDetails, onClick: () => void): HTMLElement {
+  const photo = c.photos?.find((p) => p.kind === 'report') ?? c.photos?.[0];
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = `pin-photo pin-photo--${statusClass(c)}${
+    c.status === 'open' && c.escalated_at ? ' pin-photo--escalated' : ''
+  }`;
+  el.setAttribute('aria-label', `${t(`animal.${c.animal}` as const)} — ${t(`status.${c.status}` as const)}`);
+  if (photo) {
+    const img = document.createElement('img');
+    img.src = photo.url;
+    img.alt = '';
+    img.loading = 'lazy';
+    el.appendChild(img);
+  } else {
+    const span = document.createElement('span');
+    span.className = 'pin-photo__emoji';
+    span.textContent = animalEmoji(c.animal);
+    el.appendChild(span);
+  }
+  if (c.status === 'resolved') {
+    const check = document.createElement('span');
+    check.className = 'pin-photo__check';
+    check.textContent = '✓';
+    el.appendChild(check);
+  }
+  el.addEventListener('click', onClick);
+  return el;
+}
+
+function dotPinEl(c: CaseWithDetails, onClick: () => void): HTMLElement {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = `pin-dot pin-dot--${statusClass(c)}`;
+  el.setAttribute('aria-label', `${t(`animal.${c.animal}` as const)} — ${t(`status.${c.status}` as const)}`);
+  el.addEventListener('click', onClick);
+  return el;
+}
+
+function clusterEl(count: number, hasOpen: boolean, onClick: () => void): HTMLElement {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = `pin-cluster${hasOpen ? ' pin-cluster--open' : ''}`;
+  el.textContent = count > 99 ? '99+' : String(count);
+  el.setAttribute('aria-label', `${count} cases`);
+  el.addEventListener('click', onClick);
+  return el;
+}
+
+function vetPinEl(name: string, onClick: () => void): HTMLElement {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = 'pin-vet';
+  el.textContent = '+';
+  el.setAttribute('aria-label', name);
+  el.title = name;
+  el.addEventListener('click', onClick);
+  return el;
+}
+
+// ---------------------------------------------------------------------------
+// Greedy pixel clustering at the current zoom
+// ---------------------------------------------------------------------------
+interface Cluster {
+  cases: CaseWithDetails[];
+  x: number;
+  y: number;
+}
+
+function clusterCases(
+  g: typeof google,
+  map: google.maps.Map,
+  cases: CaseWithDetails[]
+): Cluster[] {
+  const proj = map.getProjection();
+  const zoom = map.getZoom() ?? DEFAULT_ZOOM;
+  if (!proj) return cases.map((c) => ({ cases: [c], x: 0, y: 0 }));
+  const scale = 2 ** zoom;
+
+  const clusters: Cluster[] = [];
+  for (const c of cases) {
+    const wp = proj.fromLatLngToPoint(new g.maps.LatLng(c.lat, c.lng));
+    if (!wp) continue;
+    const x = wp.x * scale;
+    const y = wp.y * scale;
+    const hit = clusters.find(
+      (cl) => Math.abs(cl.x - x) < CLUSTER_PX && Math.abs(cl.y - y) < CLUSTER_PX
+    );
+    if (hit) {
+      hit.cases.push(c);
+      // keep the bubble anchored near the group's running centroid
+      hit.x = (hit.x * (hit.cases.length - 1) + x) / hit.cases.length;
+      hit.y = (hit.y * (hit.cases.length - 1) + y) / hit.cases.length;
+    } else {
+      clusters.push({ cases: [c], x, y });
+    }
+  }
+  return clusters;
+}
+
+// ---------------------------------------------------------------------------
+// Location search — Google Places Text Search, biased to the map area.
 // ---------------------------------------------------------------------------
 export function LocationSearch({
   onSelect,
@@ -216,7 +337,7 @@ export function LocationSearch({
 }
 
 // ---------------------------------------------------------------------------
-// Main cases map
+// Main cases map — photo pins, clusters, density degradation
 // ---------------------------------------------------------------------------
 export function CasesMap({
   cases,
@@ -228,7 +349,6 @@ export function CasesMap({
   cases: CaseWithDetails[];
   vets: Vet[];
   userLocation: LatLng | null;
-  /** External recenter target (e.g. a location-search result). */
   focus?: LatLng | null;
   onRequestLocation: () => void;
 }) {
@@ -238,29 +358,81 @@ export function CasesMap({
     center: userLocation ?? DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
   });
-  const markers = useRef<google.maps.Marker[]>([]);
+  const markers = useRef<HtmlMarkerInstance[]>([]);
+  const dataRef = useRef({ cases, vets });
+  dataRef.current = { cases, vets };
 
-  // Case + vet pins.
-  useEffect(() => {
+  // Rebuild all pins (data changed, or zoom/pan changed the clustering).
+  const rebuild = useRef(() => {});
+  rebuild.current = () => {
     if (!map) return;
     const g = window.google;
-    clearMarkers(markers.current);
-    for (const c of cases) {
-      markers.current.push(
-        makeMarker(g, map, { lat: c.lat, lng: c.lng }, STATUS_HEX[c.status] ?? '#d93a2b',
-          animalEmoji(c.animal), () => navigate(`/case/${c.id}`))
-      );
-    }
-    for (const v of vets) {
-      markers.current.push(
-        makeMarker(g, map, { lat: v.lat, lng: v.lng }, '#3f7fae', '+', () =>
-          navigate(`/vet/${v.id}`))
-      );
-    }
-    return () => clearMarkers(markers.current);
-  }, [map, cases, vets, navigate]);
+    const Marker = getMarkerClass(g);
 
-  // Recenter on user location / search focus.
+    markers.current.forEach((m) => m.setMap(null));
+    markers.current = [];
+
+    const bounds = map.getBounds();
+    const inView = bounds
+      ? dataRef.current.cases.filter((c) =>
+          bounds.contains(new g.maps.LatLng(c.lat, c.lng)))
+      : dataRef.current.cases;
+
+    const clusters = clusterCases(g, map, inView);
+    const singles = clusters.filter((cl) => cl.cases.length === 1).length;
+    const dense = singles > DENSITY_LIMIT; // scooter-map mode
+
+    for (const cl of clusters) {
+      if (cl.cases.length === 1) {
+        const c = cl.cases[0];
+        const el = dense
+          ? dotPinEl(c, () => navigate(`/case/${c.id}`))
+          : photoPinEl(c, () => navigate(`/case/${c.id}`));
+        const m = new Marker({ lat: c.lat, lng: c.lng }, el);
+        m.setMap(map);
+        markers.current.push(m);
+      } else {
+        const hasOpen = cl.cases.some((c) => c.status !== 'resolved');
+        // anchor the bubble at the members' geographic centroid
+        const lat = cl.cases.reduce((s, c) => s + c.lat, 0) / cl.cases.length;
+        const lng = cl.cases.reduce((s, c) => s + c.lng, 0) / cl.cases.length;
+        const el = clusterEl(cl.cases.length, hasOpen, () => {
+          const b = new g.maps.LatLngBounds();
+          cl.cases.forEach((c) => b.extend(new g.maps.LatLng(c.lat, c.lng)));
+          map.fitBounds(b, 72);
+        });
+        const m = new Marker({ lat, lng }, el);
+        m.setMap(map);
+        markers.current.push(m);
+      }
+    }
+
+    for (const v of dataRef.current.vets) {
+      const m = new Marker(
+        { lat: v.lat, lng: v.lng },
+        vetPinEl(v.clinic_name, () => navigate(`/vet/${v.id}`))
+      );
+      m.setMap(map);
+      markers.current.push(m);
+    }
+  };
+
+  useEffect(() => {
+    if (!map) return;
+    const idle = map.addListener('idle', () => rebuild.current());
+    rebuild.current();
+    return () => {
+      idle.remove();
+      markers.current.forEach((m) => m.setMap(null));
+      markers.current = [];
+    };
+  }, [map]);
+
+  // Data changed → rebuild without waiting for the next idle.
+  useEffect(() => {
+    rebuild.current();
+  }, [cases, vets, map]);
+
   useEffect(() => {
     if (map && userLocation) {
       map.panTo(userLocation);
@@ -291,7 +463,8 @@ export function CasesMap({
 }
 
 // ---------------------------------------------------------------------------
-// Pin-drop picker (report flow, clinic setup)
+// Pin-drop picker (report flow, clinic setup) — unchanged behavior:
+// initial-emit sync, accuracy-aware locate, Places search.
 // ---------------------------------------------------------------------------
 export function PinDropMap({
   value,
@@ -309,18 +482,12 @@ export function PinDropMap({
   const [accuracyM, setAccuracyM] = useState<number | null>(null);
   const accuracyCircle = useRef<google.maps.Circle | null>(null);
 
-  // The map is the source of truth while dragging; lastEmitted lets us tell
-  // an external `value` change (GPS resolved in the parent) apart from the
-  // echo of our own emit.
   const lastEmitted = useRef(value);
   const emit = (p: LatLng) => {
     lastEmitted.current = p;
     onChange(p);
   };
 
-  // ACCURACY FIX: emit the initial center exactly once as soon as the map is
-  // live. Previously the parent's value and the visible pin could disagree
-  // until the first drag — a submitted report could carry a stale location.
   useEffect(() => {
     if (!map) return;
     const c = map.getCenter();
@@ -339,7 +506,6 @@ export function PinDropMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
-  // External value change → recenter.
   useEffect(() => {
     if (!map) return;
     const moved =
@@ -371,7 +537,7 @@ export function PinDropMap({
     setLocating(true);
     setGeoError(null);
     try {
-      const pos = await getCurrentPosition(); // two-reading, accuracy-aware
+      const pos = await getCurrentPosition();
       if (map) {
         map.panTo(pos);
         map.setZoom(pos.accuracy <= 40 ? 18 : 16);
@@ -379,7 +545,6 @@ export function PinDropMap({
       emit(pos);
       showAccuracy(pos, pos.accuracy);
     } catch (e) {
-      // Never fail silently — say exactly why, dragging remains the fallback.
       setGeoError(t(`geo.${geoErrorKind(e)}` as const));
     } finally {
       setLocating(false);
@@ -430,7 +595,7 @@ export function PinDropMap({
 }
 
 // ---------------------------------------------------------------------------
-// En-route mini map: animal origin → vet, plus the rescuer's last shared spot.
+// En-route mini map — photo pin for the animal, vet cross, rescuer dot.
 // ---------------------------------------------------------------------------
 export function EnRouteMap({ caseData }: { caseData: CaseWithDetails }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -438,27 +603,40 @@ export function EnRouteMap({ caseData }: { caseData: CaseWithDetails }) {
     center: { lat: caseData.lat, lng: caseData.lng },
     zoom: 13,
   });
-  const markers = useRef<google.maps.Marker[]>([]);
+  const markers = useRef<HtmlMarkerInstance[]>([]);
 
   useEffect(() => {
     if (!map) return;
     const g = window.google;
-    clearMarkers(markers.current);
+    const Marker = getMarkerClass(g);
+    markers.current.forEach((m) => m.setMap(null));
+    markers.current = [];
 
     const bounds = new g.maps.LatLngBounds();
-    const add = (p: LatLng, fill: string, glyph: string) => {
-      markers.current.push(makeMarker(g, map, p, fill, glyph));
-      bounds.extend(p);
+    const add = (p: LatLng, el: HTMLElement) => {
+      const m = new Marker(p, el);
+      m.setMap(map);
+      markers.current.push(m);
+      bounds.extend(new g.maps.LatLng(p.lat, p.lng));
     };
 
-    add({ lat: caseData.lat, lng: caseData.lng },
-      STATUS_HEX[caseData.status] ?? '#d93a2b', animalEmoji(caseData.animal));
-    if (caseData.vet) add({ lat: caseData.vet.lat, lng: caseData.vet.lng }, '#3f7fae', '+');
-    if (caseData.rescuer_lat && caseData.rescuer_lng)
-      add({ lat: caseData.rescuer_lat, lng: caseData.rescuer_lng }, '#3f7fae', '🚗');
+    add({ lat: caseData.lat, lng: caseData.lng }, photoPinEl(caseData, () => {}));
+    if (caseData.vet) {
+      add({ lat: caseData.vet.lat, lng: caseData.vet.lng },
+        vetPinEl(caseData.vet.clinic_name, () => {}));
+    }
+    if (caseData.rescuer_lat && caseData.rescuer_lng) {
+      const car = document.createElement('div');
+      car.className = 'pin-rescuer';
+      car.textContent = '🚗';
+      add({ lat: caseData.rescuer_lat, lng: caseData.rescuer_lng }, car);
+    }
 
     map.fitBounds(bounds, 48);
-    return () => clearMarkers(markers.current);
+    return () => {
+      markers.current.forEach((m) => m.setMap(null));
+      markers.current = [];
+    };
   }, [map, caseData]);
 
   if (failed) return <MapUnavailable height={220} />;
