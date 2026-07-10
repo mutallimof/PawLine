@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCase } from '../hooks/useRealtime';
 import {
   acceptCase,
+  recordSafetyAck,
   addDeliveryPhoto,
   fetchDuplicateFlags,
   reportContent,
@@ -34,6 +35,7 @@ import { EnRouteMap } from '../components/maps';
 import { Avatar, PawTrail, StatusBadge, useToast } from '../components/ui';
 import { IconBack, IconCamera } from '../components/Icons';
 import { hasKey, t } from '../i18n';
+import { SafetyAck, hasAcceptedSafety } from '../components/legal';
 import type { DuplicateFlag } from '../lib/types';
 import { timeAgo } from '../lib/time';
 import { getCurrentPosition } from '../lib/geo';
@@ -47,6 +49,7 @@ export default function CaseDetailPage() {
 
   const [watching, setWatching] = useState(false);
   const [dupFlags, setDupFlags] = useState<DuplicateFlag[]>([]);
+  const [showSafety, setShowSafety] = useState(false);
   // The emotional peak: celebrate only a LIVE transition to resolved, not
   // every visit to an already-resolved case.
   const [justResolved, setJustResolved] = useState(false);
@@ -113,6 +116,11 @@ export default function CaseDetailPage() {
       setBusy(false);
     }
   };
+
+  const doAccept = run(async () => {
+    await acceptCase(caseData!.id);
+    void recordSafetyAck().catch(() => {}); // durable server record; best effort
+  });
 
   const toggleWatch = run(async () => {
     if (!user) return navigate('/auth');
@@ -295,7 +303,16 @@ export default function CaseDetailPage() {
           {/* Registered user, case open → accept */}
           {caseData.status === 'open' && user && (
             <>
-              <button className="btn btn--primary" disabled={busy} onClick={run(() => acceptCase(caseData.id))}>
+              <button
+                className="btn btn--primary"
+                disabled={busy}
+                onClick={() => {
+                  // First rescue ever → show the safety acknowledgment gate
+                  // right where the risk begins, not buried in settings.
+                  if (hasAcceptedSafety()) void doAccept();
+                  else setShowSafety(true);
+                }}
+              >
                 🐾 {t('case.accept')}
               </button>
               <p className="page-subtitle" style={{ textAlign: 'center' }}>{t('case.acceptNote')}</p>
@@ -467,6 +484,15 @@ export default function CaseDetailPage() {
           ))}
         </div>
       </div>
+    {showSafety && (
+        <SafetyAck
+          onAccept={() => {
+            setShowSafety(false);
+            void doAccept();
+          }}
+          onCancel={() => setShowSafety(false)}
+        />
+      )}
     </div>
   );
 }

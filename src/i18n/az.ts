@@ -371,4 +371,13 @@ export const az: Dict = {
   'notfound.title': 'Səhifə tapılmadı',
   'notfound.body': 'Belə səhifə yoxdur. Kömək lazım olan heyvanlara qayıdaq.',
   'notfound.home': 'Ana səhifə',
+
+  // Pre-launch: settings consolidation + safety acknowledgment
+  'settings.notifications': 'Bildirişlər',
+  'settings.notifManage': 'Bildiriş seçimləri',
+  'settings.notifManageSub': 'Hansı yeni hadisələrin sizə xəbər verəcəyini və ərazinizi seçin',
+  'settings.exportSub': 'Hesabınıza bağlı hər şeyi fayl kimi endirin.',
+  'safety.ackIntro': 'İlk xilasetmənizdən əvvəl təhlükəsizlik haqqında qısa söz. Bu, bir dəfə görünür.',
+  'safety.ackFine': 'Davam etməklə bu riskləri anladığınızı və öz mühakimənizlə hərəkət etdiyinizi təsdiqləyirsiniz. PawLine əlaqələndirmə vasitəsidir, xilasetmə və ya təcili yardım xidməti deyil.',
+  'safety.ackConfirm': 'Anladım — davam et',
 };

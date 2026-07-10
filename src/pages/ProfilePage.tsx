@@ -211,6 +211,10 @@ export default function ProfilePage() {
         </>
       )}
 
+      <Link to="/settings" className="btn btn--secondary" style={{ marginTop: 8 }}>
+        ⚙️ {t('settings.title')}
+      </Link>
+
       {profile.is_admin && (
         <Link to="/admin" className="btn btn--secondary" style={{ marginTop: 8 }}>
           🛠 {t('admin.title')}
@@ -225,12 +229,15 @@ export default function ProfilePage() {
         {t('auth.signOut')}
       </button>
 
-      <Link
-        to="/privacy"
-        style={{ display: 'block', textAlign: 'center', marginTop: 16, fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}
-      >
-        {t('privacy.link')}
-      </Link>
+      <footer className="app-footer">
+        <Link to="/about">{t('legal.about')}</Link>
+        <Link to="/faq">{t('legal.faq')}</Link>
+        <Link to="/safety">{t('legal.safety')}</Link>
+        <Link to="/guidelines">{t('legal.conduct')}</Link>
+        <Link to="/privacy">{t('legal.privacy')}</Link>
+        <Link to="/terms">{t('legal.terms')}</Link>
+        <Link to="/contact">{t('legal.contact')}</Link>
+      </footer>
     </div>
   );
 }

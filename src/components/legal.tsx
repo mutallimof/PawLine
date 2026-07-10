@@ -366,6 +366,74 @@ const FAQ: LocalizedDoc = {
 
 export const TermsPage = () => <DocView doc={TERMS} />;
 export const SafetyPage = () => <DocView doc={SAFETY} />;
+
+// ===========================================================================
+// First-rescue safety acknowledgment gate
+// ---------------------------------------------------------------------------
+// Shown ONCE, right before a user accepts their very first case — where the
+// risk actually begins, not buried in a menu. localStorage is the fast gate;
+// the server also records it durably (recordSafetyAck) so consent survives a
+// cleared browser and can be shown to have happened.
+// ===========================================================================
+const ACK_KEY = 'pawline-safety-ack-v1';
+
+export function hasAcceptedSafety(): boolean {
+  try {
+    return localStorage.getItem(ACK_KEY) === 'yes';
+  } catch {
+    return true; // storage blocked → don't trap the user in a loop
+  }
+}
+
+export function SafetyAck({
+  onAccept,
+  onCancel,
+}: {
+  onAccept: () => void;
+  onCancel: () => void;
+}) {
+  const doc = SAFETY[getLocale()] ?? SAFETY.en;
+  const accept = () => {
+    try {
+      localStorage.setItem(ACK_KEY, 'yes');
+    } catch {
+      /* best effort */
+    }
+    onAccept();
+  };
+
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={doc.title}>
+      <div className="modal-sheet">
+        <div className="modal-sheet__icon" aria-hidden="true">🛡️</div>
+        <h2 className="modal-sheet__title">{doc.title}</h2>
+        <p className="modal-sheet__intro">{t('safety.ackIntro')}</p>
+
+        <ul className="safety-ack__list">
+          {doc.sections.slice(0, 3).map(([heading]) => (
+            <li key={heading}>{heading}</li>
+          ))}
+        </ul>
+
+        <p className="modal-sheet__fineprint">{t('safety.ackFine')}</p>
+
+        <button className="btn btn--primary" onClick={accept}>
+          {t('safety.ackConfirm')}
+        </button>
+        <button className="link-btn" onClick={onCancel} style={{ marginTop: 8, width: '100%' }}>
+          {t('common.cancel')}
+        </button>
+
+        <Link
+          to="/safety"
+          style={{ display: 'block', textAlign: 'center', marginTop: 12, fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}
+        >
+          {t('safety.readFull')}
+        </Link>
+      </div>
+    </div>
+  );
+}
 export const ConductPage = () => <DocView doc={CONDUCT} />;
 export const AboutPage = () => <DocView doc={ABOUT} />;
 export const ContactPage = () => <DocView doc={CONTACT} />;

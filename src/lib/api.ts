@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { uploadCasePhoto } from './photos';
 import { computeDHash } from './phash';
+import { getTurnstileToken, turnstileEnabled } from './turnstile';
 
 // ---------------------------------------------------------------------------
 // Cases
@@ -84,7 +85,19 @@ export async function createCase(input: NewCaseInput): Promise<string> {
   if (!input.reporterId) {
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
-      const { error: anonErr } = await supabase.auth.signInAnonymously();
+      // Optional bot protection: attach a Turnstile token if configured.
+      // If Turnstile is on but fails, we surface a clear error rather than
+      // silently letting a bot through.
+      let captchaToken: string | undefined;
+      if (turnstileEnabled()) {
+        const tok = await getTurnstileToken().catch(() => {
+          throw new Error('captcha-failed');
+        });
+        captchaToken = tok ?? undefined;
+      }
+      const { error: anonErr } = await supabase.auth.signInAnonymously(
+        captchaToken ? { options: { captchaToken } } : undefined
+      );
       if (anonErr) throw new Error(anonErr.message);
     }
   }
@@ -618,15 +631,16 @@ export async function exportMyData(): Promise<unknown> {
  * the operator (documented) or a scheduled cleanup. Cases anonymize via
  * ON DELETE SET NULL / the profile scrub, matching the privacy policy.
  */
-export async function deleteMyAccount(userId: string): Promise<void> {
-  // Remove personal + relational data the user owns. Cases stay (reporter_id
-  // set null keeps rescue history without identity).
-  await supabase.from('push_subscriptions').delete().eq('profile_id', userId);
-  await supabase.from('blocked_users').delete().eq('blocker_id', userId);
-  const { error } = await supabase
-    .from('profiles')
-    .update({ display_name: 'Deleted user', avatar_url: null, home_lat: null, home_lng: null })
-    .eq('id', userId);
+export async function deleteMyAccount(): Promise<void> {
+  // Complete, atomic deletion incl. the auth row (migration 009). Cases keep
+  // their rescue history with identity detached, per the privacy policy.
+  const { error } = await supabase.rpc('delete_my_account');
   if (error) throw new Error(error.message);
   await supabase.auth.signOut();
+}
+
+/** Record the one-time safety acknowledgment on the server (durable). */
+export async function recordSafetyAck(): Promise<void> {
+  const { error } = await supabase.rpc('record_safety_ack');
+  if (error) throw new Error(error.message);
 }

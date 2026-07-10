@@ -369,4 +369,13 @@ export const en = {
   'notfound.title': 'Page not found',
   'notfound.body': 'That page doesn’t exist. Let’s get you back to the animals who need help.',
   'notfound.home': 'Go home',
+
+  // Pre-launch: settings consolidation + safety acknowledgment
+  'settings.notifications': 'Notifications',
+  'settings.notifManage': 'Notification preferences',
+  'settings.notifManageSub': 'Choose which new cases alert you, and your area',
+  'settings.exportSub': 'Download everything tied to your account as a file.',
+  'safety.ackIntro': 'Before your first rescue, a quick word on staying safe. This appears once.',
+  'safety.ackFine': 'By continuing you confirm you understand these risks and act on your own judgement. PawLine is a coordination tool, not a rescue or emergency service.',
+  'safety.ackConfirm': 'I understand — continue',
 };

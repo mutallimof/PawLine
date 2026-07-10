@@ -27,6 +27,11 @@ import ImpactPage from './pages/ImpactPage';
 import VetsPage from './pages/VetsPage';
 import AdminPage from './pages/AdminPage';
 import { PrivacyPage } from './components/extras';
+import {
+  TermsPage, SafetyPage, ConductPage, AboutPage, ContactPage, FaqPage,
+  NotFoundPage, ErrorBoundary,
+} from './components/legal';
+import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import {
   UserProfilePage,
@@ -98,6 +103,7 @@ function Shell() {
             {t('common.offline')}
           </div>
         )}
+        <ErrorBoundary>
         <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/report" element={<ReportPage />} />
@@ -117,9 +123,17 @@ function Shell() {
         <Route path="/vet-dashboard" element={<VetDashboardPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/safety" element={<SafetyPage />} />
+        <Route path="/guidelines" element={<ConductPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/impact" element={<ImpactPage />} />
-        <Route path="*" element={<HomePage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
+        </ErrorBoundary>
         {!hideNav && <BottomNav unreadAlerts={unread} />}
       </div>
     </div>

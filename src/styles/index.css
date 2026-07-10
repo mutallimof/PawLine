@@ -1777,3 +1777,84 @@ body {
 }
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .safety-sheet__icon { font-size: 40px; text-align: center; }
+
+/* ============================================================================
+   16. PRE-LAUNCH — modal sheet (safety ack), settings danger zone tweaks
+   ============================================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(51, 36, 31, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: page-enter var(--t-fast) both;
+}
+@media (min-width: 640px) {
+  .modal-overlay { align-items: center; }
+}
+.modal-sheet {
+  background: var(--card);
+  width: 100%;
+  max-width: 460px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 26px 22px calc(22px + var(--safe-bottom));
+  box-shadow: var(--shadow-lift);
+  animation: sheet-up var(--t-med) both;
+}
+@media (min-width: 640px) {
+  .modal-sheet { border-radius: var(--radius-lg); }
+}
+@keyframes sheet-up {
+  from { transform: translateY(24px); opacity: 0.6; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.modal-sheet__icon { font-size: 44px; text-align: center; }
+.modal-sheet__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  text-align: center;
+  margin: 8px 0 6px;
+}
+.modal-sheet__intro {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  text-align: center;
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+.modal-sheet .btn { width: 100%; }
+.modal-sheet__fineprint {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 6px 0 16px;
+}
+.safety-ack__list {
+  margin: 0 0 4px;
+  padding-left: 20px;
+}
+.safety-ack__list li {
+  font-size: 14.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+/* Settings footer links in the bottom nav area for signed-out users */
+.app-footer {
+  padding: 20px 16px calc(20px + var(--safe-bottom));
+  text-align: center;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+}
+.app-footer a {
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 700;
+  margin: 0 8px;
+  white-space: nowrap;
+  line-height: 2;
+}
