@@ -129,6 +129,7 @@ function statusClass(c: CaseWithDetails): string {
   if (c.status === 'resolved') return 'resolved';
   if (c.status === 'en_route') return 'enroute';
   if (c.status === 'open') return 'open';
+  if (c.status === 'closed') return 'resolved';
   return 'progress';
 }
 

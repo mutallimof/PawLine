@@ -28,6 +28,8 @@ interface QueuedReport {
   lng: number;
   addressHint: string;
   guestName: string;
+  injuryType?: string | null;
+  spotType?: string | null;
   reporterId: string | null;
   photos: Blob[];
 }
@@ -65,6 +67,8 @@ export async function queueReport(input: NewCaseInput): Promise<void> {
     lng: input.lng,
     addressHint: input.addressHint ?? '',
     guestName: input.guestName ?? '',
+    injuryType: (input as { injuryType?: string | null }).injuryType ?? null,
+    spotType: (input as { spotType?: string | null }).spotType ?? null,
     reporterId: input.reporterId ?? null,
     photos: input.photos.map((f) => f.slice(0, f.size, f.type)), // plain Blobs store cleanly
   };
@@ -106,6 +110,8 @@ export async function flushQueue(): Promise<number> {
           addressHint: r.addressHint,
           guestName: r.guestName,
           reporterId: r.reporterId,
+          injuryType: (r.injuryType ?? null) as never,
+          spotType: (r.spotType ?? null) as never,
           photos: r.photos.map(
             (b, i) => new File([b], `queued-${i}.jpg`, { type: b.type || 'image/jpeg' })
           ),

@@ -1705,3 +1705,75 @@ body {
 .onboarding__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); transition: background var(--t-fast), transform var(--t-fast); }
 .onboarding__dot.active { background: var(--coral); transform: scale(1.25); }
 .onboarding__actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 340px; }
+
+/* ============================================================================
+   15. PRE-LAUNCH — photo blur, chip rows, legal/settings, error/404
+   ============================================================================ */
+
+/* Blur-by-default case photos (4e) */
+.case-photo { position: relative; overflow: hidden; border-radius: var(--radius-lg); }
+.case-photo__img--blurred { filter: blur(24px); transform: scale(1.08); }
+.case-photo__reveal {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  background: rgba(51, 36, 31, 0.32); color: #fff; text-align: center; padding: 12px;
+  backdrop-filter: blur(2px);
+}
+.case-photo__reveal-icon { font-size: 26px; }
+.case-photo__reveal-title { font-weight: 800; font-size: 13.5px; }
+.case-photo__reveal-cta {
+  font-size: 12px; font-weight: 700; opacity: 0.9;
+  border: 1.5px solid rgba(255,255,255,0.6); border-radius: 999px; padding: 3px 12px; margin-top: 4px;
+}
+.case-photo__hide {
+  position: absolute; top: 8px; right: 8px; font-size: 11px; font-weight: 800;
+  color: #fff; background: rgba(51,36,31,0.55); border-radius: 999px; padding: 4px 10px;
+  backdrop-filter: blur(4px);
+}
+
+/* Chip rows (structured report fields) */
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-row .chip {
+  cursor: pointer; border: 1.5px solid var(--line); background: var(--card);
+  color: var(--ink-soft); font-weight: 700; font-size: 13px;
+  padding: 8px 13px; border-radius: 999px; transition: all var(--t-fast);
+}
+.chip-row .chip.active {
+  background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep);
+}
+
+/* Legal / long-form doc pages */
+.doc-page h2 { font-family: var(--font-display); font-size: 20px; margin: 22px 0 8px; }
+.doc-page h3 { font-size: 16px; margin: 16px 0 6px; }
+.doc-page p, .doc-page li { font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; }
+.doc-page ul { padding-left: 20px; margin: 8px 0; }
+.doc-page .doc-updated { font-size: 12.5px; color: var(--ink-soft); opacity: 0.8; margin-bottom: 18px; }
+
+/* Settings groups + footer links */
+.settings-group { margin-bottom: 22px; }
+.settings-group__label {
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--ink-soft); margin: 0 4px 8px;
+}
+.settings-links { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: center; padding: 20px 16px; }
+.settings-links a { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); }
+.danger-zone { border: 1.5px solid var(--open-100); border-radius: var(--radius-lg); padding: 14px; }
+
+/* Full-screen error boundary + 404 */
+.fullscreen-msg {
+  min-height: 80dvh; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; padding: 28px; gap: 14px;
+}
+.fullscreen-msg__icon { font-size: 64px; animation: float-paw 3.6s ease-in-out infinite; }
+.fullscreen-msg h1 { font-family: var(--font-display); font-size: 24px; margin: 0; }
+.fullscreen-msg p { color: var(--ink-soft); max-width: 380px; margin: 0; }
+
+/* Safety acknowledgment sheet */
+.safety-sheet { position: fixed; inset: 0; z-index: 1800; background: rgba(51,36,31,0.5);
+  display: flex; align-items: flex-end; justify-content: center; padding: 0; backdrop-filter: blur(3px); }
+.safety-sheet__card {
+  background: var(--card); border-radius: 24px 24px 0 0; padding: 26px 22px calc(22px + var(--safe-bottom));
+  max-width: 640px; width: 100%; animation: sheet-up var(--t-med) both; max-height: 88dvh; overflow-y: auto;
+}
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.safety-sheet__icon { font-size: 40px; text-align: center; }

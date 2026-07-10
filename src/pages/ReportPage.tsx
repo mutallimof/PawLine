@@ -11,7 +11,8 @@ import { PinDropMap } from '../components/maps';
 import { useToast } from '../components/ui';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
-import type { AnimalType } from '../lib/types';
+import type { AnimalType, InjuryType, SpotType } from '../lib/types';
+import { INJURY_TYPES, SPOT_TYPES } from '../lib/types';
 import { animalEmoji, IconCamera } from '../components/Icons';
 
 export default function ReportPage() {
@@ -26,6 +27,8 @@ export default function ReportPage() {
   const [animal, setAnimal] = useState<AnimalType>('dog');
   const [description, setDescription] = useState('');
   const [addressHint, setAddressHint] = useState('');
+  const [injuryType, setInjuryType] = useState<InjuryType | null>(null);
+  const [spotType, setSpotType] = useState<SpotType | null>(null);
   const [guestName, setGuestName] = useState('');
   const [location, setLocation] = useState<LatLng>(DEFAULT_CENTER);
   // Audit P2: DEFAULT_CENTER is a plausible-looking wrong location. Track
@@ -87,6 +90,8 @@ export default function ReportPage() {
       addressHint: addressHint.trim(),
       guestName: user ? null : guestName.trim() || null,
       reporterId: user?.id ?? null,
+      injuryType,
+      spotType,
       photos: photos.map((p) => p.file),
     };
 
@@ -196,6 +201,36 @@ export default function ReportPage() {
       </label>
 
       {/* Location */}
+      {/* Structured, language-independent fields (audit 4b) — each person
+          sees these in their own language regardless of who picked them. */}
+      <span className="field__label">{t('report.injuryLabel')}</span>
+      <div className="chip-row" style={{ marginBottom: 14 }}>
+        {INJURY_TYPES.map((k) => (
+          <button
+            key={k}
+            type="button"
+            className={`chip${injuryType === k ? ' active' : ''}`}
+            onClick={() => setInjuryType(injuryType === k ? null : k)}
+          >
+            {t(`injury.${k}` as const)}
+          </button>
+        ))}
+      </div>
+
+      <span className="field__label">{t('report.spotLabel')}</span>
+      <div className="chip-row" style={{ marginBottom: 16 }}>
+        {SPOT_TYPES.map((k) => (
+          <button
+            key={k}
+            type="button"
+            className={`chip${spotType === k ? ' active' : ''}`}
+            onClick={() => setSpotType(spotType === k ? null : k)}
+          >
+            {t(`spot.${k}` as const)}
+          </button>
+        ))}
+      </div>
+
       <span className="field__label">{t('report.location')}</span>
       <p className="page-subtitle" style={{ marginBottom: 8 }}>
         {t('report.locationHelp')}

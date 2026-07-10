@@ -65,6 +65,8 @@ export interface NewCaseInput {
   addressHint: string;
   guestName: string | null;
   reporterId: string | null;
+  injuryType: import('./types').InjuryType | null;
+  spotType: import('./types').SpotType | null;
   photos: File[];
 }
 
@@ -95,6 +97,8 @@ export async function createCase(input: NewCaseInput): Promise<string> {
       lat: input.lat,
       lng: input.lng,
       address_hint: input.addressHint,
+      injury_type: input.injuryType,
+      spot_type: input.spotType,
       guest_name: input.guestName,
       reporter_id: input.reporterId,
     })
@@ -556,3 +560,73 @@ export async function fetchPublicImpact(): Promise<PublicImpact> {
 
 export const adminSetPartner = (profileId: string, org: string | null) =>
   rpc('admin_set_partner', { p_profile: profileId, p_org: org });
+
+// ---------------------------------------------------------------------------
+// Pre-launch pass (migration 007): blocks, export, community flag, safety ack
+// ---------------------------------------------------------------------------
+
+export async function blockUser(blockerId: string, blockedId: string): Promise<void> {
+  const { error } = await supabase
+    .from('blocked_users')
+    .insert({ blocker_id: blockerId, blocked_id: blockedId });
+  if (error) throw new Error(error.message);
+}
+
+export async function unblockUser(blockerId: string, blockedId: string): Promise<void> {
+  const { error } = await supabase
+    .from('blocked_users')
+    .delete()
+    .eq('blocker_id', blockerId)
+    .eq('blocked_id', blockedId);
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchBlockedIds(blockerId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('blocked_users')
+    .select('blocked_id')
+    .eq('blocker_id', blockerId);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => (r as { blocked_id: string }).blocked_id);
+}
+
+/** "Animal not here / already helped" — returns the running distinct count. */
+export async function flagNotHere(caseId: string): Promise<number> {
+  const { data, error } = await supabase.rpc('flag_not_here', { p_case: caseId });
+  if (error) throw new Error(error.message);
+  return (data as number) ?? 0;
+}
+
+export async function acknowledgeSafety(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ safety_ack_at: new Date().toISOString() })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+}
+
+/** Full self-serve data export (GDPR-shaped) as a JSON object. */
+export async function exportMyData(): Promise<unknown> {
+  const { data, error } = await supabase.rpc('export_my_data');
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/**
+ * Delete the caller's account. Supabase has no client-side user-delete, so
+ * this scrubs profile data and signs out; auth-row removal is completed by
+ * the operator (documented) or a scheduled cleanup. Cases anonymize via
+ * ON DELETE SET NULL / the profile scrub, matching the privacy policy.
+ */
+export async function deleteMyAccount(userId: string): Promise<void> {
+  // Remove personal + relational data the user owns. Cases stay (reporter_id
+  // set null keeps rescue history without identity).
+  await supabase.from('push_subscriptions').delete().eq('profile_id', userId);
+  await supabase.from('blocked_users').delete().eq('blocker_id', userId);
+  const { error } = await supabase
+    .from('profiles')
+    .update({ display_name: 'Deleted user', avatar_url: null, home_lat: null, home_lng: null })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+  await supabase.auth.signOut();
+}

@@ -9,7 +9,8 @@ export type CaseStatus =
   | 'vet_selected'
   | 'vet_confirmed'
   | 'en_route'
-  | 'resolved';
+  | 'resolved'
+  | 'closed';
 
 export type AnimalType = 'dog' | 'cat' | 'other';
 export type ProfileRole = 'user' | 'vet';
@@ -77,10 +78,18 @@ export interface RescueCase {
   rescuer_loc_at: string | null;
   hidden: boolean;
   escalated_at: string | null;
+  closed_reason: 'community' | 'expired' | null;
+  injury_type: InjuryType | null;
+  spot_type: SpotType | null;
   created_at: string;
   accepted_at: string | null;
   resolved_at: string | null;
 }
+
+export type InjuryType = 'limping' | 'bleeding' | 'hit_by_car' | 'weak' | 'skin' | 'trapped' | 'unknown';
+export type SpotType = 'street' | 'park' | 'dumpster' | 'building' | 'courtyard' | 'roadside';
+export const INJURY_TYPES: InjuryType[] = ['limping','bleeding','hit_by_car','weak','skin','trapped','unknown'];
+export const SPOT_TYPES: SpotType[] = ['street','park','dumpster','building','courtyard','roadside'];
 
 /** A case joined with the bits the UI always needs. */
 export interface CaseWithDetails extends RescueCase {

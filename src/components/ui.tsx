@@ -29,6 +29,7 @@ export const STATUS_COLOR: Record<CaseStatus, string> = {
   vet_confirmed: 'var(--status-progress)',
   en_route: 'var(--status-enroute)',
   resolved: 'var(--status-resolved)',
+  closed: 'var(--ink-soft)',
 };
 
 export function statusLabel(status: CaseStatus): string {
