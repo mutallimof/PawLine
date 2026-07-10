@@ -98,6 +98,39 @@ Keep it to a handful — the strip is trust-building, not a billboard.
    table becomes world-readable/writable instantly. Never do this; every
    feature already works with RLS on.
 
+## Load testing (done pre-launch — results & what changed)
+
+Tested against a local PostgreSQL 16 seeded with **50,000 users** (spread
+across Baku's real geography with a realistic all/nearby/off preference mix)
+and **5,000 cases**. Method: `EXPLAIN (ANALYZE)` on the hot-path queries
+plus timed end-to-end case inserts.
+
+**What broke first (and the fix):** the new-case **notification fan-out** —
+the query inside `notify_new_case()` that runs on *every single report* to
+decide who to alert. It was a full sequential scan computing a trig-heavy
+haversine distance for all 50k users every time (**7.3 ms and growing
+linearly with signups** — the one thing on the write path that scales with
+total user count). Fix (migration 008): a cheap **bounding-box pre-filter**
+on indexed `home_lat/home_lng` gates the expensive haversine to users
+actually near the report, before the trig runs. Result: **7.3 ms → ~0.06 ms
+(~110× faster)**, and it now scales with *local* density, not total users.
+A full case INSERT including the fan-out and writing all notification rows
+measured ~9 ms at 50k users.
+
+**Checked and fine at this scale (no change needed):**
+- Open-cases map query: 1.1 ms → 0.9 ms with a partial index (008).
+- Nearby-vets query: sub-millisecond (few clinics; plain distance is fine —
+  see the PostGIS note in ARCHITECTURE.md for the eventual migration path).
+- `run_case_maintenance()` (escalate + revert + expire): ~0.5 s scanning
+  5k cases every 10 minutes — comfortable; it touches only non-terminal
+  cases via partial indexes.
+
+**Honest caveat:** this is single-node query-level load testing, which finds
+algorithmic cliffs (it found the big one). It is NOT a substitute for real
+concurrent-connection testing under Supabase's pooler — the realtime
+connection cap is still the first thing a genuine traffic spike hits, which
+is why OPERATOR_GUIDE B4 says upgrade to Pro before launch.
+
 ## Health checks (weekly, 5 minutes)
 
 - Supabase → Reports: database size, API request curve (sudden spikes =

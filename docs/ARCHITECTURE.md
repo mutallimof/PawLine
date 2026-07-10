@@ -152,3 +152,32 @@ they're allowed to read.
 - **Push reuses the notifications table as its source of truth.** A database
   webhook on INSERT calls the send-push Edge Function; in-app and push can
   never disagree because they're the same row.
+
+
+## 10. Scaling notes (flagged, not yet needed)
+
+**PostGIS / spatial indexing (item 4f).** "Nearby" queries — users near a
+new case (fan-out), vets near a user, cases near a point — currently use a
+plain haversine (`distance_km`) with, as of migration 008, a bounding-box
+pre-filter on plain btree indexes over `home_lat/home_lng`. This is
+correct and fast at launch scale (measured: fan-out ~0.06 ms at 50k users;
+see OPERATIONS "Load testing"). The bounding box is a rectangle, so it
+slightly over-selects near the poles and across the antimeridian — neither
+matters for Azerbaijan/Turkey. **Migration path when case/vet volume grows
+large (roughly: millions of rows, or multi-country with dense metros):**
+enable the PostGIS extension, add a `geography(Point)` column alongside the
+lat/lng, build a GiST index on it, and replace the bbox+haversine with
+`ST_DWithin`. That change is localized to `notify_new_case()`, the vet
+listing query, and `check_case_duplicates()` — no schema-wide churn. Not
+worth the operational weight (PostGIS upgrades, bigger backups) until the
+btree bounding box actually shows strain, which the load test says is far
+away.
+
+**Notification fan-out at extreme scale.** Even index-gated, the fan-out
+writes one row per matching user synchronously inside the reporting
+transaction. At hundreds of thousands of *local* opted-in users per report
+(not a near-term reality for these markets), move the fan-out to a queued
+Edge Function: the trigger enqueues one job, a worker writes notifications
+in batches. The notifications table is already the single source of truth
+for both in-app and push, so this is an internal change with no client
+impact.
