@@ -10,6 +10,7 @@ import { Component, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getLocale, t, type LocaleCode } from '../i18n';
 import { IconBack } from './Icons';
+import { captureBoundaryError } from '../lib/monitoring';
 
 type Section = [heading: string, body: string | string[]];
 type Doc = { title: string; updated?: string; intro?: string; sections: Section[] };
@@ -469,7 +470,10 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { hasError
     return { hasError: true };
   }
   componentDidCatch(error: unknown) {
-    // Surfaced to Sentry automatically if configured; also logged.
+    // Boundary-caught render errors never hit window.onerror, so Sentry
+    // must be told explicitly — otherwise the crashes users actually SEE
+    // are the ones monitoring never records.
+    captureBoundaryError(error);
     console.error('PawLine uncaught error:', error);
   }
   render() {

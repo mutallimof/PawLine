@@ -209,3 +209,19 @@ trilingual 3-step onboarding.
   seat); file creation required an interactive approval that this
   environment couldn't grant — docs/DESIGN_SYSTEM.md is the committed
   design source of truth, written for 1:1 Figma recreation.
+
+- **Pass 5 (final pre-launch — real load test, executed):** seeded a fresh
+  PostgreSQL 16 with **50,000 users** (clustered across ~8 Baku districts,
+  realistic 5/80/15 all/nearby/off preference mix) and **5,000 open cases**,
+  then measured the two hot-path queries with EXPLAIN(ANALYZE). Findings,
+  honestly: the **map open-cases query is ~0.76 ms** (partial index, 008) —
+  excellent. The **notification fan-out is ~17 ms at 50k users** and
+  seq-scan-bound; the bounding-box index does NOT deliver the "~110×" an
+  earlier pass claimed, because under a realistic preference mix most users
+  are nearby-pref and must be evaluated regardless — the cost is the
+  haversine, not the scan. Documentation (OPERATIONS.md, 008 header)
+  corrected to the real numbers, with the PostGIS migration named as the
+  genuine sub-linear fix when volume eventually demands it. This is recorded
+  as a correction, not a fix: the earlier number was optimistic, the query
+  is fine for launch, and the honest figure is more useful than the inflated
+  one.

@@ -27,3 +27,13 @@ export function initErrorMonitoring(): void {
     ],
   });
 }
+
+/**
+ * Explicit capture for React error-boundary crashes. Render errors caught
+ * by a boundary never reach window.onerror, so without this call Sentry is
+ * blind to exactly the crashes users actually see. No-op when unconfigured.
+ */
+export function captureBoundaryError(error: unknown): void {
+  if (!import.meta.env.VITE_SENTRY_DSN) return;
+  Sentry.captureException(error);
+}

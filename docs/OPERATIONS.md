@@ -100,30 +100,53 @@ Keep it to a handful — the strip is trust-building, not a billboard.
 
 ## Load testing (done pre-launch — results & what changed)
 
-Tested against a local PostgreSQL 16 seeded with **50,000 users** (spread
-across Baku's real geography with a realistic all/nearby/off preference mix)
-and **5,000 cases**. Method: `EXPLAIN (ANALYZE)` on the hot-path queries
-plus timed end-to-end case inserts.
+Tested against a local PostgreSQL 16 seeded with **50,000 users** (clustered
+across ~8 Baku districts with a realistic 5% "all" / 80% "nearby" / 15%
+"off" notification-preference mix) and **5,000 open cases**. Method:
+`EXPLAIN (ANALYZE, BUFFERS)` on the two hot-path queries. Numbers below are
+the ones actually observed in this pass — re-measured honestly rather than
+carried over from an earlier, more optimistic estimate.
 
-**What broke first (and the fix):** the new-case **notification fan-out** —
-the query inside `notify_new_case()` that runs on *every single report* to
-decide who to alert. It was a full sequential scan computing a trig-heavy
-haversine distance for all 50k users every time (**7.3 ms and growing
-linearly with signups** — the one thing on the write path that scales with
-total user count). Fix (migration 008): a cheap **bounding-box pre-filter**
-on indexed `home_lat/home_lng` gates the expensive haversine to users
-actually near the report, before the trig runs. Result: **7.3 ms → ~0.06 ms
-(~110× faster)**, and it now scales with *local* density, not total users.
-A full case INSERT including the fan-out and writing all notification rows
-measured ~9 ms at 50k users.
+**Read hot path — the map's open-cases query: excellent.** With the partial
+index `cases_open_visible_idx` (migration 008), fetching the 200 most recent
+open, non-hidden cases runs in **~0.76 ms** via an index scan. This is the
+query that runs constantly as people browse the map, and it is not a
+concern at this scale or well beyond it.
+
+**Write hot path — the new-case notification fan-out: ~17 ms at 50k users,
+and here is the honest story.** This query runs once per report to decide
+who to alert. Measured at **~17 ms** with 50k users. Critically, at this
+scale PostgreSQL chooses a **sequential scan** over the bounding-box index,
+and it is *right* to: ~42k users have `nearby` preference and the query
+must evaluate them, so an index adds heap-fetch overhead without avoiding
+enough work to pay for itself. The real cost is the **haversine
+trigonometry** (`distance_km`) evaluated across nearby-preference users, not
+the scan itself.
+
+**What this corrects.** An earlier pass reported a "~110×" speedup from the
+bbox pre-filter. Re-measured under a realistic preference mix, that number
+does **not** hold generally — it only appears when a report is
+geographically distant from almost all users, which is uncommon in a
+single-city launch where most users cluster near most reports. The bbox
+gate (kept, migration 008) still helps in the genuinely-distant case and
+costs nothing when it doesn't, but it is not a 100× win. Reporting the real
+~17 ms is more useful than repeating an inflated figure.
+
+**Is ~17 ms per report a problem? No, not near-term** — it is fast enough
+that report submission feels instant, and it runs inside the insert, not on
+the user's device. But it scales with *nearby-preference user count*, so it
+is the thing to watch as the user base grows. The documented, correct fix
+when it eventually matters is the **PostGIS migration** (see
+ARCHITECTURE.md): a real spatial index (GiST on a `geography` column) makes
+the "who is within radius R" question genuinely sub-linear and replaces the
+haversine scan entirely. That is the right lever, deferred honestly until
+the numbers demand it rather than pre-optimized now.
 
 **Checked and fine at this scale (no change needed):**
-- Open-cases map query: 1.1 ms → 0.9 ms with a partial index (008).
-- Nearby-vets query: sub-millisecond (few clinics; plain distance is fine —
-  see the PostGIS note in ARCHITECTURE.md for the eventual migration path).
-- `run_case_maintenance()` (escalate + revert + expire): ~0.5 s scanning
-  5k cases every 10 minutes — comfortable; it touches only non-terminal
-  cases via partial indexes.
+- Nearby-vets query: sub-millisecond (few clinics; plain distance is fine).
+- `run_case_maintenance()` (escalate + revert + expire): scans only
+  non-terminal cases via partial indexes; comfortable at 5k cases every
+  10 minutes.
 
 **Honest caveat:** this is single-node query-level load testing, which finds
 algorithmic cliffs (it found the big one). It is NOT a substitute for real
