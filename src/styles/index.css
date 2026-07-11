@@ -929,7 +929,7 @@ select {
 
 /* ---- 12. Fix-pass additions ---------------------------------------------- */
 
-/* Location search (Nominatim) */
+/* Location search (Google Places) */
 .loc-search {
   position: relative;
   margin-bottom: 8px;

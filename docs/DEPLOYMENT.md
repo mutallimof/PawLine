@@ -18,7 +18,7 @@ the app is a static bundle; only the backend on Supabase matters.)
    password and store it in a password manager.
 2. **SQL Editor** → run, in order:
    `supabase/migrations/001_init.sql` → `002_locale.sql` →
-   `003_production.sql` → `004_grants.sql` → `005_security.sql` → `006_features.sql` → `007_prelaunch.sql`.
+   `003_production.sql` → `004_grants.sql` → `005_security.sql` → `006_features.sql` → `007_prelaunch.sql` → `008_performance.sql` → `009_prelaunch2.sql`.
    (004 grants the baseline table privileges explicitly — without it, the
    dashboard's "Automatically expose new tables" toggle being off causes
    403s on every query even though RLS is correct.)

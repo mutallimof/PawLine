@@ -35,7 +35,8 @@ you what success looks like.
    a time: paste the entire file's contents → **Run** → wait for
    "Success. No rows returned":
    `001_init.sql` → `002_locale.sql` → `003_production.sql` →
-   `004_grants.sql` → `005_security.sql` → `006_features.sql`.
+   `004_grants.sql` → `005_security.sql` → `006_features.sql` →
+   `007_prelaunch.sql` → `008_performance.sql` → `009_prelaunch2.sql`.
    - ❌ *If a file errors:* stop. Don't skip ahead. Copy the error message
      and the file name into a new chat with an AI assistant along with the
      file's contents — the fix is usually a one-liner. (The migrations are
@@ -50,7 +51,7 @@ you what success looks like.
    - ✅ *Check it worked:* SQL Editor → run
      `select jobname from cron.job;` → you should see
      `pawline-escalate-stale-cases`. If the table doesn't exist, re-run
-     just the last block of `006_features.sql` after enabling the
+     just the last block of `006_features.sql` (and the cron block in `007_prelaunch.sql`) after enabling the
      extension.
 5. **Settings → API**: copy two values into your password manager:
    - **Project URL** (like `https://abcd1234.supabase.co`)
@@ -277,7 +278,146 @@ the research pass identified — make sure open cases are getting accepted
 (Admin → Stats → median time-to-accept). If that number climbs, rescuer
 supply is the fire, not the servers: activate the partner orgs.
 
-### B5. Habits — what to actually check
+### B5. Turnstile — the full setup (15 minutes, do this before launch)
+
+The app already contains the client side (it activates automatically when
+the key below exists; without it, guest reporting still works and the
+database circuit breaker still bounds abuse). To turn it on:
+
+1. **dash.cloudflare.com** → sign up free → left menu **Turnstile** →
+   **Add widget**. Name: `pawline` · Domains: your Vercel URL and your
+   custom domain (no `https://`, just the hostname) · Mode: **Managed**
+   (invisible for almost everyone; shows a checkbox only to suspicious
+   traffic). Create → copy BOTH the **Site Key** and the **Secret Key**
+   into your password manager.
+2. **Supabase → Authentication → Bot and Abuse Protection** (name varies
+   slightly by dashboard version; it's under Authentication settings) →
+   Enable Captcha protection → provider **Turnstile** → paste the
+   **Secret Key** → Save.
+3. **Vercel → Settings → Environment Variables** → add
+   `VITE_TURNSTILE_SITE_KEY` = the **Site Key** → **Redeploy**.
+4. ✅ *Test:* open the live app in a private window → report as a guest →
+   the report goes through (Managed mode is usually invisible). To see it
+   actually challenge, Cloudflare's widget page has a "force interaction"
+   test mode.
+   ❌ *If guest reports start failing with a captcha error:* the Secret
+   Key in Supabase and the Site Key in Vercel are probably from different
+   widgets — they must be from the same one.
+
+### B6. Backups: the TESTED restore procedure
+
+Backups you've never restored are hopes, not backups. This procedure was
+executed end-to-end during the pre-launch pass on a 50,000-user database
+(dump → restore into a clean database → verified all rows, all 29 security
+policies, and that functions actually execute). Practice it once yourself
+in ~15 minutes:
+
+**Taking a backup (choose one):**
+- **Supabase Pro**: automatic daily backups already exist (Database →
+  Backups). Nothing to do.
+- **Manual (free tier, or extra safety before risky changes):** on your
+  computer, with the database connection string from Supabase → Settings →
+  Database (URI tab):
+  ```bash
+  pg_dump "YOUR-CONNECTION-STRING" -Fc -f pawline-$(date +%F).dump
+  ```
+  Keep the file somewhere safe (it contains user data — treat it like a
+  password). ~2 MB per 50k users, so storage is a non-issue.
+
+**Restoring (the part people never practice):**
+1. Supabase → **Database → Backups → Restore** (Pro tier: pick a date,
+   click restore — the project restores in place, expect a few minutes of
+   downtime), **or** for a manual dump into a fresh/second project:
+   ```bash
+  pg_restore -d "NEW-PROJECT-CONNECTION-STRING" --no-owner --no-acl pawline-YYYY-MM-DD.dump
+   ```
+2. **Verify — don't assume.** In the SQL editor of the restored project:
+   ```sql
+   select count(*) from public.profiles;      -- expect your user count
+   select count(*) from pg_policies where schemaname = 'public';  -- expect 29
+   select proname from pg_proc where proname = 'delete_my_account'; -- exists
+   ```
+3. If restoring into a *new* project: the project URL and anon key changed
+   → update both env vars in Vercel and redeploy (see B2's rotation table —
+   it's the same motion).
+
+**When to restore:** you deleted/broke data by accident, a migration went
+wrong, or (worst case) post-breach recovery. When in doubt, restore into a
+SECOND project first and look around before touching production.
+
+### B7. Rollback: revert to the last known-good deployment (2 minutes)
+
+If a deploy breaks the app (blank screen, errors everywhere), you do NOT
+need to fix code under pressure:
+
+1. **Vercel → your project → Deployments** → find the last deployment that
+   was working (they're timestamped; the one before your broken one) →
+   **⋯ menu → Promote to Production** (or "Instant Rollback" on the
+   current production deployment's menu). The old version is live again in
+   seconds. This is always safe: deployments are immutable snapshots.
+2. **The database caveat — read this part twice:** rolling back the APP
+   does not roll back the DATABASE. Migrations in this project are
+   additive (new tables/columns/functions), so an older app version runs
+   fine against a newer database — that's by design. But never write a
+   future migration that DROPS or renames a column an older app still
+   reads, or rollback stops being safe. If a migration itself caused the
+   problem, that's a restore situation (B6), not a rollback.
+3. After rolling back: reproduce the problem in a preview deployment (every
+   git branch gets its own URL on Vercel) and only promote again when the
+   preview works.
+
+### B8. Monitoring with real alerting (so problems find YOU)
+
+Silent logs help nobody at 2am. Three alert channels, ~20 minutes total,
+all free tiers:
+
+1. **Crash alerts — Sentry** (you added the DSN in A4): sentry.io → your
+   project → **Alerts → Create Alert → Issues** → condition "when a new
+   issue is created" → action "send email to me" → save. Optionally a
+   second rule: "when an issue is seen by more than 10 users in 1 hour".
+   That's the difference between logging and alerting — now crashes email
+   you. The app reports both global errors AND React render crashes (the
+   error boundary reports explicitly — a silent gap that was found and
+   fixed in the pre-launch pass).
+2. **Downtime alerts — UptimeRobot** (uptimerobot.com, free): Add New
+   Monitor → HTTP(s) → your production URL → check every 5 minutes →
+   alert contact: your email. You'll know the site is down before users
+   tell you.
+3. **Database health — Supabase**: Settings → Notifications: make sure
+   email notifications are ON (they alert on resource exhaustion,
+   approaching limits). Weekly, glance at Reports → Database as per B10.
+
+If all three are quiet, the app is up, not crashing, and the database is
+healthy — that's your whole monitoring story at this scale.
+
+### B9. Pre-launch real-condition QA (do once on real devices)
+
+These three things can only be verified in the real deployed environment —
+automated checks in a sandbox can't reach a real inbox, a real push
+service, or a real camera. Each takes 2 minutes; do all of them before
+inviting partner organizations:
+
+1. **Password-reset email actually arrives:** live app → sign-in screen →
+   "Forgot password?" with your real email → the email should arrive
+   within ~2 minutes (check spam the first time — and if it landed there,
+   that's your cue to set up custom SMTP later; Supabase's built-in sender
+   has modest deliverability and a 3-4/hour rate limit, fine for launch,
+   not for scale). Click the link → set a new password → sign in with it.
+2. **Push notifications fire from the real webhook:** on your phone, in
+   the installed PWA, Profile → enable 🔔 → fully close the app → from
+   another device/account, accept a case you reported → a push should
+   arrive on the closed phone within seconds. ❌ If not: Supabase →
+   Database → Webhooks → check the send-push hook shows recent deliveries
+   (if deliveries show errors, the `x-push-secret` header doesn't match
+   the secret you set in A2).
+3. **Real camera photo sizes upload fine:** report a case using an actual
+   phone camera photo (modern phones produce 3–12 MB images; the app
+   compresses client-side before upload, so what leaves the phone is
+   ~200–400 KB). ✅ The report submits on mobile data in a few seconds and
+   the photo appears on the case. ❌ If uploads fail only on huge photos,
+   note the phone model — that's a compression bug worth reporting.
+
+### B10. Habits — what to actually check
 
 **Weekly (5 minutes):**
 - Admin → Reports queue at zero, pending vets handled
@@ -296,7 +436,7 @@ supply is the fire, not the servers: activate the partner orgs.
 **Quarterly:** rotate what B2 marks as hygiene; re-run the A6 smoke test
 after any big dependency update.
 
-### B6. Fix-it-yourself vs. call a professional
+### B11. Fix-it-yourself vs. call a professional
 
 **You + this documentation + an AI assistant can handle:** everything in
 B1–B5; approving/hiding/banning; key rotation; tier upgrades; re-running a

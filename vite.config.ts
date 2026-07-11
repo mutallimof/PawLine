@@ -8,7 +8,7 @@ import { VitePWA } from 'vite-plugin-pwa';
  * The PWA plugin generates the web app manifest and a service worker:
  *  - The app shell (JS/CSS/fonts) is precached, so the UI opens instantly
  *    and works full-screen when installed to the home screen.
- *  - OpenStreetMap tiles and Supabase Storage photos are cached at runtime
+ *  - Google Maps tiles and Supabase Storage photos are cached at runtime
  *    (cache-first with expiry) so recently viewed maps/photos still render
  *    on a flaky connection — common in the field during a rescue.
  *  - API/realtime traffic is NOT cached: case status and chat must be live.
