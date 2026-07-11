@@ -118,6 +118,8 @@ export default function ReportPage() {
         photos.forEach((p) => URL.revokeObjectURL(p.url));
         toast(t('report.queuedOffline'));
         navigate('/');
+      } else if (e instanceof Error && e.message === 'captcha-failed') {
+        toast(t('report.captchaFailed'));
       } else {
         toast(e instanceof Error ? e.message : t('common.error'));
       }

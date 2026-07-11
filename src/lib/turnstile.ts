@@ -1,92 +1,126 @@
 /**
- * Cloudflare Turnstile — bot protection on the anonymous (guest) sign-in
- * that backs guest reporting.
+ * Cloudflare Turnstile — optional bot protection on the guest (anonymous)
+ * report path.
  *
- * Design: OPTIONAL and gracefully degrading. If VITE_TURNSTILE_SITE_KEY is
- * set, a guest's first report solves a Turnstile challenge (usually
- * invisible) and passes the token to Supabase, which verifies it server-side
- * (configured in the dashboard — see OPERATOR_GUIDE §Turnstile). If the key
- * is absent, reporting works exactly as before; the database circuit breaker
- * (migration 005) still bounds abuse. This lets the operator turn real
- * bot-protection on with one env var + one dashboard toggle, no code change.
+ * Design decision: this is GRACEFULLY OPTIONAL. If VITE_TURNSTILE_SITE_KEY is
+ * set, a guest solves a Turnstile challenge (usually invisible/managed — no
+ * user friction in the common case) before their first anonymous report, and
+ * the token is passed to signInAnonymously({ options: { captchaToken } }).
+ * If the key is NOT set, the report flow works exactly as before — the
+ * database circuit breaker (migration 005: 40 guest reports/hour platform-
+ * wide) still bounds abuse. This lets the operator launch immediately and
+ * turn on Turnstile the moment a spam wave appears, with zero code change.
  *
- * We load the script on demand and render an invisible widget once, reusing
- * it for subsequent tokens.
+ * Setup is one dashboard step each side — see OPERATOR_GUIDE §Turnstile.
  */
 
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
 
 export function turnstileEnabled(): boolean {
   return !!SITE_KEY;
 }
 
-interface TurnstileAPI {
-  render: (el: HTMLElement, opts: Record<string, unknown>) => string;
-  execute: (id: string, opts?: Record<string, unknown>) => void;
-  reset: (id: string) => void;
-}
-
-declare global {
-  interface Window {
-    turnstile?: TurnstileAPI;
-    __pawlineTurnstileReady?: Promise<void>;
-  }
-}
+let scriptPromise: Promise<void> | null = null;
 
 function loadScript(): Promise<void> {
-  if (window.turnstile) return Promise.resolve();
-  if (window.__pawlineTurnstileReady) return window.__pawlineTurnstileReady;
-  window.__pawlineTurnstileReady = new Promise<void>((resolve, reject) => {
+  if (scriptPromise) return scriptPromise;
+  scriptPromise = new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${SCRIPT_URL}"]`)) {
+      resolve();
+      return;
+    }
     const s = document.createElement('script');
-    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    s.src = SCRIPT_URL;
     s.async = true;
     s.defer = true;
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error('turnstile-load-failed'));
+    s.onerror = () => {
+      scriptPromise = null;
+      reject(new Error('turnstile-load-failed'));
+    };
     document.head.appendChild(s);
   });
-  return window.__pawlineTurnstileReady;
+  return scriptPromise;
 }
 
-let widgetId: string | null = null;
-let container: HTMLElement | null = null;
+interface TurnstileAPI {
+  render: (
+    el: HTMLElement,
+    opts: {
+      sitekey: string;
+      callback: (token: string) => void;
+      'error-callback'?: () => void;
+      'expired-callback'?: () => void;
+      size?: 'normal' | 'flexible' | 'compact' | 'invisible';
+      appearance?: 'always' | 'execute' | 'interaction-only';
+    }
+  ) => string;
+  remove: (id: string) => void;
+}
 
 /**
- * Obtain a fresh Turnstile token, or null if Turnstile isn't configured.
- * Rejects only on genuine widget failure so the caller can decide whether to
- * hard-block or fall through.
+ * Obtain a Turnstile token. Renders a managed widget into a transient,
+ * off-screen container; in the common (invisible) case this resolves with
+ * no user interaction. Rejects on load failure or timeout so callers can
+ * decide whether to proceed without a token.
  */
-export async function getTurnstileToken(): Promise<string | null> {
-  if (!SITE_KEY) return null;
+export async function getTurnstileToken(timeoutMs = 12_000): Promise<string> {
+  if (!SITE_KEY) throw new Error('turnstile-not-configured');
   await loadScript();
-  const api = window.turnstile;
-  if (!api) return null;
 
-  if (!container) {
-    container = document.createElement('div');
+  const turnstile = (window as unknown as { turnstile?: TurnstileAPI }).turnstile;
+  if (!turnstile) throw new Error('turnstile-unavailable');
+
+  return new Promise<string>((resolve, reject) => {
+    const container = document.createElement('div');
     container.style.position = 'fixed';
-    container.style.bottom = '0';
-    container.style.left = '-9999px';
+    container.style.bottom = '80px';
+    container.style.left = '50%';
+    container.style.transform = 'translateX(-50%)';
+    container.style.zIndex = '4000';
     document.body.appendChild(container);
-  }
 
-  return new Promise<string | null>((resolve, reject) => {
-    const opts = {
-      sitekey: SITE_KEY,
-      size: 'invisible' as const,
-      callback: (token: string) => resolve(token),
-      'error-callback': () => reject(new Error('turnstile-error')),
-      'timeout-callback': () => reject(new Error('turnstile-timeout')),
-    };
-    try {
-      if (widgetId === null) {
-        widgetId = api.render(container as HTMLElement, opts);
-      } else {
-        api.reset(widgetId);
+    let widgetId: string | null = null;
+    const cleanup = () => {
+      try {
+        if (widgetId) turnstile.remove(widgetId);
+      } catch {
+        /* ignore */
       }
-      api.execute(widgetId, opts);
+      container.remove();
+    };
+
+    const timer = window.setTimeout(() => {
+      cleanup();
+      reject(new Error('turnstile-timeout'));
+    }, timeoutMs);
+
+    try {
+      widgetId = turnstile.render(container, {
+        sitekey: SITE_KEY,
+        size: 'flexible',
+        appearance: 'interaction-only', // invisible unless a challenge is needed
+        callback: (token: string) => {
+          window.clearTimeout(timer);
+          cleanup();
+          resolve(token);
+        },
+        'error-callback': () => {
+          window.clearTimeout(timer);
+          cleanup();
+          reject(new Error('turnstile-error'));
+        },
+        'expired-callback': () => {
+          window.clearTimeout(timer);
+          cleanup();
+          reject(new Error('turnstile-expired'));
+        },
+      });
     } catch (e) {
-      reject(e instanceof Error ? e : new Error('turnstile-failed'));
+      window.clearTimeout(timer);
+      cleanup();
+      reject(e instanceof Error ? e : new Error('turnstile-render-failed'));
     }
   });
 }

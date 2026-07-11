@@ -380,4 +380,5 @@ export const tr: Dict = {
   'safety.ackIntro': 'İlk kurtarmanızdan önce güvenlik hakkında kısa bir söz. Bu bir kez görünür.',
   'safety.ackFine': 'Devam ederek bu riskleri anladığınızı ve kendi kararınızla hareket ettiğinizi onaylarsınız. PawLine bir koordinasyon aracıdır, kurtarma veya acil servis değildir.',
   'safety.ackConfirm': 'Anladım — devam et',
+  'report.captchaFailed': 'İnsan olduğunuz doğrulanamadı. Lütfen tekrar deneyin veya bildirmek için ücretsiz bir hesap oluşturun.',
 };
