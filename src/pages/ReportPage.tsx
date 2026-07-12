@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createCase } from '../lib/api';
+import { createCase, openVetsNear } from '../lib/api';
 import { isNetworkError, queueReport } from '../lib/offlineQueue';
 import { PinDropMap } from '../components/maps';
 import { useToast } from '../components/ui';
@@ -35,6 +35,25 @@ export default function ReportPage() {
   // whether the user (or GPS/search) ever actually set the pin; the map's
   // automatic first emit doesn't count.
   const [locationTouched, setLocationTouched] = useState(false);
+
+  // Transparency, not a blocker: if no clinic near the animal is open right
+  // now (3am, say), the reporter deserves to know help may be slower — but
+  // the animal still needs to be FOUND, so reporting stays fully open.
+  const [noVetsOpen, setNoVetsOpen] = useState(false);
+  useEffect(() => {
+    if (!locationTouched) return; // default city centre isn't a real location
+    let cancelled = false;
+    void openVetsNear(location.lat, location.lng, 25)
+      .then((n) => {
+        if (!cancelled) setNoVetsOpen(n === 0);
+      })
+      .catch(() => {
+        if (!cancelled) setNoVetsOpen(false); // never scare people on a network blip
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [location, locationTouched]);
   const firstEmit = useRef(true);
   const onPinChange = (p: LatLng) => {
     setLocation(p);
@@ -257,6 +276,19 @@ export default function ReportPage() {
           <input value={guestName} onChange={(e) => setGuestName(e.target.value)} maxLength={60} />
         </label>
       )}
+
+      {/* Honest heads-up — never a blocker. The animal must still be found. */}
+
+      {noVetsOpen && (
+
+        <div className="banner banner--warn" role="status">
+
+          {t('report.noVetsOpen')}
+
+        </div>
+
+      )}
+
 
       <button className="btn btn--primary" onClick={submit} disabled={submitting}>
         {submitting ? t('report.submitting') : t('report.submit')}

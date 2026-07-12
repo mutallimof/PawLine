@@ -119,7 +119,15 @@ export function VetPublicPage() {
             <TierBadge xp={profile.xp} />
           </div>
         )}
-        {!vet.is_open && <div className="banner banner--warn">{t('vets.closed')}</div>}
+        {vet.open_now === false ? (
+          <div className="banner banner--warn">
+            {vet.opens_at
+              ? t('vets.closedUntil').replace('{time}', vet.opens_at.slice(0, 5))
+              : t('vets.closed')}
+          </div>
+        ) : vet.is_open === false ? (
+          <div className="banner banner--warn">{t('vets.atCapacity')}</div>
+        ) : null}
         {user && user.id !== vet.id && (
           <button className="btn btn--primary" onClick={() => void message()}>
             💬 {t('dm.messageUser')}
@@ -138,6 +146,9 @@ export function VetSetupPage() {
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [isOpen, setIsOpen] = useState(true);
+  const [opensAt, setOpensAt] = useState('09:00');
+  const [closesAt, setClosesAt] = useState('18:00');
+  const [is247, setIs247] = useState(false);
   const [location, setLocation] = useState<LatLng>(DEFAULT_CENTER);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
@@ -153,6 +164,10 @@ export function VetSetupPage() {
         setAddress(v.address);
         setPhone(v.phone);
         setIsOpen(v.is_open);
+        // 'HH:MM:SS' from Postgres → 'HH:MM' for <input type="time">
+        if (v.opens_at) setOpensAt(v.opens_at.slice(0, 5));
+        if (v.closes_at) setClosesAt(v.closes_at.slice(0, 5));
+        setIs247(v.is_24_7);
         setLocation({ lat: v.lat, lng: v.lng });
       } else {
         if (profile) setClinicName(profile.display_name);
@@ -185,6 +200,14 @@ export function VetSetupPage() {
         lat: location.lat,
         lng: location.lng,
         is_open: isOpen,
+        // A 24/7 clinic's hours are irrelevant; store them anyway so the
+        // clinic keeps its settings if it ever turns 24/7 back off.
+        opens_at: `${opensAt}:00`,
+        closes_at: `${closesAt}:00`,
+        is_24_7: is247,
+        // Wall-clock hours are meaningless without a zone. Baku is the launch
+        // market default; Turkish clinics are an hour behind.
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Baku',
       });
       navigate('/vet-dashboard');
     } catch (e) {
@@ -220,10 +243,56 @@ export function VetSetupPage() {
         <PinDropMap value={location} onChange={setLocation} />
       </div>
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, fontWeight: 700, fontSize: 14 }}>
-        <input type="checkbox" checked={isOpen} onChange={(e) => setIsOpen(e.target.checked)} style={{ width: 18, height: 18 }} />
-        {t('vetSetup.isOpen')}
+      {/* Opening hours — the whole point: rescuers stop being sent here the
+          moment the clinic closes, WITHOUT anyone remembering to flip a
+          switch at 8pm. */}
+      <div className="section-label">{t('vetSetup.hours')}</div>
+      <p className="page-subtitle" style={{ marginTop: -4 }}>{t('vetSetup.hoursSub')}</p>
+
+      <label
+        style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 14px', fontWeight: 700, fontSize: 14 }}
+      >
+        <input
+          type="checkbox"
+          checked={is247}
+          onChange={(e) => setIs247(e.target.checked)}
+          style={{ width: 18, height: 18 }}
+        />
+        {t('vetSetup.is247')}
       </label>
+
+      {!is247 && (
+        <>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <label className="field" style={{ flex: 1 }}>
+              <span className="field__label">{t('vetSetup.opensAt')}</span>
+              <input type="time" value={opensAt} onChange={(e) => setOpensAt(e.target.value)} />
+            </label>
+            <label className="field" style={{ flex: 1 }}>
+              <span className="field__label">{t('vetSetup.closesAt')}</span>
+              <input type="time" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} />
+            </label>
+          </div>
+          <p className="page-subtitle" style={{ marginTop: -6, marginBottom: 16 }}>
+            {t('vetSetup.overnightNote')}
+          </p>
+        </>
+      )}
+
+      {/* Capacity is now a DIFFERENT thing from hours, and says so. */}
+      <div className="section-label">{t('vetSetup.capacity')}</div>
+      <label
+        style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '8px 0 6px', fontWeight: 700, fontSize: 14 }}
+      >
+        <input
+          type="checkbox"
+          checked={isOpen}
+          onChange={(e) => setIsOpen(e.target.checked)}
+          style={{ width: 18, height: 18 }}
+        />
+        {t('vetSetup.capacity')}
+      </label>
+      <p className="page-subtitle" style={{ marginBottom: 16 }}>{t('vetSetup.capacitySub')}</p>
 
       <button className="btn btn--primary" onClick={() => void save()} disabled={busy || !clinicName.trim()}>
         {t('vetSetup.save')}

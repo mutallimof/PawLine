@@ -381,4 +381,21 @@ export const az: Dict = {
   'safety.ackFine': 'Davam etməklə bu riskləri anladığınızı və öz mühakimənizlə hərəkət etdiyinizi təsdiqləyirsiniz. PawLine əlaqələndirmə vasitəsidir, xilasetmə və ya təcili yardım xidməti deyil.',
   'safety.ackConfirm': 'Anladım — davam et',
   'report.captchaFailed': 'İnsan olduğunuzu təsdiqləmək mümkün olmadı. Yenidən cəhd edin və ya bildirmək üçün pulsuz hesab yaradın.',
+
+  // Vet operating hours (migration 010)
+  'vets.always': '24/7',
+  'vets.openUntil': '{time}-a qədər açıqdır',
+  'vets.closedUntil': 'Bağlıdır · {time}-da açılır',
+  'vets.atCapacity': 'Açıqdır, lakin hazırda doludur',
+  'vets.noneOpenTitle': 'Yaxınlıqda hazırda açıq klinika yoxdur.',
+  'vets.noneOpenBody': 'Müalicə klinika açılana qədər gözləməli ola bilər. Heyvanı isti, sakit və təhlükəsiz saxlayın və bir azdan yenidən yoxlayın — bir qədər uzaqda 24/7 klinika da ola bilər.',
+  'report.noVetsOpen': 'Diqqət: buranın yaxınlığında hazırda açıq klinika yoxdur, ona görə kömək daha uzun çəkə bilər. Yenə də bildirin — əvvəlcə heyvan tapılmalıdır, müalicə sonra gələ bilər.',
+  'vetSetup.hours': 'İş saatları',
+  'vetSetup.hoursSub': 'Xilasedicilər yalnız siz açıq olduğunuz müddətdə sizə göndərilir — beləliklə bağlanma vaxtı heç bir düyməni yadda saxlamağa ehtiyac yoxdur.',
+  'vetSetup.opensAt': 'Açılır',
+  'vetSetup.closesAt': 'Bağlanır',
+  'vetSetup.is247': 'Təcili hallar üçün 24/7 açığıq',
+  'vetSetup.overnightNote': 'Gecə yarısından sonra bağlanma (məs. 20:00 → 06:00) düzgün işlənir.',
+  'vetSetup.capacity': 'Hazırda heyvan qəbul edirik',
+  'vetSetup.capacitySub': 'Bunu yalnız açıq olduğunuz, lakin həqiqətən dolu olduğunuz halda söndürün. İş saatlarınız avtomatik idarə olunur.',
 };

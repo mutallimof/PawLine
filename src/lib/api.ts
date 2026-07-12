@@ -218,20 +218,40 @@ export async function addDeliveryPhoto(caseId: string, file: File): Promise<void
 // Vets
 // ---------------------------------------------------------------------------
 
+/**
+ * Reads the `vets_public` VIEW, not the table: it adds `open_now` and
+ * `accepting_now`, computed from the clinic's real hours in ITS OWN timezone,
+ * on the server. Computing openness on the device would be wrong the moment a
+ * phone's clock or timezone is off — and a rescuer standing at a locked door
+ * at 2am is exactly the failure this must never produce.
+ */
 export async function fetchVets(): Promise<Vet[]> {
-  const { data, error } = await supabase.from('vets').select('*');
+  const { data, error } = await supabase.from('vets_public').select('*');
   if (error) throw error;
   return (data ?? []) as Vet[];
 }
 
+/** How many APPROVED clinics are actually open right now near a point. */
+export async function openVetsNear(lat: number, lng: number, km = 25): Promise<number> {
+  const { data, error } = await supabase.rpc('open_vets_near', {
+    p_lat: lat,
+    p_lng: lng,
+    p_km: km,
+  });
+  if (error) throw new Error(error.message);
+  return (data as number) ?? 0;
+}
+
 export async function fetchVet(id: string): Promise<Vet | null> {
-  const { data, error } = await supabase.from('vets').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await supabase.from('vets_public').select('*').eq('id', id).maybeSingle();
   if (error) throw error;
   return data as Vet | null;
 }
 
 /** Clinic owners manage their details — verification status is admin-only. */
-export async function upsertVet(vet: Omit<Vet, 'created_at' | 'status'>): Promise<void> {
+export async function upsertVet(
+  vet: Omit<Vet, 'created_at' | 'status' | 'open_now' | 'accepting_now'>,
+): Promise<void> {
   const { error } = await supabase.from('vets').upsert(vet);
   if (error) throw error;
 }

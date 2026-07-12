@@ -122,11 +122,21 @@ export default function VetsPage() {
                   {km !== undefined ? `${formatDistance(km)} · ` : ''}
                   {vet.address}
                 </div>
-                {!vet.is_open && (
-                  <div className="list-row__sub" style={{ color: 'var(--status-open)' }}>
-                    {t('vets.closed')}
+                {vet.open_now === false ? (
+                  <div className="list-row__sub list-row__sub--closed">
+                    {vet.opens_at
+                      ? t('vets.closedUntil').replace('{time}', vet.opens_at.slice(0, 5))
+                      : t('vets.closed')}
                   </div>
-                )}
+                ) : vet.is_open === false ? (
+                  <div className="list-row__sub list-row__sub--closed">{t('vets.atCapacity')}</div>
+                ) : vet.is_24_7 ? (
+                  <div className="list-row__sub list-row__sub--open">{t('vets.always')}</div>
+                ) : vet.closes_at ? (
+                  <div className="list-row__sub list-row__sub--open">
+                    {t('vets.openUntil').replace('{time}', vet.closes_at.slice(0, 5))}
+                  </div>
+                ) : null}
               </div>
             </Link>
           ))}

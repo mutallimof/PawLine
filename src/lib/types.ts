@@ -56,9 +56,25 @@ export interface Vet {
   phone: string;
   lat: number;
   lng: number;
+  /**
+   * CAPACITY switch, not opening hours: "we're open but can't take more right
+   * now". Opening hours are the fields below — a clinic that forgets to flip
+   * this at closing time is no longer recommended all night (migration 010).
+   */
   is_open: boolean;
+  /** Local wall-clock hours. null = not set yet (treated as open, not hidden). */
+  opens_at: string | null;   // 'HH:MM:SS'
+  closes_at: string | null;  // 'HH:MM:SS'
+  /** Round-the-clock emergency clinic — hours are ignored entirely. */
+  is_24_7: boolean;
+  /** Hours are wall-clock, so they need a zone. Baku and Istanbul differ. */
+  timezone: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
+  /** Computed server-side (view vets_public) — never trust a client clock. */
+  open_now?: boolean;
+  /** open_now AND has capacity. This is what the picker gates on. */
+  accepting_now?: boolean;
 }
 
 export interface RescueCase {

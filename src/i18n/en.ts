@@ -379,4 +379,21 @@ export const en = {
   'safety.ackFine': 'By continuing you confirm you understand these risks and act on your own judgement. PawLine is a coordination tool, not a rescue or emergency service.',
   'safety.ackConfirm': 'I understand — continue',
   'report.captchaFailed': 'Couldn’t verify you’re human. Please try again, or create a free account to report.',
+
+  // Vet operating hours (migration 010)
+  'vets.always': '24/7',
+  'vets.openUntil': 'Open until {time}',
+  'vets.closedUntil': 'Closed · opens at {time}',
+  'vets.atCapacity': 'Open, but full right now',
+  'vets.noneOpenTitle': 'No clinics are open nearby right now.',
+  'vets.noneOpenBody': 'Treatment may have to wait until a clinic opens. Keep the animal warm, quiet and safe, and check back shortly — a 24/7 clinic may also be reachable a little further out.',
+  'report.noVetsOpen': 'Heads up: no clinics near here are open right now, so help may take longer to arrange. Please still report — the animal needs to be found first, and treatment can follow.',
+  'vetSetup.hours': 'Opening hours',
+  'vetSetup.hoursSub': 'Rescuers are only sent to you while you are open — so you never have to remember a toggle at closing time.',
+  'vetSetup.opensAt': 'Opens at',
+  'vetSetup.closesAt': 'Closes at',
+  'vetSetup.is247': 'We are open 24/7 for emergencies',
+  'vetSetup.overnightNote': 'Closing after midnight (e.g. 20:00 → 06:00) is handled correctly.',
+  'vetSetup.capacity': 'Accepting animals right now',
+  'vetSetup.capacitySub': 'Turn this off only when you are open but genuinely full. Your opening hours are handled automatically.',
 };

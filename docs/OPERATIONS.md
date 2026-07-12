@@ -46,6 +46,29 @@ rescuer, or you can confirm/dismiss). Nothing to do centrally — but if two
 rescuers head to the same animal, the confirmed-duplicate timeline note
 tells them to coordinate.
 
+### Vet opening hours (migration 010)
+Clinics now carry real hours (`opens_at`/`closes_at` in their own timezone, or
+an `is_24_7` flag), so a clinic that closes for the night STOPS being offered
+to rescuers automatically — no toggle to remember. The old `is_open` switch
+still exists but now means one precise thing: **"open, but full right now"**
+(capacity), not "closed".
+
+Two things this changes for you:
+- **When approving a clinic, confirm its hours on the same phone call** you
+  already make. A verified clinic with no hours set is treated as always open
+  (deliberate — silently hiding every existing clinic the moment this shipped
+  would have been worse than the bug), so an unset clinic can still send a
+  rescuer to a locked door. Ask, and have them set it.
+- **Hours edits do NOT trigger re-verification.** Closing early on a quiet
+  Tuesday is not an identity change. Editing the clinic NAME or ADDRESS still
+  bounces them back to pending for re-review, exactly as before.
+
+Enforcement is server-side: `select_vet()` refuses a closed clinic even if a
+modified client asks for one. Rescuers see closed clinics greyed out with
+"opens at HH:MM", and when nothing nearby is open the reporter is told
+honestly that treatment may be delayed — reporting is never blocked, because
+the animal still has to be found first.
+
 ### Stats (the health check)
 **Admin → Stats** shows the number that decides whether PawLine survives:
 **median time-to-acceptance** over 30 days, plus resolved counts, active

@@ -36,7 +36,7 @@ you what success looks like.
    "Success. No rows returned":
    `001_init.sql` → `002_locale.sql` → `003_production.sql` →
    `004_grants.sql` → `005_security.sql` → `006_features.sql` →
-   `007_prelaunch.sql` → `008_performance.sql` → `009_prelaunch2.sql`.
+   `007_prelaunch.sql` → `008_performance.sql` → `009_prelaunch2.sql` → `010_vet_hours.sql`.
    - ❌ *If a file errors:* stop. Don't skip ahead. Copy the error message
      and the file name into a new chat with an AI assistant along with the
      file's contents — the fix is usually a one-liner. (The migrations are
