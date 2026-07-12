@@ -23,11 +23,15 @@
   --status-enroute: #3f7fae;     /* moving — calm blue */
   --status-resolved: #3f9b6c;    /* safe — green */
 
-  /* Type */
-  --font-display: 'Noto Serif', 'Georgia', serif;
+  /* Type — Fraunces is the *voice* (the hand), Noto Sans does the work.
+     Direction A: low optical-size + heavy weights give Fraunces its warm,
+     slightly-wonky, hand-cut character instead of a cold geometric serif. */
+  --font-display: 'Fraunces', 'Georgia', serif;
   --font-body: 'Noto Sans', system-ui, -apple-system, sans-serif;
+  --fraunces-soft: 'opsz' 32, 'SOFT' 60, 'WONK' 1; /* softer, wonkier terminals */
 
-  /* Shape & elevation — rounded, soft, approachable. */
+  /* Shape & elevation — rounded, soft, approachable.
+     Shadows are warm INK (90,50,35), never grey — Direction A rule #2. */
   --radius: 18px;
   --radius-sm: 12px;
   --radius-lg: 24px;
@@ -35,6 +39,9 @@
   --shadow-soft: 0 2px 8px rgba(90, 50, 35, 0.07);
   --shadow-lift: 0 10px 30px rgba(90, 50, 35, 0.14);
   --grad-coral: linear-gradient(135deg, #ef6a4f 0%, #e85d4a 55%, #d84a37 100%);
+  /* Layered warm depth for hero surfaces — not a flat fill. */
+  --depth-card: 0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 2px 6px rgba(90, 50, 35, 0.06), 0 10px 26px rgba(90, 50, 35, 0.10);
 
   /* Motion — quick, springy, never bouncy-toy. */
   --t-fast: 150ms cubic-bezier(0.2, 0.8, 0.3, 1);
@@ -1873,3 +1880,335 @@ body {
   margin-left: 6px;
 }
 .tag--always { background: var(--done-100); color: var(--done-700); }
+
+/* ============================================================================
+   17. "THE HAND THAT HELPS" — Direction A soul layer
+   ----------------------------------------------------------------------------
+   Warmth through craft: hand-inked marks, warmer neutrals, TINTED (never grey)
+   shadows, a whisper of paper grain, and motion with a little human weight.
+   Appended last so it wins over the flat baseline it replaces.
+   ============================================================================ */
+
+:root {
+  /* Warmer neutrals — no pure white anywhere (Headspace principle). The old
+     --card was near-white; nudge everything a few degrees toward paper. */
+  --paper: #fef9f3;          /* warmest neutral, replaces bare white */
+  --ink-line: #3a2a23;       /* ink for hand-drawn marks — warm, not #000 */
+
+  /* Tinted, layered shadows — depth from warm color, not grey haze. */
+  --shadow-ink: 0 1px 1px rgba(120, 74, 52, 0.05),
+                0 3px 6px rgba(120, 74, 52, 0.08),
+                0 10px 22px rgba(120, 74, 52, 0.10);
+  --shadow-ink-lift: 0 2px 4px rgba(120, 74, 52, 0.08),
+                     0 8px 18px rgba(120, 74, 52, 0.12),
+                     0 20px 40px rgba(120, 74, 52, 0.16);
+
+  /* Layered warm background wash — subtle, alive without being busy. */
+  --wash: radial-gradient(1200px 520px at 82% -8%, rgba(232, 93, 74, 0.08), transparent 60%),
+          radial-gradient(900px 480px at -12% 26%, rgba(224, 155, 38, 0.06), transparent 55%);
+}
+
+/* Paper grain — a barely-there tactile texture on the app background. This is
+   the "human fingerprint" the research kept naming; kept at ~3% so it reads as
+   warmth, never noise. Pure CSS (inline SVG data URI), no asset to load. */
+body {
+  background-color: var(--sand);
+  background-image:
+    var(--wash),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-attachment: fixed, fixed, fixed;
+}
+
+/* Display type: Fraunces wants a heavier optical presence — its character
+   lives in the higher weights and a touch of negative tracking at size. */
+.page-title,
+.onboarding__title,
+.modal-sheet__title,
+.side-nav__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.page-title { font-optical-sizing: auto; }
+
+/* ---- The ink marks ---- */
+.ink { color: var(--ink-line); display: inline-block; vertical-align: middle; }
+.ink-scene { color: var(--ink-line); opacity: 0.9; }
+
+/* Draw-on: the paw appears as if being inked, once. */
+@keyframes ink-draw-in {
+  0%   { opacity: 0; transform: scale(0.6) rotate(-8deg); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+.ink--draw { animation: ink-draw-in 520ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+
+/* Inked paw trail — prints fade in along a wandering line. */
+.paw-trail-ink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--coral-deep);
+}
+@keyframes print-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.7); }
+}
+.paw-trail-ink__print { animation: print-in 460ms ease-out both; }
+
+/* ---- Depth applied to real surfaces ---- */
+.card,
+.case-card,
+.list-row,
+.paw-trail,
+.modal-sheet {
+  background: var(--paper);
+  box-shadow: var(--shadow-ink);
+}
+@media (hover: hover) {
+  .case-card:hover { box-shadow: var(--shadow-ink-lift); }
+}
+
+/* Buttons: keep the coral gradient but give it inked depth + a warmer press. */
+.btn--primary {
+  box-shadow: 0 2px 4px rgba(194, 64, 47, 0.24), 0 8px 18px rgba(232, 93, 74, 0.28);
+}
+.btn--primary:active { box-shadow: 0 1px 2px rgba(194, 64, 47, 0.3); }
+
+/* Empty states now host an ink scene; center and warm it. */
+.empty-state .ink-scene { margin-bottom: 6px; }
+.empty-state__icon.ink-scene { animation: none; } /* scenes don't bob like emoji did */
+
+/* Section headings pick up a hint of the display face for authored feel. */
+.section-label {
+  font-family: var(--font-body);
+  letter-spacing: 0.04em;
+}
+
+/* Motion with weight: a gentle settle on card entry (was a flat fade). */
+@keyframes settle-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.case-card { animation: settle-in var(--t-med) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ink--draw,
+  .paw-trail-ink__print,
+  .case-card { animation: none; }
+}
+
+
+/* Resolution celebration in Direction A: inked paws bloom upward in the
+   'safe' green — the emotional peak, drawn by hand rather than typed emoji. */
+.paw-burst .ink { color: var(--status-resolved); }
+.banner--success.celebrate {
+  background: linear-gradient(180deg, #eafaf0 0%, #dff3e6 100%);
+  border: 1px solid #c4e9d1;
+}
+
+
+/* ---- Impact page: the showcase (Direction A) ---- */
+.impact-hero { text-align: center; padding: 8px 0 6px; }
+.impact-hero .ink-scene { color: var(--coral-deep); opacity: 0.92; }
+.impact-hero__title { font-size: 30px; margin: 6px 0 4px; }
+.impact-hero__sub { max-width: 40ch; margin: 0 auto; }
+
+.impact-grid { margin-top: 8px; }
+.impact-stat--hero {
+  grid-column: 1 / -1;
+  position: relative;
+  background: linear-gradient(180deg, #fff6ee 0%, #fdeee3 100%);
+  border: 1px solid #f4dccb;
+  border-radius: 26px 18px 28px 16px;   /* hand-placed */
+  box-shadow: var(--depth-card);
+  padding: 24px 18px 20px;
+  overflow: hidden;
+  transform: rotate(-0.35deg);
+}
+.impact-stat--hero .impact-stat__paw { color: var(--coral); margin-bottom: 2px; }
+.impact-stat__value--big {
+  font-family: var(--font-display);
+  font-weight: 900;   /* the heavy end — Direction A's punch */
+  font-variation-settings: 'opsz' 40, 'SOFT' 30, 'WONK' 1;
+  font-size: clamp(56px, 18vw, 82px);
+  line-height: 0.9;
+  color: var(--coral);
+  letter-spacing: -0.03em;
+}
+.impact-stat__value {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-variation-settings: var(--fraunces-soft);
+  letter-spacing: -0.02em;
+}
+.impact-stat:nth-child(even) { transform: rotate(0.4deg); }
+.impact-divider {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 2px;
+  opacity: 0.8;
+}
+
+
+/* ---- Onboarding in Direction A ---- */
+.onboarding__icon .ink-scene { color: var(--coral-deep); opacity: 0.92; }
+.onboarding__title { font-size: 27px; letter-spacing: -0.015em; }
+
+/* ============================================================================
+   17. DESIGN SOUL LAYER — Direction A: "The Hand That Helps"
+   ----------------------------------------------------------------------------
+   Imperfection is not styling here; it is the trust argument, drawn. A human
+   made every mark, and a human is what this app promises will come. Warmth
+   from craft (ink, texture, weight, wobble), never from cuteness.
+   Appended last so it wins.
+   ============================================================================ */
+
+/* ---- Fraunces, given its hand-cut character (opsz/SOFT/WONK axes) --------- */
+.page-title,
+.onboarding__title,
+.modal-sheet__title,
+.fullscreen-msg h1,
+.doc-page h1,
+h1, h2 {
+  font-variation-settings: var(--fraunces-soft);
+  letter-spacing: -0.015em;
+}
+.page-title {
+  font-weight: 900;              /* the heavy end is where Fraunces sings */
+  font-size: clamp(26px, 7vw, 34px);
+  line-height: 1.05;
+}
+
+/* The italic is the app's quiet, reassuring voice — used deliberately. */
+.voice-quiet {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--coral-deep);
+  font-variation-settings: 'opsz' 28, 'SOFT' 80, 'WONK' 1;
+}
+
+/* ---- Paper grain: every large warm surface gets a faint tooth ------------- */
+/* A tiny inline SVG noise, tiled — 2-3% so it reads as paper, not static. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.35  0 0 0 0 0.20  0 0 0 0 0.14  0 0 0 0.028 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#root { position: relative; z-index: 1; } /* content sits above the grain */
+
+/* ---- The wobbly card: hand-placed, never machine-perfect ----------------- */
+/* Uneven radii + a hair of rotation. Applied broadly but subtly. */
+.card,
+.case-card {
+  border-radius: 24px 17px 26px 15px;
+  box-shadow: var(--depth-card);
+}
+.case-card:nth-child(2n) { transform: rotate(0.35deg); }
+.case-card:nth-child(3n) { transform: rotate(-0.4deg); }
+.case-card:nth-child(2n):active,
+.case-card:nth-child(3n):active { transform: rotate(0deg) scale(0.985); }
+
+/* ---- Buttons as inked stamps: press = soft squash ------------------------ */
+.btn--primary {
+  border-radius: 20px 15px 22px 14px;
+  box-shadow: 0 5px 0 rgba(120, 40, 26, 0.35), 0 8px 18px rgba(232, 93, 74, 0.30);
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+}
+.btn--primary:active {
+  transform: translateY(3px) scale(0.99);
+  box-shadow: 0 2px 0 rgba(120, 40, 26, 0.35), 0 4px 10px rgba(232, 93, 74, 0.3);
+}
+
+/* ---- Brushed underline under page titles: a hand-drawn stroke ------------- */
+.page-title::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 5px;
+  margin-top: 8px;
+  border-radius: 3px;
+  background: var(--coral);
+  /* a stroke that isn't a clean rectangle — tapered like a brush lift */
+  clip-path: polygon(0 40%, 12% 10%, 46% 70%, 70% 15%, 88% 60%, 100% 30%, 100% 100%, 0 100%);
+  opacity: 0.9;
+}
+
+/* ---- Ink-draw motion: strokes DRAW in, they never merely fade ------------ */
+@keyframes ink-draw {
+  from { clip-path: inset(0 100% 0 0); opacity: 0.4; }
+  to   { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+@keyframes ink-bloom {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.5) rotate(var(--r, 0deg)); }
+  55%  { opacity: 1; }
+  100% { opacity: 0.9; transform: translateY(var(--ty, -40px)) scale(1.05) rotate(var(--r, 0deg)); }
+}
+.page-title { animation: ink-draw 620ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+
+/* ---- Resolution bloom: paws appear like ink pressed into paper ----------- */
+.paw-bloom span {
+  position: absolute;
+  animation: ink-bloom 900ms cubic-bezier(0.2, 0.85, 0.35, 1) both;
+}
+
+/* ---- The arrival headline — the single most important line in the app ---- */
+.arrival-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-variation-settings: 'opsz' 40, 'SOFT' 40, 'WONK' 1;
+  font-size: clamp(40px, 12vw, 56px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-align: center;
+}
+
+/* ---- Impact page: from lifeless to the showcase -------------------------- */
+.impact-hero-stat {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-variation-settings: 'opsz' 40, 'SOFT' 30, 'WONK' 1;
+  font-size: clamp(56px, 18vw, 84px);
+  line-height: 0.9;
+  color: var(--coral);
+  letter-spacing: -0.03em;
+}
+.impact-stat-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-variation-settings: var(--fraunces-soft);
+  font-size: clamp(36px, 11vw, 48px);
+  color: var(--ink);
+  line-height: 1;
+}
+
+/* Respect reduced motion — collapse the ink theatre. */
+@media (prefers-reduced-motion: reduce) {
+  .page-title, .paw-bloom span { animation-duration: 0.01ms !important; }
+}
+
+/* ---- The arrival moment (live resolution) — Direction A's peak ---- */
+.arrival {
+  position: relative;
+  text-align: center;
+  padding: 44px 16px 30px;
+  margin-bottom: 14px;
+  background: radial-gradient(120% 90% at 50% 0%, var(--coral-soft) 0%, transparent 62%);
+  border-radius: 26px 20px 28px 18px;
+  overflow: visible;
+}
+.arrival-title { animation: ink-draw 700ms cubic-bezier(0.2,0.8,0.3,1) 380ms both; }
+.arrival-sub { margin: 8px auto 0; max-width: 34ch; font-size: 16px; }
+.paw-bloom {
+  position: absolute;
+  top: 30px; left: 0; right: 0; height: 0;
+  color: var(--coral);
+}
+.paw-bloom span { top: 0; }

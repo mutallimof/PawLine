@@ -12,6 +12,7 @@ import { Avatar, CaseCard, LanguageSwitcher, TierBadge, useToast } from '../comp
 import { tierForXp, tierName } from '../lib/xp';
 import { getCurrentPosition } from '../lib/geo';
 import { t } from '../i18n';
+import { InkScene } from '../components/Ink';
 import type { CaseWithDetails, NewCasePref } from '../lib/types';
 
 export default function ProfilePage() {
@@ -50,7 +51,7 @@ export default function ProfilePage() {
           <LanguageSwitcher />
         </div>
         <div className="empty-state">
-          <div className="empty-state__icon">🐾</div>
+          <InkScene kind="calm" />
           {t('dm.signIn')}
           <div style={{ marginTop: 16 }}>
             <Link to="/auth" className="btn btn--primary">{t('auth.signIn')}</Link>

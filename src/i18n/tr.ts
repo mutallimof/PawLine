@@ -171,7 +171,7 @@ export const tr: Dict = {
   'common.send': 'Gönder',
   'common.list': 'Liste',
   'common.loading': 'Yükleniyor…',
-  'common.error': 'Bir şeyler ters gitti. Lütfen tekrar deneyin.',
+  'common.error': 'Bu geçmedi. Birazdan tekrar deneyin.',
   'common.justNow': 'az önce',
   'common.minAgo': '{n} dk önce',
   'common.hoursAgo': '{n} sa önce',
@@ -398,4 +398,8 @@ export const tr: Dict = {
   'vetSetup.overnightNote': 'Gece yarısından sonra kapanış (ör. 20:00 → 06:00) doğru şekilde işlenir.',
   'vetSetup.capacity': 'Şu anda hayvan kabul ediyoruz',
   'vetSetup.capacitySub': 'Bunu yalnızca açık olduğunuz ama gerçekten dolu olduğunuzda kapatın. Çalışma saatleriniz otomatik olarak yönetilir.',
+
+  // The arrival — Direction A emotional peak (live resolution)
+  'case.arrivalTitle': 'O artık güvende.',
+  'case.arrivalSub': 'Klinikte güvende ve bakılıyor. Sen de bunun bir parçasıydın.',
 };

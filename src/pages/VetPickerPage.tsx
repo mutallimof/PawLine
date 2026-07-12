@@ -12,6 +12,7 @@ import { IconBack } from '../components/Icons';
 import type { Vet } from '../lib/types';
 import { distanceKm, formatDistance } from '../lib/geo';
 import { t } from '../i18n';
+import { InkScene } from '../components/Ink';
 
 /** 'HH:MM:SS' → 'HH:MM' (the seconds are noise to a human). */
 function hhmm(t: string): string {
@@ -79,7 +80,7 @@ export default function VetPickerPage() {
 
       {sorted.length === 0 && (
         <div className="empty-state">
-          <div className="empty-state__icon">🏥</div>
+          <InkScene kind="search" />
           {t('vets.none')}
         </div>
       )}

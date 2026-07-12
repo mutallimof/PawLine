@@ -11,10 +11,21 @@ import { registerSW } from 'virtual:pwa-register';
 // fonts ship), which rendered Azerbaijani text visibly broken.
 // Subset-precise imports (latin + latin-ext cover az/tr/en fully) keep the
 // PWA precache small — the full multi-script packages tripled its size.
-import '@fontsource/noto-serif/latin-600.css';
-import '@fontsource/noto-serif/latin-700.css';
-import '@fontsource/noto-serif/latin-ext-600.css';
-import '@fontsource/noto-serif/latin-ext-700.css';
+// Display face: Fraunces — a characterful, soft "old-style" serif with a
+// wonky optical axis. Chosen for Direction A ("The Hand That Helps"): it
+// carries warmth and a human hand before a word is read. Both latin and
+// latin-ext subsets load because Azerbaijani (ə/ğ/İ/ş) and Turkish (ç/ö/ü/ı)
+// split across them — verified at the glyph level.
+import '@fontsource/fraunces/latin-400.css';
+import '@fontsource/fraunces/latin-500.css';
+import '@fontsource/fraunces/latin-600.css';
+import '@fontsource/fraunces/latin-700.css';
+import '@fontsource/fraunces/latin-900.css';
+import '@fontsource/fraunces/latin-ext-400.css';
+import '@fontsource/fraunces/latin-ext-500.css';
+import '@fontsource/fraunces/latin-ext-600.css';
+import '@fontsource/fraunces/latin-ext-700.css';
+import '@fontsource/fraunces/latin-ext-900.css';
 import '@fontsource/noto-sans/latin-400.css';
 import '@fontsource/noto-sans/latin-600.css';
 import '@fontsource/noto-sans/latin-700.css';

@@ -398,4 +398,8 @@ export const az: Dict = {
   'vetSetup.overnightNote': 'Gecə yarısından sonra bağlanma (məs. 20:00 → 06:00) düzgün işlənir.',
   'vetSetup.capacity': 'Hazırda heyvan qəbul edirik',
   'vetSetup.capacitySub': 'Bunu yalnız açıq olduğunuz, lakin həqiqətən dolu olduğunuz halda söndürün. İş saatlarınız avtomatik idarə olunur.',
+
+  // The arrival — Direction A emotional peak (live resolution)
+  'case.arrivalTitle': 'O, təhlükəsizdir.',
+  'case.arrivalSub': 'Klinikada təhlükəsizdir və qayğı göstərilir. Sən də bunun bir hissəsi oldun.',
 };

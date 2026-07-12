@@ -13,6 +13,7 @@ import { CaseCard, useToast } from '../components/ui';
 import { SponsorStrip } from '../components/extras';
 import { geoErrorKind, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
+import { InkScene, PawTrailInk } from '../components/Ink';
 
 type View = 'map' | 'feed';
 type Filter = 'active' | 'all' | 'resolved';
@@ -94,7 +95,9 @@ export default function HomePage() {
         <div className="home-feed">
           {loading && (
             <div aria-hidden="true">
-              <div className="skeleton skeleton--card" />
+              <div style={{ padding: '18px 0 22px' }}>
+                <PawTrailInk count={4} />
+              </div>
               <div className="skeleton skeleton--card" />
               <div className="skeleton skeleton--card" />
             </div>
@@ -111,7 +114,7 @@ export default function HomePage() {
           )}
           {!loading && !error && filtered.length === 0 && (
             <div className="empty-state">
-              <div className="empty-state__icon">🐾</div>
+              <InkScene kind="calm" />
               {t('home.empty')}
             </div>
           )}

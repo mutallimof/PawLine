@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { t } from '../i18n';
+import { InkScene, type EmptyKind } from './Ink';
 
 const KEY = 'pawline-onboarded-v1';
 
@@ -17,11 +18,13 @@ export function shouldShowOnboarding(): boolean {
   }
 }
 
+// Each step gets a hand-inked scene, not an emoji — the report→rescuer→vet
+// pipeline told in the app's own visual voice from the very first screen.
 const STEPS = [
-  { icon: '📸', title: 'onb.1title', body: 'onb.1body' },
-  { icon: '🧡', title: 'onb.2title', body: 'onb.2body' },
-  { icon: '🏥', title: 'onb.3title', body: 'onb.3body' },
-] as const;
+  { scene: 'search', title: 'onb.1title', body: 'onb.1body' },
+  { scene: 'calm', title: 'onb.2title', body: 'onb.2body' },
+  { scene: 'done', title: 'onb.3title', body: 'onb.3body' },
+] as const satisfies readonly { scene: EmptyKind; title: string; body: string }[];
 
 export default function Onboarding({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState(0);
@@ -39,7 +42,9 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   const s = STEPS[step];
   return (
     <div className="onboarding" role="dialog" aria-modal="true" aria-label={t(s.title)}>
-      <div className="onboarding__icon" aria-hidden="true">{s.icon}</div>
+      <div className="onboarding__icon" aria-hidden="true">
+        <InkScene kind={s.scene} size={150} />
+      </div>
       <h1 className="onboarding__title">{t(s.title)}</h1>
       <p className="onboarding__body">{t(s.body)}</p>
 
