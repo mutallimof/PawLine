@@ -36,6 +36,7 @@ import { Avatar, PawTrail, StatusBadge, useToast } from '../components/ui';
 import { IconBack, IconCamera } from '../components/Icons';
 import { hasKey, t } from '../i18n';
 import { SafetyAck, hasAcceptedSafety } from '../components/legal';
+import { Paw } from '../components/Ink';
 import type { DuplicateFlag } from '../lib/types';
 import { timeAgo } from '../lib/time';
 import { getCurrentPosition } from '../lib/geo';
@@ -237,26 +238,38 @@ export default function CaseDetailPage() {
           );
         })}
 
-        {caseData.status === 'resolved' && (
-          <div className={`banner banner--success${justResolved ? ' celebrate' : ''}`}>
-            {t('case.resolvedBanner')}
-            {justResolved &&
-              ['-70px','-30px','25px','65px'].map((dx, i) => (
+        {caseData.status === 'resolved' && justResolved && (
+          // The emotional peak, given its due: a Fraunces arrival headline
+          // over an ink bloom of paws that draw in from below, like prints
+          // pressed into paper. Fires only on a LIVE transition.
+          <div className="arrival">
+            <div className="paw-bloom" aria-hidden="true">
+              {[
+                { l: '18%', s: 18, ty: '-54px', r: '-24deg', d: 120 },
+                { l: '40%', s: 26, ty: '-72px', r: '8deg', d: 40 },
+                { l: '62%', s: 20, ty: '-60px', r: '20deg', d: 200 },
+                { l: '30%', s: 14, ty: '-40px', r: '-10deg', d: 280 },
+                { l: '76%', s: 16, ty: '-48px', r: '16deg', d: 340 },
+              ].map((p, i) => (
                 <span
                   key={i}
-                  className="paw-burst"
-                  aria-hidden="true"
                   style={{
-                    ['--dx' as string]: dx,
-                    ['--dy' as string]: `${-46 - i * 10}px`,
-                    ['--rot' as string]: `${i % 2 ? 24 : -20}deg`,
-                    animationDelay: `${i * 90}ms`,
+                    left: p.l,
+                    ['--ty' as string]: p.ty,
+                    ['--r' as string]: p.r,
+                    animationDelay: `${p.d}ms`,
                   }}
                 >
-                  🐾
+                  <Paw size={p.s} />
                 </span>
               ))}
+            </div>
+            <h2 className="arrival-title">{t('case.arrivalTitle')}</h2>
+            <p className="voice-quiet arrival-sub">{t('case.arrivalSub')}</p>
           </div>
+        )}
+        {caseData.status === 'resolved' && !justResolved && (
+          <div className="banner banner--success">{t('case.resolvedBanner')}</div>
         )}
 
         {/* People involved */}

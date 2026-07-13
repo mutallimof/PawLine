@@ -106,7 +106,7 @@ export const en = {
 
   // Notifications
   'alerts.title': 'Alerts',
-  'alerts.empty': 'Nothing yet. When cases move, you’ll see it here.',
+  'alerts.empty': 'All quiet for now. When a case moves, you’ll hear about it here.',
   'alerts.markAll': 'Mark all read',
 
   // Auth
@@ -169,7 +169,7 @@ export const en = {
   'common.send': 'Send',
   'common.list': 'List',
   'common.loading': 'Loading…',
-  'common.error': 'Something went wrong. Please try again.',
+  'common.error': 'That didn’t go through. Give it another try in a moment.',
   'common.justNow': 'just now',
   'common.minAgo': '{n}m ago',
   'common.hoursAgo': '{n}h ago',
@@ -306,7 +306,7 @@ export const en = {
   'onb.skip': 'Skip',
   'onb.start': 'Let’s go 🐾',
   'home.stillWaiting': 'Still waiting for a rescuer',
-  'home.loadError': 'Couldn’t load cases — check your connection.',
+  'home.loadError': 'We couldn’t reach the cases just now — check your connection and try again.',
 
   // Pre-launch pass — statuses, structured fields, blur, legal, settings
   'status.closed': 'Closed',
@@ -396,4 +396,8 @@ export const en = {
   'vetSetup.overnightNote': 'Closing after midnight (e.g. 20:00 → 06:00) is handled correctly.',
   'vetSetup.capacity': 'Accepting animals right now',
   'vetSetup.capacitySub': 'Turn this off only when you are open but genuinely full. Your opening hours are handled automatically.',
+
+  // The arrival — Direction A emotional peak (live resolution)
+  'case.arrivalTitle': 'She’s safe.',
+  'case.arrivalSub': 'Safe at the clinic and being cared for. You were part of this.',
 };

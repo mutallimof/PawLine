@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchPublicImpact, type PublicImpact } from '../lib/api';
 import { IconBack } from '../components/Icons';
+import { InkScene, Paw, PawTrailInk } from '../components/Ink';
 import { SponsorStrip } from '../components/extras';
 import { t } from '../i18n';
 
@@ -21,7 +22,12 @@ export default function ImpactPage() {
   }, []);
 
   const stat = (value: string | number, label: string, big = false) => (
-    <div className="impact-stat" style={big ? { gridColumn: '1 / -1' } : undefined}>
+    <div className={`impact-stat${big ? ' impact-stat--hero' : ''}`}>
+      {big && (
+        <div className="impact-stat__paw" aria-hidden="true">
+          <Paw size={30} animate />
+        </div>
+      )}
       <div className={`impact-stat__value${big ? ' impact-stat__value--big' : ''}`}>{value}</div>
       <div className="impact-stat__label">{label}</div>
     </div>
@@ -32,8 +38,11 @@ export default function ImpactPage() {
       <button className="back-btn" onClick={() => navigate(-1)}>
         <IconBack size={18} /> {t('common.back')}
       </button>
-      <h1 className="page-title">🐾 {t('impact.title')}</h1>
-      <p className="page-subtitle">{t('impact.subtitle')}</p>
+      <div className="impact-hero">
+        <InkScene kind="done" size={150} />
+        <h1 className="page-title impact-hero__title">{t('impact.title')}</h1>
+        <p className="page-subtitle impact-hero__sub">{t('impact.subtitle')}</p>
+      </div>
 
       {failed && <div className="banner banner--warn">{t('common.error')}</div>}
       {!impact && !failed && <div className="skeleton skeleton--stats" aria-hidden="true" />}
@@ -41,6 +50,9 @@ export default function ImpactPage() {
       {impact && (
         <div className="impact-grid">
           {stat(impact.helped_this_month, t('impact.helpedMonth'), true)}
+          <div className="impact-divider" aria-hidden="true">
+            <PawTrailInk count={5} size={20} />
+          </div>
           {stat(impact.helped_total, t('impact.helpedTotal'))}
           {stat(
             impact.median_accept_min !== null

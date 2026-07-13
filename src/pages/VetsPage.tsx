@@ -17,6 +17,7 @@ import { IconBack } from '../components/Icons';
 import { SponsorStrip } from '../components/extras';
 import { distanceKm, formatDistance, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
+import { InkScene } from '../components/Ink';
 import type { Vet } from '../lib/types';
 
 export default function VetsPage() {
@@ -104,7 +105,7 @@ export default function VetsPage() {
           {loading && <div className="spinner" />}
           {!loading && sorted.length === 0 && (
             <div className="empty-state">
-              <div className="empty-state__icon">🏥</div>
+              <InkScene kind="search" />
               {t('vets.none')}
             </div>
           )}

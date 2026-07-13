@@ -19,6 +19,7 @@ import {
   unblockUser,
 } from '../lib/api';
 import { t } from '../i18n';
+import { InkScene } from '../components/Ink';
 import type { Profile } from '../lib/types';
 
 export default function SettingsPage() {
@@ -51,7 +52,7 @@ export default function SettingsPage() {
         </button>
         <h1 className="page-title">{t('settings.title')}</h1>
         <div className="empty-state">
-          <div className="empty-state__icon">🔒</div>
+          <InkScene kind="lost" />
           {t('dm.signIn')}
           <Link to="/auth" className="btn btn--primary" style={{ marginTop: 14 }}>
             {t('auth.signIn')}

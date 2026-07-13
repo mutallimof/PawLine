@@ -11,6 +11,7 @@ import { useNotifications } from './hooks/useRealtime';
 import { BottomNav, SideNav, ToastProvider, useToast } from './components/ui';
 import { getLocale, subscribeLocale, t } from './i18n';
 import Onboarding, { shouldShowOnboarding } from './components/Onboarding';
+import { InkDefs } from './components/Ink';
 import { flushQueue } from './lib/offlineQueue';
 
 import HomePage from './pages/HomePage';
@@ -95,6 +96,7 @@ function Shell() {
 
   return (
     <div className="app-frame">
+      <InkDefs />
       {/* Desktop-only sidebar; phones keep the bottom tab bar (CSS-gated). */}
       <SideNav unreadAlerts={unread} />
       <div className="app-main">
