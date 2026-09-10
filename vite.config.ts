@@ -14,6 +14,12 @@ import { VitePWA } from 'vite-plugin-pwa';
  *  - API/realtime traffic is NOT cached: case status and chat must be live.
  */
 export default defineConfig({
+  server: {
+    // Allow access via tunnels (Cloudflare/ngrok/Colab) for sharing a
+    // local dev server with someone else to test on their own device.
+    host: true,
+    allowedHosts: true,
+  },
   build: {
     rollupOptions: {
       output: {
