@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
-import { blockUser, sendCaseMessage } from '../lib/api';
+import { blockUser, markCaseChatRead, sendCaseMessage } from '../lib/api';
 import { Avatar, StatusBadge, useToast } from '../components/ui';
 import { ReportButton } from '../components/Report';
 import { IconBack, IconSend } from '../components/Icons';
@@ -46,6 +46,12 @@ export default function CaseChatPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages.length]);
+
+  // Migration 017: mark read whenever new messages land while it's open —
+  // mirrors DmThreadPage's markConversationRead effect.
+  useEffect(() => {
+    if (id && user) void markCaseChatRead(id).catch(() => {});
+  }, [id, user, messages.length]);
 
   const send = async () => {
     const body = draft.trim();

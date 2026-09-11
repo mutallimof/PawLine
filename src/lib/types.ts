@@ -218,10 +218,10 @@ export interface InboxEntry {
  * the user is attached to (reporter/rescuer/vet) or has posted in, that
  * actually has at least one message.
  *
- * NOTE: unlike DMs, there's no per-user "last read" marker for case chats
- * (conversation_participants has last_read_at; case_watchers does not), so
- * there's no `unread` field here — only chronological ordering. Adding one
- * would need a schema change; see the note in api.ts's fetchCaseChatInbox().
+ * Read state (migration 017): case_watchers.last_read_at, mirroring DMs'
+ * conversation_participants.last_read_at. `unread` matches InboxEntry's
+ * boolean; `unreadCount` is the number shown in the Messages list badge —
+ * DMs don't have an equivalent count field, only the dot.
  */
 export interface CaseChatInboxEntry {
   caseId: string;
@@ -229,6 +229,8 @@ export interface CaseChatInboxEntry {
   addressHint: string;
   status: CaseStatus;
   lastMessage: CaseMessage | null;
+  unread: boolean;
+  unreadCount: number;
 }
 
 

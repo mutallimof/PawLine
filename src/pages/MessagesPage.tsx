@@ -93,7 +93,7 @@ export default function MessagesPage() {
           <Link
             key={`case-${item.entry.caseId}`}
             to={`/case/${item.entry.caseId}/chat`}
-            className="list-row"
+            className={`list-row${item.entry.unread ? ' list-row--unread' : ''}`}
           >
             <div
               className="avatar"
@@ -114,6 +114,11 @@ export default function MessagesPage() {
               <StatusBadge status={item.entry.status} />
               {item.entry.lastMessage && (
                 <span className="list-row__sub">{timeAgo(item.entry.lastMessage.created_at)}</span>
+              )}
+              {item.entry.unread && (
+                <span className="nav-badge" style={{ position: 'static' }}>
+                  {Math.min(item.entry.unreadCount, 99)}
+                </span>
               )}
             </div>
           </Link>
