@@ -211,6 +211,26 @@ grant execute on function public.get_my_vet() to authenticated;
 --      column later can't silently start leaking through this view again.
 -- Adds rating_avg/rating_count (C2) as the same kind of computed column
 -- open_now/accepting_now already are.
+--
+-- DROP + CREATE, not a bare CREATE OR REPLACE: 010's original view was
+-- `select v.*, ...`, which — at that point in the vets table's column
+-- history — put "address" in the 3rd output position. This version puts
+-- "contact_phone" 3rd instead (the column list below is reordered from
+-- the old v.* expansion, not just extended). Postgres's CREATE OR REPLACE
+-- VIEW only allows APPENDING columns or changing a column's query
+-- expression in place — it refuses to rename or reorder an existing
+-- output column ("cannot change name of view column ... to ...", 42P16).
+-- A plain DROP sidesteps that: nothing else in the schema selects FROM
+-- vets_public (checked — no other view, function, or policy references
+-- it; only application code does, via the Supabase client, which isn't a
+-- database-level dependency and is unaffected by drop+recreate as long as
+-- the new view still exposes what it expects, which it does, as a
+-- superset). So a plain `drop view if exists` (no CASCADE) is safe here —
+-- there is nothing for a CASCADE to take down. The view's own grant is
+-- dropped along with it, which is exactly why that grant is re-issued
+-- below, after the create.
+drop view if exists public.vets_public;
+
 create or replace view public.vets_public
 with (security_invoker = true) as
 select
