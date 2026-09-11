@@ -96,6 +96,11 @@ export function CaseCard({
   userLocation: LatLng | null;
 }) {
   const photo = caseData.photos?.find((p) => p.kind === 'report') ?? caseData.photos?.[0];
+  // Migration 018 (A2): photo.url can be null (signing failed) even when a
+  // photo row exists, or an already-rendered <img> can fail mid-view if its
+  // signed URL expires — both fall back to the same empty-state treatment.
+  const [photoBroken, setPhotoBroken] = useState(false);
+  const showPhoto = !!photo?.url && !photoBroken;
   const distance = userLocation
     ? formatDistance(distanceKm(userLocation, { lat: caseData.lat, lng: caseData.lng }))
     : null;
@@ -110,9 +115,13 @@ export function CaseCard({
         : 'progress'
       }${caseData.status === 'open' && caseData.escalated_at ? ' case-card--escalated' : ''}`}
     >
-      <div className={`case-card__photo${photo ? '' : ' case-card__photo--empty'}`}>
-        {photo ? (
-          <img src={photo.url} alt={`${caseData.animal} — ${statusLabel(caseData.status)}`} />
+      <div className={`case-card__photo${showPhoto ? '' : ' case-card__photo--empty'}`}>
+        {showPhoto ? (
+          <img
+            src={photo!.url!}
+            alt={`${caseData.animal} — ${statusLabel(caseData.status)}`}
+            onError={() => setPhotoBroken(true)}
+          />
         ) : (
           <span>{animalEmoji(caseData.animal)}</span>
         )}

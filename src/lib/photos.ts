@@ -1,6 +1,6 @@
 /**
- * Photo handling: client-side compression + upload to the public
- * 'case-photos' storage bucket.
+ * Photo handling: client-side compression + upload to the PRIVATE
+ * 'case-photos' storage bucket (migration 018 — was public until then).
  *
  * Compression matters here — reports are often sent from the street on
  * mobile data. We downscale to max 1600px and re-encode as JPEG ~0.8.
@@ -47,7 +47,12 @@ function safeId(): string {
     : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/** Upload a photo and return its public URL. */
+/**
+ * Upload a photo and return its storage PATH — not a URL. The bucket is
+ * private (migration 018), so there is no public URL to hand back; callers
+ * store this path on case_photos.path, and fetchCases()/fetchCase() mint a
+ * short-lived signed URL for display (see api.ts).
+ */
 export async function uploadCasePhoto(file: File, caseId: string): Promise<string> {
   const blob = await compressImage(file);
   const path = `${caseId}/${safeId()}.jpg`;
@@ -57,6 +62,5 @@ export async function uploadCasePhoto(file: File, caseId: string): Promise<strin
     .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
   if (error) throw error;
 
-  const { data } = supabase.storage.from('case-photos').getPublicUrl(path);
-  return data.publicUrl;
+  return path;
 }

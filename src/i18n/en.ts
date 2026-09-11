@@ -382,6 +382,7 @@ export const en = {
   'photo.graphic': 'May contain graphic content',
   'photo.tapToView': 'Tap to view',
   'photo.hide': 'Hide',
+  'photo.unavailable': 'Photo unavailable',
   'case.notHere': 'Animal not here / already helped',
   'case.notHerePrompt': 'Report that this animal is no longer here or has already been helped? A few reports from different people will close the case.',
   'case.notHereThanks': 'Thanks — that helps keep the map accurate.',

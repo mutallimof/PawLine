@@ -70,6 +70,12 @@ export default function CaseDetailPage() {
   const [ratingValue, setRatingValue] = useState(0);
   const [ratingNote, setRatingNote] = useState('');
   const [ratingBusy, setRatingBusy] = useState(false);
+  // Migration 018 (A2): tracks photos whose signed URL failed to load —
+  // separate from photo.url being null outright (signing failed upstream);
+  // both fall back to the same "photo unavailable" placeholder below.
+  const [brokenPhotoIds, setBrokenPhotoIds] = useState<Set<string>>(new Set());
+  const markPhotoBroken = (id: string) =>
+    setBrokenPhotoIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
 
   useEffect(() => {
     if (id && user) isWatching(id, user.id).then(setWatching).catch(() => {});
@@ -572,23 +578,46 @@ export default function CaseDetailPage() {
           <div className="section-label">{t('report.photos')}</div>
           {reportPhotos[0] && (
             <div className="photo-hero" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 12 }}>
-              <img src={reportPhotos[0].url} alt={caseData.description} />
+              {reportPhotos[0].url && !brokenPhotoIds.has(reportPhotos[0].id) ? (
+                <img
+                  src={reportPhotos[0].url}
+                  alt={caseData.description}
+                  onError={() => markPhotoBroken(reportPhotos[0].id)}
+                />
+              ) : (
+                <div className="photo-unavailable">
+                  <span aria-hidden="true">🐾</span>
+                  <span>{t('photo.unavailable')}</span>
+                </div>
+              )}
             </div>
           )}
           {reportPhotos.length > 1 && (
             <div className="photo-grid" style={{ marginBottom: 12 }}>
-              {reportPhotos.slice(1).map((p) => (
-                <img key={p.id} src={p.url} alt="" />
-              ))}
+              {reportPhotos.slice(1).map((p) =>
+                p.url && !brokenPhotoIds.has(p.id) ? (
+                  <img key={p.id} src={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
+                ) : (
+                  <div key={p.id} className="photo-unavailable">
+                    <span aria-hidden="true">🐾</span>
+                  </div>
+                )
+              )}
             </div>
           )}
           {deliveryPhotos.length > 0 && (
             <>
               <div className="section-label">{t('status.resolved')}</div>
               <div className="photo-grid" style={{ marginBottom: 14 }}>
-                {deliveryPhotos.map((p) => (
-                  <img key={p.id} src={p.url} alt="" />
-                ))}
+                {deliveryPhotos.map((p) =>
+                  p.url && !brokenPhotoIds.has(p.id) ? (
+                    <img key={p.id} src={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
+                  ) : (
+                    <div key={p.id} className="photo-unavailable">
+                      <span aria-hidden="true">🐾</span>
+                    </div>
+                  )
+                )}
               </div>
             </>
           )}

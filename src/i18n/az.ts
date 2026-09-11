@@ -384,6 +384,7 @@ export const az: Dict = {
   'photo.graphic': 'Narahatedici məzmun ola bilər',
   'photo.tapToView': 'Baxmaq üçün toxunun',
   'photo.hide': 'Gizlət',
+  'photo.unavailable': 'Foto əlçatan deyil',
   'case.notHere': 'Heyvan burada yoxdur / artıq kömək edilib',
   'case.notHerePrompt': 'Bu heyvanın artıq burada olmadığını və ya kömək edildiyini bildirmək istəyirsiniz? Müxtəlif insanlardan bir neçə bildiriş hadisəni bağlayacaq.',
   'case.notHereThanks': 'Təşəkkürlər — bu, xəritəni dəqiq saxlamağa kömək edir.',

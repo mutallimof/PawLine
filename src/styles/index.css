@@ -386,6 +386,25 @@ select {
   font-size: 42px;
 }
 
+/* Migration 018 (A2): a photo the data promised but couldn't be shown —
+   signing failed, or its signed URL expired mid-view. Distinct from the
+   plain "no photo attached" empty states above (those never show this). */
+.photo-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  min-height: 90px;
+  background: var(--coral-soft);
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: inherit;
+}
+.photo-unavailable span:first-child { font-size: 26px; }
+
 .case-card__body {
   padding: 12px 14px 14px;
 }

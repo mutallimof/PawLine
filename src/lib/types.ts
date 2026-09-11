@@ -157,9 +157,17 @@ export interface CaseWithDetails extends RescueCase {
 export interface CasePhoto {
   id: string;
   case_id: string;
-  url: string;
+  /** DB column (migration 018) — a bare storage path, never fetchable directly. */
+  path: string;
   kind: 'report' | 'delivery';
   created_at: string;
+  /**
+   * NOT a DB column — hydrated client-side by fetchCases()/fetchCase() from
+   * a batched createSignedUrls() call (case-photos is a private bucket as
+   * of migration 018). Null if signing that path failed; render sites treat
+   * that the same as "no photo".
+   */
+  url: string | null;
 }
 
 export interface CaseEvent {

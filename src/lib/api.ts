@@ -59,7 +59,9 @@ export async function fetchCases(): Promise<CaseWithDetails[]> {
     .order('created_at', { ascending: false })
     .limit(200);
   if (error) throw error;
-  return (data ?? []) as unknown as CaseWithDetails[];
+  const cases = (data ?? []) as unknown as CaseWithDetails[];
+  await resolvePhotoUrls(cases);
+  return cases;
 }
 
 export async function fetchCase(id: string): Promise<CaseWithDetails | null> {
@@ -69,7 +71,112 @@ export async function fetchCase(id: string): Promise<CaseWithDetails | null> {
     .eq('id', id)
     .maybeSingle();
   if (error) throw error;
-  return data as unknown as CaseWithDetails | null;
+  const caseData = data as unknown as CaseWithDetails | null;
+  if (caseData) await resolvePhotoUrls([caseData]);
+  return caseData;
+}
+
+// ---------------------------------------------------------------------------
+// Guest sessions & signed photo URLs (migration 018, A2)
+// ---------------------------------------------------------------------------
+
+let sessionPromise: Promise<void> | null = null;
+
+/**
+ * Guarantees SOME session exists — a real sign-in, or a silent anonymous
+ * one — before minting signed photo URLs. case-photos is a private bucket
+ * as of migration 018, and its storage.objects SELECT policy is
+ * `to authenticated` only, so a bare anon-key caller (no session at all)
+ * can't sign anything; this is also the enforcement point for "guests need
+ * an identity to view photos."
+ *
+ * Deliberately NO Turnstile here, unlike createCase()'s anonymous sign-in:
+ * this fires from ordinary browsing (viewing the feed/map), not report
+ * submission, and gating that would put a captcha in front of just looking
+ * at the map. Accepted tradeoff (A2 decision 3): createCase()'s own
+ * Turnstile branch only fires when `!session.session`, so a session minted
+ * here for viewing pre-empts it too — a bot that loads the feed once (which
+ * it has to, to find anything to spam-report) already holds a session by
+ * the time it reports. The backstops that still apply regardless of how the
+ * session was minted are the DB's per-device (4/hr, 15/day) and platform-
+ * wide anonymous (40/hr) report-rate limits (003, 005), not Turnstile.
+ *
+ * Guarded against concurrent double sign-in: overlapping callers (e.g. the
+ * feed and a case-detail page mounting at once) share one in-flight
+ * promise instead of each minting a separate anonymous identity.
+ */
+async function ensureSession(): Promise<void> {
+  if (sessionPromise) return sessionPromise;
+  sessionPromise = (async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return;
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) throw new Error(error.message);
+  })().finally(() => {
+    sessionPromise = null;
+  });
+  return sessionPromise;
+}
+
+/** 1 hour — long enough for a normal viewing session, short enough that
+ * hiding a case (011, 018) closes access to its photos quickly. */
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+/**
+ * Resolves every photo's `.url` in place across a list of cases via ONE
+ * batched createSignedUrls() call — not one call per photo (a full feed
+ * page can carry a few hundred paths; this is still a single request).
+ *
+ * Never throws: a signing failure (Storage hiccup, anonymous sign-in
+ * disabled, etc.) degrades every photo to `url: null` — which render sites
+ * already treat the same as "no photo" — rather than breaking the whole
+ * feed. The case metadata that matters most (location, status,
+ * description) must never depend on Storage being reachable; that's the
+ * exact bug this migration's sibling fix (CASE_SELECT's vets embed) was
+ * about, and photo signing gets the same posture.
+ */
+async function resolvePhotoUrls(cases: CaseWithDetails[]): Promise<void> {
+  const paths = Array.from(
+    new Set(cases.flatMap((c) => (c.photos ?? []).map((p) => p.path)))
+  );
+  if (paths.length === 0) return;
+
+  try {
+    await ensureSession();
+    const { data, error } = await supabase.storage
+      .from('case-photos')
+      .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+    if (error) throw error;
+
+    const urlByPath = new Map(
+      (data ?? [])
+        .filter((d) => !d.error && d.signedUrl)
+        .map((d) => [d.path ?? '', d.signedUrl as string])
+    );
+    for (const c of cases) {
+      for (const p of c.photos ?? []) p.url = urlByPath.get(p.path) ?? null;
+    }
+  } catch {
+    for (const c of cases) {
+      for (const p of c.photos ?? []) p.url = null;
+    }
+  }
+}
+
+/**
+ * Tell this device's own service worker to drop any cached copies of a
+ * case's photos — called directly here on admin hide, and from
+ * useCases()/useCase() when realtime reports a case turning hidden, so
+ * every currently-open tab (not just the admin's) purges immediately
+ * rather than waiting out the 7-day cache expiry. This only reaches
+ * devices with PawLine open right now; it is not a substitute for the
+ * short signed-URL expiry, which is what actually bounds a closed
+ * device's access.
+ */
+export function purgeCachedCasePhotos(caseId: string): void {
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'purge-case-photos', caseId });
+  }
 }
 
 export interface NewCaseInput {
@@ -142,10 +249,10 @@ export async function createCase(input: NewCaseInput): Promise<string> {
   for (const file of input.photos) {
     // Bad-signal resilience (audit P1): each photo gets three attempts with
     // backoff before we declare the network dead.
-    let url = '';
+    let path = '';
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        url = await uploadCasePhoto(file, caseId);
+        path = await uploadCasePhoto(file, caseId);
         break;
       } catch (e) {
         if (attempt === 3) throw e;
@@ -155,7 +262,7 @@ export async function createCase(input: NewCaseInput): Promise<string> {
     const phash = await computeDHash(file).catch(() => null);
     const { error: photoErr } = await supabase
       .from('case_photos')
-      .insert({ case_id: caseId, url, kind: 'report', phash });
+      .insert({ case_id: caseId, path, kind: 'report', phash });
     if (photoErr) throw photoErr;
   }
 
@@ -221,10 +328,10 @@ export async function isWatching(caseId: string, profileId: string): Promise<boo
 }
 
 export async function addDeliveryPhoto(caseId: string, file: File): Promise<void> {
-  const url = await uploadCasePhoto(file, caseId);
+  const path = await uploadCasePhoto(file, caseId);
   const { error } = await supabase
     .from('case_photos')
-    .insert({ case_id: caseId, url, kind: 'delivery' });
+    .insert({ case_id: caseId, path, kind: 'delivery' });
   if (error) throw error;
 }
 
@@ -724,8 +831,12 @@ export async function fetchOpenReports(): Promise<ContentReport[]> {
   return (data ?? []) as unknown as ContentReport[];
 }
 
-export const adminHideCase = (caseId: string, hidden: boolean) =>
-  rpc('admin_hide_case', { p_case: caseId, p_hidden: hidden });
+export const adminHideCase = async (caseId: string, hidden: boolean) => {
+  await rpc('admin_hide_case', { p_case: caseId, p_hidden: hidden });
+  // Immediate same-device purge; useCases()/useCase() also purge on the
+  // realtime event so every other currently-open tab does too.
+  if (hidden) purgeCachedCasePhotos(caseId);
+};
 export const adminHideCaseMessage = (id: number, hidden: boolean) =>
   rpc('admin_hide_case_message', { p_id: id, p_hidden: hidden });
 export const adminBanUser = (profileId: string, banned: boolean) =>

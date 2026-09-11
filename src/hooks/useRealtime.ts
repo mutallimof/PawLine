@@ -14,6 +14,7 @@ import {
   fetchCases,
   fetchMessages,
   fetchNotifications,
+  purgeCachedCasePhotos,
 } from '../lib/api';
 import type {
   AppNotification,
@@ -42,6 +43,20 @@ function useRefetch(fn: () => Promise<void>, delayMs = 250) {
   }, [fn, delayMs]);
 }
 
+/**
+ * Migration 018 (A2): if this change just made a case hidden, tell this
+ * tab's own service worker to drop any cached copies of its photos —
+ * reaches every currently-open tab watching this case/the feed, not just
+ * the admin's device that clicked "hide" (adminHideCase() covers that one
+ * directly). Not gated on payload.old (Postgres only guarantees `old`
+ * carries every column with REPLICA IDENTITY FULL, which cases doesn't
+ * have) — purging an already-hidden or already-purged case is a harmless
+ * no-op, so checking `new.hidden` alone is enough.
+ */
+function purgeIfHidden(payload: { new?: { id?: string; hidden?: boolean } }) {
+  if (payload.new?.hidden && payload.new.id) purgeCachedCasePhotos(payload.new.id);
+}
+
 // ---------------------------------------------------------------------------
 // All cases (map + feed) — live.
 // ---------------------------------------------------------------------------
@@ -67,7 +82,10 @@ export function useCases() {
     void load();
     const channel = supabase
       .channel(uniqueTopic('cases-list'))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cases' }, refetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cases' }, (payload) => {
+        purgeIfHidden(payload);
+        refetch();
+      })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'case_photos' }, refetch)
       .subscribe();
     return () => void supabase.removeChannel(channel);
@@ -105,7 +123,10 @@ export function useCase(caseId: string | undefined) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'cases', filter: `id=eq.${caseId}` },
-        refetch
+        (payload) => {
+          purgeIfHidden(payload);
+          refetch();
+        }
       )
       .on(
         'postgres_changes',

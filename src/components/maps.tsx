@@ -133,6 +133,13 @@ function statusClass(c: CaseWithDetails): string {
   return 'progress';
 }
 
+function pinEmojiFallback(c: CaseWithDetails): HTMLElement {
+  const span = document.createElement('span');
+  span.className = 'pin-photo__emoji';
+  span.textContent = animalEmoji(c.animal);
+  return span;
+}
+
 function photoPinEl(c: CaseWithDetails, onClick: () => void): HTMLElement {
   const photo = c.photos?.find((p) => p.kind === 'report') ?? c.photos?.[0];
   const el = document.createElement('button');
@@ -141,17 +148,19 @@ function photoPinEl(c: CaseWithDetails, onClick: () => void): HTMLElement {
     c.status === 'open' && c.escalated_at ? ' pin-photo--escalated' : ''
   }`;
   el.setAttribute('aria-label', `${t(`animal.${c.animal}` as const)} — ${t(`status.${c.status}` as const)}`);
-  if (photo) {
+  if (photo?.url) {
     const img = document.createElement('img');
     img.src = photo.url;
     img.alt = '';
     img.loading = 'lazy';
+    // Migration 018 (A2): a signed URL that expires mid-session, or a
+    // signing failure that slipped through — same fallback as "no photo".
+    img.onerror = () => {
+      img.replaceWith(pinEmojiFallback(c));
+    };
     el.appendChild(img);
   } else {
-    const span = document.createElement('span');
-    span.className = 'pin-photo__emoji';
-    span.textContent = animalEmoji(c.animal);
-    el.appendChild(span);
+    el.appendChild(pinEmojiFallback(c));
   }
   if (c.status === 'resolved') {
     const check = document.createElement('span');
