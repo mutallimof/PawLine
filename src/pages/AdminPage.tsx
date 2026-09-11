@@ -13,12 +13,15 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   adminBanUser,
+  adminFlagAccount,
   adminSetPartner,
   fetchAdminStats,
+  fetchReportedAccounts,
   fetchVetDocuments,
   getVetDocumentUrl,
   searchProfiles,
   type AdminStats,
+  type ReportedAccount,
   adminDeleteSponsor,
   adminHideCase,
   adminHideCaseMessage,
@@ -75,13 +78,15 @@ function VetDocumentsList({ vetId }: { vetId: string }) {
   );
 }
 
-type Tab = 'stats' | 'vets' | 'reports' | 'sponsors';
+type Tab = 'stats' | 'vets' | 'reports' | 'flagged' | 'sponsors';
 
 export default function AdminPage() {
   const { profile } = useAuth();
   const [tab, setTab] = useState<Tab>('stats');
   const [pendingVets, setPendingVets] = useState<Vet[]>([]);
   const [reports, setReports] = useState<ContentReport[]>([]);
+  const [flagged, setFlagged] = useState<ReportedAccount[]>([]);
+  const [flagWindow, setFlagWindow] = useState(7);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
   // Partner badge management
@@ -99,20 +104,22 @@ export default function AdminPage() {
 
   const reload = useCallback(async () => {
     try {
-      const [v, r, s, st] = await Promise.all([
+      const [v, r, fl, s, st] = await Promise.all([
         fetchPendingVets(),
         fetchOpenReports(),
+        fetchReportedAccounts(flagWindow),
         fetchSponsors(),
         fetchAdminStats(),
       ]);
       setPendingVets(v);
       setReports(r);
+      setFlagged(fl);
       setSponsors(s);
       setStats(st);
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
     }
-  }, [toast]);
+  }, [toast, flagWindow]);
 
   useEffect(() => {
     if (profile?.is_admin) void reload();
@@ -144,7 +151,7 @@ export default function AdminPage() {
       <h1 className="page-title">{t('admin.title')}</h1>
 
       <div className="segmented" style={{ margin: '12px 0 16px' }}>
-        {(['stats', 'vets', 'reports', 'sponsors'] as Tab[]).map((tb) => (
+        {(['stats', 'vets', 'reports', 'flagged', 'sponsors'] as Tab[]).map((tb) => (
           <button
             key={tb}
             className={`segmented__option${tab === tb ? ' active' : ''}`}
@@ -153,6 +160,7 @@ export default function AdminPage() {
             {t(`admin.${tb}` as const)}
             {tb === 'vets' && pendingVets.length > 0 ? ` (${pendingVets.length})` : ''}
             {tb === 'reports' && reports.length > 0 ? ` (${reports.length})` : ''}
+            {tb === 'flagged' && flagged.length > 0 ? ` (${flagged.length})` : ''}
           </button>
         ))}
       </div>
@@ -323,6 +331,51 @@ export default function AdminPage() {
                   onClick={run(() => adminResolveReport(r.id, 'dismissed'))}
                 >
                   {t('admin.dismiss')}
+                </button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* ---- C4: accounts with unusually many open reports recently ---- */}
+      {tab === 'flagged' && (
+        <>
+          <p className="page-subtitle" style={{ marginTop: -4 }}>{t('admin.flaggedSub')}</p>
+          <div className="segmented" style={{ marginBottom: 14 }}>
+            {[1, 7, 30].map((d) => (
+              <button
+                key={d}
+                className={`segmented__option${flagWindow === d ? ' active' : ''}`}
+                onClick={() => setFlagWindow(d)}
+              >
+                {t('admin.flaggedWindow', { n: d })}
+              </button>
+            ))}
+          </div>
+          {flagged.length === 0 && <div className="empty-state">{t('admin.none')}</div>}
+          {flagged.map((a) => (
+            <div key={a.profile_id} className="card" style={{ padding: 14, marginBottom: 12 }}>
+              <div className="list-row__title">{a.display_name}</div>
+              <div className="list-row__sub">
+                {t('admin.flaggedCounts', { reports: a.report_count, cases: a.case_count })}
+              </div>
+              <div className="list-row__sub">
+                {timeAgo(a.first_report_at)} → {timeAgo(a.last_report_at)}
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <Link to={`/user/${a.profile_id}`} className="btn btn--ghost btn--small">
+                  {t('admin.viewProfile')}
+                </Link>
+                <button
+                  className="btn btn--danger btn--small"
+                  disabled={busy}
+                  onClick={() => {
+                    if (!window.confirm(t('admin.flagConfirm', { name: a.display_name }))) return;
+                    void run(() => adminFlagAccount(a.profile_id))();
+                  }}
+                >
+                  {t('admin.flagAction')}
                 </button>
               </div>
             </div>

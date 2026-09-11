@@ -642,6 +642,32 @@ export const adminSetVetStatus = (vetId: string, status: 'approved' | 'rejected'
   rpc('admin_set_vet_status', { p_vet: vetId, p_status: status });
 
 // ---------------------------------------------------------------------------
+// Reporter abuse flagging (migration 015, C4)
+// ---------------------------------------------------------------------------
+
+export interface ReportedAccount {
+  profile_id: string;
+  display_name: string;
+  report_count: number;
+  case_count: number;
+  first_report_at: string;
+  last_report_at: string;
+}
+
+/** Accounts with unusually many open reports against their content recently. */
+export async function fetchReportedAccounts(windowDays = 7): Promise<ReportedAccount[]> {
+  const { data, error } = await supabase.rpc('admin_reported_accounts', {
+    p_window: `${windowDays} days`,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as ReportedAccount[];
+}
+
+/** One action: hide every case that account created, ban it, resolve their open reports. */
+export const adminFlagAccount = (profileId: string) =>
+  rpc('admin_flag_account', { p_profile: profileId });
+
+// ---------------------------------------------------------------------------
 // Duplicate flags
 // ---------------------------------------------------------------------------
 
