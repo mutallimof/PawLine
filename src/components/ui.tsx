@@ -103,7 +103,7 @@ export function CaseCard({
   return (
     <Link
       to={`/case/${caseData.id}`}
-      className={`card case-card case-card--${
+      className={`card case-card case-card--compact case-card--${
         caseData.status === 'resolved' ? 'resolved'
         : caseData.status === 'en_route' ? 'enroute'
         : caseData.status === 'open' ? 'open'
@@ -116,13 +116,14 @@ export function CaseCard({
         ) : (
           <span>{animalEmoji(caseData.animal)}</span>
         )}
-        <StatusBadge status={caseData.status} overlay />
       </div>
       <div className="case-card__body">
-        <p className="case-card__desc">{caseData.description}</p>
         <div className="case-card__meta">
+          <StatusBadge status={caseData.status} />
           <span>{animalEmoji(caseData.animal)} {t(`animal.${caseData.animal}` as const)}</span>
-          <span>·</span>
+        </div>
+        <p className="case-card__desc">{caseData.description}</p>
+        <div className="case-card__meta case-card__meta--sub">
           <span>{timeAgo(caseData.created_at)}</span>
           {distance && (
             <>
@@ -136,7 +137,7 @@ export function CaseCard({
           {caseData.address_hint && (
             <>
               <span>·</span>
-              <span>{caseData.address_hint}</span>
+              <span className="case-card__addr">{caseData.address_hint}</span>
             </>
           )}
         </div>
@@ -360,6 +361,15 @@ export function PasswordField({
 // ---------------------------------------------------------------------------
 // Language switcher — works for guests (localStorage) and signed-in users
 // (localStorage + profiles.locale, so the choice follows them across devices).
+//
+// FLAGGED, NOT FIXED (Group H): profiles.locale's CHECK constraint
+// (migration 002) and handle_new_user()'s signup allow-list only permit
+// ('az','tr','en') — not 'ru'. So for a signed-in user choosing Russian,
+// the updateProfile() call below fails silently (already caught) — the
+// local switch still applies for this session/device, but the choice
+// won't survive signing in elsewhere until a migration adds 'ru' to both.
+// That's a schema change; per this group's instructions it's flagged here
+// rather than written as an unapplied migration.
 // ---------------------------------------------------------------------------
 
 export function LanguageSwitcher() {

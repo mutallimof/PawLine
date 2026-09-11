@@ -1,33 +1,43 @@
 /**
  * Minimal reactive i18n layer.
  *
- * Every user-facing string goes through t('key'). Three locales ship:
- * Azerbaijani (default), Turkish, English.
+ * Every user-facing string goes through t('key'). Four locales ship:
+ * Azerbaijani (default), Turkish, English, Russian (Group H).
  *
  * Reactivity: the current locale is module state with a subscriber set.
  * The app shell subscribes via useSyncExternalStore, so switching language
  * re-renders the whole tree and every t() call re-evaluates — no per-string
  * wiring needed.
  *
- * Persistence: localStorage always (works for guests); for registered users
- * the profiles.locale column is authoritative and is applied on sign-in
- * (see AuthContext) and written by the language switcher.
+ * Persistence: localStorage always (works for guests, incl. Russian — this
+ * layer doesn't touch the database). For registered users the
+ * profiles.locale column is ALSO supposed to be authoritative, but as of
+ * this group its CHECK constraint (migration 002) and handle_new_user()'s
+ * signup allow-list only permit ('az','tr','en') — 'ru' isn't in either.
+ * That's a schema change (flagged, not written, per this group's
+ * instruction) — see the note on LanguageSwitcher in ui.tsx. Until it
+ * lands, a signed-in user choosing Russian keeps it for the session/device
+ * via localStorage, but the server-side persist silently fails (already
+ * caught elsewhere) and a fresh sign-in on another device falls back to
+ * whatever profiles.locale actually holds.
  */
 
 import { en } from './en';
 import { az } from './az';
 import { tr } from './tr';
+import { ru } from './ru';
 
 export type Dict = typeof en;
-export type LocaleCode = 'az' | 'tr' | 'en';
+export type LocaleCode = 'az' | 'tr' | 'en' | 'ru';
 
-export const SUPPORTED_LOCALES: Record<LocaleCode, Dict> = { az, tr, en };
+export const SUPPORTED_LOCALES: Record<LocaleCode, Dict> = { az, tr, en, ru };
 
 /** Native-language display names for the switcher. */
 export const LOCALE_NAMES: Record<LocaleCode, string> = {
   az: 'Azərbaycanca',
   tr: 'Türkçe',
   en: 'English',
+  ru: 'Русский',
 };
 
 const STORAGE_KEY = 'pawline-locale';

@@ -15,6 +15,22 @@ import { IconBack, IconSend } from '../components/Icons';
 import { t } from '../i18n';
 import { clockTime } from '../lib/time';
 
+/**
+ * Group E: a consistent colour per sender across the thread, distinct from
+ * the semantic status/brand colours (--coral, --status-*) so a sender's
+ * name is never mistaken for a status cue. Plain hash of their id — no
+ * state, so it's naturally stable across renders and reloads.
+ */
+const SENDER_COLORS = [
+  '#c2402f', '#3f7fae', '#3f9b6c', '#8a5cb5',
+  '#b5762f', '#4a7a6b', '#a8477a', '#5c6bc0',
+];
+function senderColor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return SENDER_COLORS[hash % SENDER_COLORS.length];
+}
+
 export default function CaseChatPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -68,26 +84,22 @@ export default function CaseChatPage() {
         {!loading && messages.length === 0 && (
           <div className="empty-state">{t('caseChat.empty')}</div>
         )}
-        {messages.map((m) => {
+        {messages.map((m, i) => {
           const mine = m.sender_id === user?.id;
+          // Group E: sender name shows only on the first message of a run —
+          // consecutive messages from the same person collapse together,
+          // WhatsApp-style.
+          const isFirstOfRun = i === 0 || messages[i - 1].sender_id !== m.sender_id;
           return (
             <div key={m.id} className={`bubble${mine ? ' bubble--mine' : ''}`}>
-              {!mine && m.sender && (
-                <div className="bubble__sender">
-                  <Link to={`/user/${m.sender.id}`}>
+              {/* Sender name + block: identity info, so only once per run —
+                  block acts on the PERSON, not this one message. */}
+              {!mine && m.sender && isFirstOfRun && (
+                <div className="bubble__sender" style={{ color: senderColor(m.sender.id) }}>
+                  <Link to={`/user/${m.sender.id}`} style={{ color: 'inherit' }}>
                     {m.sender.display_name}
                     {m.sender.role === 'vet' ? ' 🏥' : ''}
                   </Link>
-                  {user && (
-                    <ReportButton
-                      reporterId={user.id}
-                      targetType="case_message"
-                      targetCase={m.case_id}
-                      targetMessage={m.id}
-                      targetProfile={m.sender_id}
-                      small
-                    />
-                  )}
                   {user && m.sender_id && m.sender_id !== user.id && (
                     <button
                       style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-soft)' }}
@@ -109,6 +121,18 @@ export default function CaseChatPage() {
               )}
               {m.body}
               <span className="bubble__time">{clockTime(m.created_at)}</span>
+              {/* Report (B2): per-message, so every message keeps this —
+                  unlike the name/block above, unrelated to run-grouping. */}
+              {!mine && user && (
+                <ReportButton
+                  reporterId={user.id}
+                  targetType="case_message"
+                  targetCase={m.case_id}
+                  targetMessage={m.id}
+                  targetProfile={m.sender_id}
+                  small
+                />
+              )}
             </div>
           );
         })}

@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { t } from '../i18n';
 import { InkScene, type EmptyKind } from './Ink';
+import { LanguageSwitcher } from './ui';
 
 const KEY = 'pawline-onboarded-v1';
 
@@ -42,6 +43,10 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   const s = STEPS[step];
   return (
     <div className="onboarding" role="dialog" aria-modal="true" aria-label={t(s.title)}>
+      {/* Group H: language matters before anything else is legible. */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+        <LanguageSwitcher />
+      </div>
       <div className="onboarding__icon" aria-hidden="true">
         <InkScene kind={s.scene} size={150} />
       </div>

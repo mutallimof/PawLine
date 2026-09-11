@@ -452,6 +452,9 @@ export function CasesMap({
   return (
     <div className="map-wrap">
       <div ref={ref} style={{ width: '100%', height: '100%' }} />
+      {/* Group H: shimmer while the JS API is still loading — was a bare
+          empty box before. */}
+      {!map && <div className="map-skeleton" aria-hidden="true" />}
       <button
         className="map-locate-btn"
         onClick={onRequestLocation}
@@ -571,6 +574,7 @@ export function PinDropMap({
       ) : (
         <div className="map-wrap" style={{ height, borderRadius: 'var(--radius)' }}>
           <div ref={ref} style={{ width: '100%', height: '100%' }} />
+          {!map && <div className="map-skeleton" aria-hidden="true" />}
           <div className="center-pin">📍</div>
           <button
             type="button"
@@ -591,6 +595,44 @@ export function PinDropMap({
           {geoError}
         </div>
       )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Case location mini map (Group F) — one pin, no route. Case detail leads
+// with "where", so this needs to read at a glance without the rescuer
+// tapping into anything.
+// ---------------------------------------------------------------------------
+export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { map, failed } = useGoogleMap(ref, {
+    center: { lat: caseData.lat, lng: caseData.lng },
+    zoom: 15,
+  });
+  const markers = useRef<HtmlMarkerInstance[]>([]);
+
+  useEffect(() => {
+    if (!map) return;
+    const g = window.google;
+    const Marker = getMarkerClass(g);
+    const m = new Marker(
+      { lat: caseData.lat, lng: caseData.lng },
+      photoPinEl(caseData, () => {})
+    );
+    m.setMap(map);
+    markers.current = [m];
+    return () => {
+      markers.current.forEach((mk) => mk.setMap(null));
+      markers.current = [];
+    };
+  }, [map, caseData]);
+
+  if (failed) return <MapUnavailable height={160} />;
+  return (
+    <div className="map-wrap" style={{ height: 160, borderRadius: 'var(--radius)' }}>
+      <div ref={ref} style={{ width: '100%', height: '100%' }} />
+      {!map && <div className="map-skeleton" aria-hidden="true" />}
     </div>
   );
 }
@@ -644,6 +686,7 @@ export function EnRouteMap({ caseData }: { caseData: CaseWithDetails }) {
   return (
     <div className="map-wrap" style={{ height: 220, borderRadius: 'var(--radius)' }}>
       <div ref={ref} style={{ width: '100%', height: '100%' }} />
+      {!map && <div className="map-skeleton" aria-hidden="true" />}
     </div>
   );
 }

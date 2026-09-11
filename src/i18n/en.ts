@@ -33,6 +33,13 @@ export const en = {
   'home.filter.resolved': 'Resolved',
   'home.empty': 'No cases here yet. Hopefully it stays that way — but if you spot an animal in trouble, report it.',
   'home.distanceAway': '{km} km away',
+  'home.filters': 'Filters',
+  'home.filterRadius': 'Distance',
+  'home.filterRadiusAny': 'Any distance',
+  'home.filterRadiusNoLocation': 'Enable location to filter by distance.',
+  'home.filterAnimal': 'Animal',
+  'home.filterStatus': 'Status',
+  'home.filterClear': 'Clear filters',
 
   // Report flow
   'report.title': 'Report an animal',
@@ -57,6 +64,7 @@ export const en = {
 
   // Case detail
   'case.reportedBy': 'Reported by {name}',
+  'case.locationUnknown': 'No landmark given — see the map below',
   'case.guest': 'a guest',
   'case.timeline': 'Timeline',
   'case.accept': 'I’ll rescue this animal',

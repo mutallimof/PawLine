@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { PasswordField, useToast } from '../components/ui';
+import { LanguageSwitcher, PasswordField, useToast } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 
@@ -76,6 +76,11 @@ export default function AuthPage() {
 
   return (
     <div className="page" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '90dvh' }}>
+      {/* Group H: not gated behind signing in — every auth screen gets it. */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+        <LanguageSwitcher />
+      </div>
+
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <div style={{ fontSize: 52 }}>🐾</div>
         <h1 className="page-title">{t('app.name')}</h1>

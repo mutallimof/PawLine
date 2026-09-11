@@ -408,6 +408,52 @@ select {
   overflow: hidden;
 }
 
+/* Group G: compact horizontal card — smaller, more per screen than the old
+   photo-on-top layout. Status now reads from the badge in the meta row
+   (was an overlay on the photo, which had no room at this thumbnail size)
+   plus the existing status-tinted background/border below. */
+.case-card--compact {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 8px;
+}
+.case-card--compact .case-card__photo {
+  width: 88px;
+  min-width: 88px;
+  aspect-ratio: 1 / 1;
+}
+.case-card--compact .case-card__body {
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+.case-card--compact .case-card__meta {
+  margin-top: 0;
+  font-size: 11.5px;
+  flex-wrap: wrap;
+}
+.case-card--compact .case-card__meta--sub {
+  color: var(--ink-soft);
+}
+.case-card--compact .case-card__desc {
+  -webkit-line-clamp: 1;
+  font-size: 13.5px;
+  margin: 0;
+}
+.case-card--compact .case-card__addr {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -1705,6 +1751,17 @@ body {
   animation: shimmer 1.4s linear infinite;
 }
 .skeleton--card { height: 108px; margin-bottom: 12px; }
+
+/* Group H: map placeholder while the Google Maps JS is still loading — was
+   a bare empty div before. .map-wrap is already position:relative. */
+.map-skeleton {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f1e7df 25%, #faf3ee 50%, #f1e7df 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
 
 /* ---- Resolution celebration (the emotional peak) ----
    Paw prints burst gently from the success banner — once, then calm. */

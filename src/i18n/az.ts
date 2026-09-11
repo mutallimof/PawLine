@@ -35,6 +35,13 @@ export const az: Dict = {
   'home.filter.resolved': 'Həll olunub',
   'home.empty': 'Burada hələ hadisə yoxdur. Ümid edək ki, belə də qalacaq — amma çətinlikdə olan heyvan görsəniz, bildirin.',
   'home.distanceAway': '{km} km uzaqda',
+  'home.filters': 'Filtrlər',
+  'home.filterRadius': 'Məsafə',
+  'home.filterRadiusAny': 'İstənilən məsafə',
+  'home.filterRadiusNoLocation': 'Məsafəyə görə filtrləmək üçün məkanı aktivləşdirin.',
+  'home.filterAnimal': 'Heyvan',
+  'home.filterStatus': 'Status',
+  'home.filterClear': 'Filtrləri təmizlə',
 
   // Report flow
   'report.title': 'Heyvan barədə bildir',
@@ -59,6 +66,7 @@ export const az: Dict = {
 
   // Case detail
   'case.reportedBy': '{name} tərəfindən bildirilib',
+  'case.locationUnknown': 'Nişan qeyd edilməyib — aşağıdakı xəritəyə baxın',
   'case.guest': 'qonaq',
   'case.timeline': 'Xronologiya',
   'case.accept': 'Bu heyvanı xilas edəcəyəm',

@@ -14,7 +14,15 @@ import { captureBoundaryError } from '../lib/monitoring';
 
 type Section = [heading: string, body: string | string[]];
 type Doc = { title: string; updated?: string; intro?: string; sections: Section[] };
-type LocalizedDoc = Record<LocaleCode, Doc>;
+/**
+ * `en` is the only guaranteed translation — DocView already falls back to
+ * it (`doc[getLocale()] ?? doc.en`) for any locale without an entry. Group
+ * H added 'ru' to LocaleCode without translating these six long-form legal/
+ * info documents (a much larger job than the short UI strings in i18n/ —
+ * see the chat response this shipped with for the actual size). Left as an
+ * honest English fallback rather than a fabricated or duplicated 'ru' entry.
+ */
+type LocalizedDoc = { en: Doc } & Partial<Record<LocaleCode, Doc>>;
 
 function DocView({ doc }: { doc: LocalizedDoc }) {
   const navigate = useNavigate();

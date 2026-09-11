@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { PasswordField, useToast } from '../components/ui';
+import { LanguageSwitcher, PasswordField, useToast } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 
@@ -54,6 +54,11 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="page" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80dvh' }}>
+      {/* Group H: every auth screen gets the switcher, not just post-login. */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+        <LanguageSwitcher />
+      </div>
+
       <div style={{ textAlign: 'center', marginBottom: 22 }}>
         <div style={{ fontSize: 48 }}>🔑</div>
         <h1 className="page-title">{t('auth.resetTitle')}</h1>
