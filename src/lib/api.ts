@@ -545,7 +545,7 @@ export async function fetchCaseChatInbox(myId: string): Promise<CaseChatInboxEnt
   );
   if (caseIds.length === 0) return [];
 
-  const [{ data: cases }, { data: msgs }] = await Promise.all([
+  const [{ data: cases }, { data: msgs }, { data: watches }] = await Promise.all([
     supabase.from('cases').select('id, animal, address_hint, status').in('id', caseIds),
     supabase
       .from('case_messages')
@@ -553,12 +553,21 @@ export async function fetchCaseChatInbox(myId: string): Promise<CaseChatInboxEnt
       .in('case_id', caseIds)
       .order('created_at', { ascending: false })
       .limit(500),
+    // migration 017: per-case read marker, mirrors DMs'
+    // conversation_participants.last_read_at.
+    supabase.from('case_watchers').select('case_id, last_read_at').eq('profile_id', myId).in('case_id', caseIds),
   ]);
 
   const latest = new Map<string, CaseMessage>();
+  const messagesByCase = new Map<string, CaseMessage[]>();
   for (const m of (msgs ?? []) as unknown as CaseMessage[]) {
     if (!latest.has(m.case_id)) latest.set(m.case_id, m);
+    (messagesByCase.get(m.case_id) ?? messagesByCase.set(m.case_id, []).get(m.case_id)!).push(m);
   }
+
+  const lastReadByCase = new Map(
+    (watches ?? []).map((w) => [w.case_id as string, w.last_read_at as string])
+  );
 
   const entries: CaseChatInboxEntry[] = [];
   for (const c of (cases ?? []) as {
@@ -569,13 +578,38 @@ export async function fetchCaseChatInbox(myId: string): Promise<CaseChatInboxEnt
   }[]) {
     const last = latest.get(c.id);
     if (!last) continue; // no messages yet — not a chat to list
-    entries.push({ caseId: c.id, animal: c.animal, addressHint: c.address_hint, status: c.status, lastMessage: last });
+
+    // No watcher row (e.g. a selected-but-unconfirmed vet who's never
+    // opened the chat, unlike DM participants a case_watchers row isn't
+    // guaranteed) means never read — anything from someone else is unread,
+    // unlike fetchInbox()'s DM logic which treats that edge case as read.
+    // Count is capped by the same 500-messages-across-all-cases window
+    // used for "latest message" above; a very high-volume case chat could
+    // undercount rather than issue a per-case query.
+    const lastReadAt = lastReadByCase.get(c.id);
+    const unreadMsgs = (messagesByCase.get(c.id) ?? []).filter(
+      (m) => m.sender_id !== myId && (!lastReadAt || m.created_at > lastReadAt)
+    );
+
+    entries.push({
+      caseId: c.id,
+      animal: c.animal,
+      addressHint: c.address_hint,
+      status: c.status,
+      lastMessage: last,
+      unread: unreadMsgs.length > 0,
+      unreadCount: unreadMsgs.length,
+    });
   }
 
   // Newest activity first.
   entries.sort((a, b) => b.lastMessage!.created_at.localeCompare(a.lastMessage!.created_at));
   return entries;
 }
+
+/** Migration 017: mark a case chat read (upsert — see the migration's comment on why). */
+export const markCaseChatRead = (caseId: string) =>
+  rpc('mark_case_chat_read', { p_case: caseId });
 
 export async function fetchMessages(conversationId: string): Promise<DirectMessage[]> {
   const { data, error } = await supabase
