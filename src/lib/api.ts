@@ -33,12 +33,23 @@ import { getTurnstileToken, turnstileEnabled } from './turnstile';
 // Cases
 // ---------------------------------------------------------------------------
 
+// vet embed: an explicit column list, not '*'. Postgres expands an
+// unqualified '*' to every column at parse time and requires SELECT on
+// ALL of them — migration 014 narrowed vets' grant to this exact public
+// list (dropping manager_name/manager_surname/manager_phone), so '*' here
+// made the whole cases query fail with a permission error for anon/
+// authenticated, i.e. the entire live feed. Keep this in sync with
+// migration 014's `grant select (...) on public.vets` column list.
 const CASE_SELECT = `
   *,
   photos:case_photos (*),
   reporter:profiles!cases_reporter_id_fkey (id, display_name, avatar_url),
   rescuer:profiles!cases_rescuer_id_fkey (id, display_name, avatar_url, xp),
-  vet:vets!cases_vet_id_fkey (*)
+  vet:vets!cases_vet_id_fkey (
+    id, clinic_name, contact_phone, contact_email, address, lat, lng,
+    is_open, opens_at, closes_at, is_24_7, timezone, accepted_animals,
+    status, created_at
+  )
 `;
 
 export async function fetchCases(): Promise<CaseWithDetails[]> {
