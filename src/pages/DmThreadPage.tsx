@@ -1,4 +1,18 @@
-/** One direct-message thread. Realtime delivery; marks itself read. */
+/**
+ * One direct-message thread. Realtime delivery; marks itself read.
+ *
+ * No report button here (B2): content_reports.target_type only allows
+ * 'case' | 'case_message' | 'profile', and target_message is a bigint FK
+ * to case_messages specifically — there is no column or type value for a
+ * DM (the `messages` table). Reporting a DM sender's whole profile
+ * (target_type: 'profile') is possible with the current schema, but there
+ * is no admin action to hide a single DM either (admin_hide_case_message
+ * only touches case_messages), and DMs are already private 1:1 threads
+ * with `blocked_users` as the existing defense — see FIX_SPEC B4. Needs a
+ * schema change (new target_type + FK to `messages`) to do properly;
+ * flagging per FIX_SPEC's "stop and flag it" rule rather than building
+ * around it.
+ */
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

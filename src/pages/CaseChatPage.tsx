@@ -8,8 +8,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
-import { blockUser, reportContent, sendCaseMessage } from '../lib/api';
+import { blockUser, sendCaseMessage } from '../lib/api';
 import { Avatar, StatusBadge, useToast } from '../components/ui';
+import { ReportButton } from '../components/Report';
 import { IconBack, IconSend } from '../components/Icons';
 import { t } from '../i18n';
 import { clockTime } from '../lib/time';
@@ -78,28 +79,14 @@ export default function CaseChatPage() {
                     {m.sender.role === 'vet' ? ' 🏥' : ''}
                   </Link>
                   {user && (
-                    <button
-                      style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-soft)' }}
-                      title={t('mod.report')}
-                      aria-label={t('mod.report')}
-                      onClick={() => {
-                        const reason = window.prompt(t('mod.reportPrompt'));
-                        if (reason && reason.trim().length >= 3) {
-                          void reportContent({
-                            reporterId: user.id,
-                            targetType: 'case_message',
-                            targetCase: m.case_id,
-                            targetMessage: m.id,
-                            targetProfile: m.sender_id,
-                            reason: reason.trim(),
-                          })
-                            .then(() => toast(t('mod.reported')))
-                            .catch(() => toast(t('common.error')));
-                        }
-                      }}
-                    >
-                      ⚑
-                    </button>
+                    <ReportButton
+                      reporterId={user.id}
+                      targetType="case_message"
+                      targetCase={m.case_id}
+                      targetMessage={m.id}
+                      targetProfile={m.sender_id}
+                      small
+                    />
                   )}
                   {user && m.sender_id && m.sender_id !== user.id && (
                     <button

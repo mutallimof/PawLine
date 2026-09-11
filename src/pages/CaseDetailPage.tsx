@@ -19,7 +19,6 @@ import {
   recordSafetyAck,
   addDeliveryPhoto,
   fetchDuplicateFlags,
-  reportContent,
   resolveDuplicateFlag,
   confirmDelivery,
   dropCase,
@@ -33,6 +32,7 @@ import {
 } from '../lib/api';
 import { EnRouteMap } from '../components/maps';
 import { Avatar, PawTrail, StatusBadge, useToast } from '../components/ui';
+import { ReportButton } from '../components/Report';
 import { IconBack, IconCamera } from '../components/Icons';
 import { hasKey, t } from '../i18n';
 import { SafetyAck, hasAcceptedSafety } from '../components/legal';
@@ -433,25 +433,7 @@ export default function CaseDetailPage() {
 
           {/* Anyone signed in can flag abusive/fake content for admin review */}
           {user && (
-            <button
-              className="btn btn--ghost btn--small"
-              style={{ alignSelf: 'flex-end' }}
-              onClick={() => {
-                const reason = window.prompt(t('mod.reportPrompt'));
-                if (reason && reason.trim().length >= 3) {
-                  void reportContent({
-                    reporterId: user.id,
-                    targetType: 'case',
-                    targetCase: caseData.id,
-                    reason: reason.trim(),
-                  })
-                    .then(() => toast(t('mod.reported')))
-                    .catch((e) => toast(e instanceof Error ? e.message : t('common.error')));
-                }
-              }}
-            >
-              ⚑ {t('mod.report')}
-            </button>
+            <ReportButton reporterId={user.id} targetType="case" targetCase={caseData.id} />
           )}
 
           {/* Everyone: case chat + watch */}

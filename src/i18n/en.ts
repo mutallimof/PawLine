@@ -200,8 +200,14 @@ export const en = {
 
   // Production pass — moderation, admin, push, privacy, duplicates, sponsors
   'mod.report': 'Report',
-  'mod.reportPrompt': 'Why are you reporting this? (e.g. fake, abusive, spam)',
+  'mod.reportPrompt': 'Why are you reporting this?',
   'mod.reported': 'Thanks — an admin will review this.',
+  'mod.reason.wrong_content': 'Wrong content',
+  'mod.reason.not_animal': 'Not an animal',
+  'mod.reason.scam': 'Scam',
+  'mod.reason.duplicate': 'Duplicate',
+  'mod.reason.other': 'Other',
+  'mod.reasonOtherPlaceholder': 'Tell us more…',
   'dup.banner': 'This looks similar to a report from {min} min ago, about {m} m away — same animal?',
   'dup.photoMatch': 'The photos also look similar.',
   'dup.view': 'View that report',

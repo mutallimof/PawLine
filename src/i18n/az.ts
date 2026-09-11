@@ -202,8 +202,14 @@ export const az: Dict = {
 
   // Production pass — moderation, admin, push, privacy, duplicates, sponsors
   'mod.report': 'Şikayət et',
-  'mod.reportPrompt': 'Bunu niyə şikayət edirsiniz? (məs. saxta, təhqiramiz, spam)',
+  'mod.reportPrompt': 'Bunu niyə şikayət edirsiniz?',
   'mod.reported': 'Təşəkkürlər — admin bunu nəzərdən keçirəcək.',
+  'mod.reason.wrong_content': 'Yanlış məzmun',
+  'mod.reason.not_animal': 'Heyvan deyil',
+  'mod.reason.scam': 'Fırıldaq',
+  'mod.reason.duplicate': 'Təkrar bildiriş',
+  'mod.reason.other': 'Digər',
+  'mod.reasonOtherPlaceholder': 'Ətraflı izah edin…',
   'dup.banner': 'Bu, {min} dəqiqə əvvəl, təxminən {m} m məsafədə edilən bildirişə bənzəyir — eyni heyvandır?',
   'dup.photoMatch': 'Fotolar da oxşardır.',
   'dup.view': 'Həmin bildirişə bax',
