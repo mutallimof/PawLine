@@ -4,9 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDmThread } from '../hooks/useRealtime';
 import {
+  blockUser,
   fetchDmPartner,
+  isUserBlocked,
   markConversationRead,
   sendMessage,
+  unblockUser,
 } from '../lib/api';
 import { Avatar, useToast } from '../components/ui';
 import { IconBack, IconSend } from '../components/Icons';
@@ -19,6 +22,7 @@ export default function DmThreadPage() {
   const { user } = useAuth();
   const { messages, loading } = useDmThread(id);
   const [partner, setPartner] = useState<InboxEntry['other'] | null>(null);
+  const [blocked, setBlocked] = useState(false);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -28,6 +32,30 @@ export default function DmThreadPage() {
   useEffect(() => {
     if (id && user) fetchDmPartner(id, user.id).then(setPartner).catch(() => {});
   }, [id, user]);
+
+  // B4: reflect current block state so the header action reads Block vs Unblock.
+  useEffect(() => {
+    if (user && partner) {
+      isUserBlocked(user.id, partner.id).then(setBlocked).catch(() => {});
+    }
+  }, [user, partner]);
+
+  const toggleBlock = async () => {
+    if (!user || !partner) return;
+    try {
+      if (blocked) {
+        await unblockUser(user.id, partner.id);
+        setBlocked(false);
+      } else {
+        if (!window.confirm(t('settings.blockConfirm', { name: partner.display_name }))) return;
+        await blockUser(user.id, partner.id);
+        setBlocked(true);
+        toast(t('settings.blocked_done'));
+      }
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    }
+  };
 
   // Mark the thread read whenever new messages land while it's open.
   useEffect(() => {
@@ -61,10 +89,18 @@ export default function DmThreadPage() {
         {partner && (
           <>
             <Avatar name={partner.display_name} url={partner.avatar_url} small />
-            <div style={{ fontWeight: 800, fontSize: 15 }}>
+            <div style={{ fontWeight: 800, fontSize: 15, flex: 1, minWidth: 0 }}>
               {partner.display_name}
               {partner.role === 'vet' ? ' 🏥' : ''}
             </div>
+            <button
+              className="btn btn--ghost btn--small"
+              title={blocked ? t('settings.unblock') : t('settings.block')}
+              aria-label={blocked ? t('settings.unblock') : t('settings.block')}
+              onClick={() => void toggleBlock()}
+            >
+              🚫
+            </button>
           </>
         )}
       </header>

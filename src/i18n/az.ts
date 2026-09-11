@@ -227,6 +227,7 @@ export const az: Dict = {
   'admin.approve': 'Təsdiqlə',
   'admin.reject': 'Rədd et',
   'admin.hideContent': 'Məzmunu gizlət',
+  'admin.alreadyHidden': 'Artıq gizlədilib',
   'admin.banUser': 'İstifadəçini blokla',
   'admin.dismiss': 'İmtina et',
   'admin.none': 'Gözləyən heç nə yoxdur. 🎉',

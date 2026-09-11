@@ -190,6 +190,11 @@ export interface ContentReport {
   status: 'open' | 'resolved' | 'dismissed';
   created_at: string;
   resolved_at: string | null;
+  // Denormalized previews of the reported content, joined in fetchOpenReports()
+  // so the admin screen can show what's actually being reported (B3).
+  reported_case?: Pick<RescueCase, 'id' | 'description' | 'animal' | 'hidden'> | null;
+  reported_message?: { id: number; body: string; case_id: string; hidden: boolean } | null;
+  reported_profile?: Pick<Profile, 'id' | 'display_name'> | null;
 }
 
 export interface DuplicateFlag {

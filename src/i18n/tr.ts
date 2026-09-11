@@ -227,6 +227,7 @@ export const tr: Dict = {
   'admin.approve': 'Onayla',
   'admin.reject': 'Reddet',
   'admin.hideContent': 'İçeriği gizle',
+  'admin.alreadyHidden': 'Zaten gizli',
   'admin.banUser': 'Kullanıcıyı yasakla',
   'admin.dismiss': 'Yok say',
   'admin.none': 'Bekleyen bir şey yok. 🎉',

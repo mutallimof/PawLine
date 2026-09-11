@@ -9,9 +9,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
+  blockUser,
   fetchProfile,
   fetchVet,
   getOrCreateDm,
+  isUserBlocked,
+  unblockUser,
   upsertVet,
 } from '../lib/api';
 import { useCases } from '../hooks/useRealtime';
@@ -27,12 +30,21 @@ export function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [blocked, setBlocked] = useState(false);
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
 
   useEffect(() => {
     if (id) fetchProfile(id).then(setProfile).catch(() => {});
   }, [id]);
+
+  // B4: reflect current block state so the button reads Block vs Unblock.
+  useEffect(() => {
+    if (user && id && user.id !== id) {
+      isUserBlocked(user.id, id).then(setBlocked).catch(() => {});
+    }
+  }, [user, id]);
 
   if (!profile) return <div className="page"><div className="spinner" /></div>;
 
@@ -42,6 +54,26 @@ export function UserProfilePage() {
       navigate(`/messages/${await getOrCreateDm(profile.id)}`);
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
+    }
+  };
+
+  const toggleBlock = async () => {
+    if (!user) return navigate('/auth');
+    setBusy(true);
+    try {
+      if (blocked) {
+        await unblockUser(user.id, profile.id);
+        setBlocked(false);
+      } else {
+        if (!window.confirm(t('settings.blockConfirm', { name: profile.display_name }))) return;
+        await blockUser(user.id, profile.id);
+        setBlocked(true);
+        toast(t('settings.blocked_done'));
+      }
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -65,9 +97,18 @@ export function UserProfilePage() {
           </span>
         </div>
         {user && user.id !== profile.id && (
-          <button className="btn btn--primary" onClick={() => void message()}>
-            💬 {t('dm.messageUser')}
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <button className="btn btn--primary" onClick={() => void message()}>
+              💬 {t('dm.messageUser')}
+            </button>
+            <button
+              className="btn btn--ghost"
+              disabled={busy}
+              onClick={() => void toggleBlock()}
+            >
+              🚫 {blocked ? t('settings.unblock') : t('settings.block')}
+            </button>
+          </div>
         )}
       </div>
     </div>

@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
-import { reportContent, sendCaseMessage } from '../lib/api';
+import { blockUser, reportContent, sendCaseMessage } from '../lib/api';
 import { Avatar, StatusBadge, useToast } from '../components/ui';
 import { IconBack, IconSend } from '../components/Icons';
 import { t } from '../i18n';
@@ -99,6 +99,23 @@ export default function CaseChatPage() {
                       }}
                     >
                       ⚑
+                    </button>
+                  )}
+                  {user && m.sender_id && m.sender_id !== user.id && (
+                    <button
+                      style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-soft)' }}
+                      title={t('settings.block')}
+                      aria-label={t('settings.block')}
+                      onClick={() => {
+                        const senderName = m.sender?.display_name ?? '';
+                        const senderId = m.sender_id;
+                        if (!window.confirm(t('settings.blockConfirm', { name: senderName }))) return;
+                        void blockUser(user.id, senderId)
+                          .then(() => toast(t('settings.blocked_done')))
+                          .catch((e) => toast(e instanceof Error ? e.message : t('common.error')));
+                      }}
+                    >
+                      🚫
                     </button>
                   )}
                 </div>

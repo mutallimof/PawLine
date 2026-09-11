@@ -225,6 +225,7 @@ export const en = {
   'admin.approve': 'Approve',
   'admin.reject': 'Reject',
   'admin.hideContent': 'Hide content',
+  'admin.alreadyHidden': 'Already hidden',
   'admin.banUser': 'Ban user',
   'admin.dismiss': 'Dismiss',
   'admin.none': 'Nothing waiting. 🎉',

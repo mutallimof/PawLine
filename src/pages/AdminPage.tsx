@@ -197,6 +197,26 @@ export default function AdminPage() {
                 {r.target_type} · {timeAgo(r.created_at)}
               </div>
               <p style={{ fontSize: 14, margin: '6px 0' }}>“{r.reason}”</p>
+
+              {/* B3: show what's actually being reported, not just the reason. */}
+              {r.target_type === 'case' && r.reported_case && (
+                <p className="list-row__sub" style={{ fontStyle: 'italic' }}>
+                  {r.reported_case.hidden ? `[${t('admin.alreadyHidden')}] ` : ''}
+                  {r.reported_case.animal} — {r.reported_case.description.slice(0, 140)}
+                </p>
+              )}
+              {r.target_type === 'case_message' && r.reported_message && (
+                <p className="list-row__sub" style={{ fontStyle: 'italic' }}>
+                  {r.reported_message.hidden ? `[${t('admin.alreadyHidden')}] ` : ''}
+                  “{r.reported_message.body.slice(0, 140)}”
+                </p>
+              )}
+              {r.target_type === 'profile' && r.reported_profile && (
+                <p className="list-row__sub" style={{ fontStyle: 'italic' }}>
+                  {r.reported_profile.display_name}
+                </p>
+              )}
+
               {r.target_case && (
                 <Link
                   to={`/case/${r.target_case}`}

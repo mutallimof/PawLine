@@ -479,15 +479,25 @@ export async function reportContent(input: {
   if (error) throw new Error(error.message);
 }
 
+// Joins in the actual reported content (B3) — the reason alone doesn't tell
+// an admin what they'd be hiding/banning. Admin RLS on cases/case_messages
+// (migration 003) already lets is_admin() see hidden rows too.
+const REPORT_SELECT = `
+  *,
+  reported_case:cases!content_reports_target_case_fkey (id, description, animal, hidden),
+  reported_message:case_messages!content_reports_target_message_fkey (id, body, case_id, hidden),
+  reported_profile:profiles!content_reports_target_profile_fkey (id, display_name)
+`;
+
 export async function fetchOpenReports(): Promise<ContentReport[]> {
   const { data, error } = await supabase
     .from('content_reports')
-    .select('*')
+    .select(REPORT_SELECT)
     .eq('status', 'open')
     .order('created_at', { ascending: true })
     .limit(100);
   if (error) throw new Error(error.message);
-  return (data ?? []) as ContentReport[];
+  return (data ?? []) as unknown as ContentReport[];
 }
 
 export const adminHideCase = (caseId: string, hidden: boolean) =>
@@ -621,6 +631,17 @@ export async function fetchBlockedIds(blockerId: string): Promise<string[]> {
     .eq('blocker_id', blockerId);
   if (error) throw new Error(error.message);
   return (data ?? []).map((r) => (r as { blocked_id: string }).blocked_id);
+}
+
+/** Has the current viewer already blocked this specific person? (B4) */
+export async function isUserBlocked(blockerId: string, blockedId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('blocked_users')
+    .select('blocked_id')
+    .eq('blocker_id', blockerId)
+    .eq('blocked_id', blockedId)
+    .maybeSingle();
+  return !!data;
 }
 
 /** "Animal not here / already helped" — returns the running distinct count. */
