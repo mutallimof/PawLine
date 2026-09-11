@@ -31,6 +31,16 @@ export default function VetPickerPage() {
     fetchVets().then(setVets).catch(() => {});
   }, []);
 
+  // C2: a rating nudges the ranking within the open/closed groups below, but
+  // never overrides them — distance-to-the-animal stays the deciding factor
+  // in an emergency; a 5-star clinic 20km away must not outrank a 3-star one
+  // 2km away. Each star above the 3-star midpoint is worth a small distance
+  // discount (and below-midpoint, a small penalty); rating_count 0 → no
+  // adjustment at all (an un-rated clinic isn't punished for being new).
+  const KM_PER_STAR = 0.6;
+  const ratingScore = (v: Vet) =>
+    v.rating_count ? ((v.rating_avg ?? 0) - 3) * KM_PER_STAR : 0;
+
   const sorted = useMemo(() => {
     const origin = caseData ? { lat: caseData.lat, lng: caseData.lng } : null;
     const entries = vets
@@ -39,15 +49,16 @@ export default function VetPickerPage() {
         vet: v,
         km: origin ? distanceKm(origin, { lat: v.lat, lng: v.lng }) : undefined,
       }));
-    // Open clinics ALWAYS outrank closed ones, then nearest-first within each
-    // group. A closed clinic 200m away is useless; an open one 4km away is the
-    // whole point. Closed ones stay visible (so the rescuer can see they exist
-    // and when they reopen) but sink to the bottom and can't be selected.
+    // Open clinics ALWAYS outrank closed ones, then nearest-first (rating-
+    // adjusted) within each group. A closed clinic 200m away is useless; an
+    // open one 4km away is the whole point. Closed ones stay visible (so the
+    // rescuer can see they exist and when they reopen) but sink to the
+    // bottom and can't be selected.
     entries.sort((a, b) => {
       const aOpen = a.vet.open_now !== false;
       const bOpen = b.vet.open_now !== false;
       if (aOpen !== bOpen) return aOpen ? -1 : 1;
-      return (a.km ?? 0) - (b.km ?? 0);
+      return (a.km ?? 0) - ratingScore(a.vet) - ((b.km ?? 0) - ratingScore(b.vet));
     });
     return entries;
   }, [vets, caseData]);
@@ -119,7 +130,12 @@ export default function VetPickerPage() {
                 {km !== undefined ? `${formatDistance(km)} · ` : ''}
                 {vet.address}
               </div>
-              {vet.phone && <div className="list-row__sub">{vet.phone}</div>}
+              {!!vet.rating_count && (
+                <div className="list-row__sub">
+                  ★ {vet.rating_avg?.toFixed(1)} ({vet.rating_count})
+                </div>
+              )}
+              {vet.contact_phone && <div className="list-row__sub">{vet.contact_phone}</div>}
 
               {!openNow && (
                 <div className="list-row__sub list-row__sub--closed">

@@ -15,6 +15,8 @@ import {
   adminBanUser,
   adminSetPartner,
   fetchAdminStats,
+  fetchVetDocuments,
+  getVetDocumentUrl,
   searchProfiles,
   type AdminStats,
   adminDeleteSponsor,
@@ -30,7 +32,48 @@ import {
 import { useToast } from '../components/ui';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
-import type { ContentReport, Profile, Sponsor, Vet } from '../lib/types';
+import type { ContentReport, Profile, Sponsor, Vet, VetDocument } from '../lib/types';
+
+/** C1: a pending vet's uploaded verification documents — private bucket, so
+ * each is only ever viewed via a short-lived signed URL, fetched on click. */
+function VetDocumentsList({ vetId }: { vetId: string }) {
+  const [docs, setDocs] = useState<VetDocument[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const toast = useToast();
+
+  useEffect(() => {
+    fetchVetDocuments(vetId)
+      .then(setDocs)
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, [vetId]);
+
+  if (!loaded) return null;
+  if (docs.length === 0) {
+    return <p className="list-row__sub" style={{ fontStyle: 'italic' }}>{t('admin.vetNoDocuments')}</p>;
+  }
+
+  return (
+    <div style={{ margin: '6px 0' }}>
+      <div className="field__label" style={{ marginBottom: 4 }}>{t('admin.vetDocuments')}</div>
+      {docs.map((d) => (
+        <button
+          key={d.id}
+          type="button"
+          className="link-btn"
+          style={{ display: 'block', fontSize: 13, marginBottom: 2 }}
+          onClick={() => {
+            void getVetDocumentUrl(d.path)
+              .then((url) => window.open(url, '_blank', 'noopener'))
+              .catch(() => toast(t('common.error')));
+          }}
+        >
+          📄 {d.filename || d.path}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 type Tab = 'stats' | 'vets' | 'reports' | 'sponsors';
 
@@ -165,7 +208,19 @@ export default function AdminPage() {
             <div key={v.id} className="card" style={{ padding: 14, marginBottom: 12 }}>
               <div className="list-row__title">{v.clinic_name}</div>
               <div className="list-row__sub">{v.address}</div>
-              <div className="list-row__sub">{v.phone}</div>
+              <div className="list-row__sub">{v.contact_phone}{v.contact_email ? ` · ${v.contact_email}` : ''}</div>
+              {(v.manager_name || v.manager_surname || v.manager_phone) && (
+                <div className="list-row__sub">
+                  {t('admin.vetManager')}: {[v.manager_name, v.manager_surname].filter(Boolean).join(' ')}
+                  {v.manager_phone ? ` · ${v.manager_phone}` : ''}
+                </div>
+              )}
+              {v.accepted_animals?.length > 0 && (
+                <div className="list-row__sub">
+                  {v.accepted_animals.map((a) => t(`animal.${a}` as const)).join(', ')}
+                </div>
+              )}
+              <VetDocumentsList vetId={v.id} />
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <button
                   className="btn btn--success btn--small"

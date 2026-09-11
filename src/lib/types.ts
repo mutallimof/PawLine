@@ -46,6 +46,10 @@ export interface Profile {
   home_lat?: number | null;
   home_lng?: number | null;
   notify_radius_km?: number;
+  /** Migration 014 (C5) — additive, nullable; older rows have none of these. */
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
   created_at: string;
 }
 
@@ -53,7 +57,9 @@ export interface Vet {
   id: string;
   clinic_name: string;
   address: string;
-  phone: string;
+  /** Public clinic contact — was `phone` before migration 014 (C3 rename). */
+  contact_phone: string;
+  contact_email: string;
   lat: number;
   lng: number;
   /**
@@ -69,12 +75,45 @@ export interface Vet {
   is_24_7: boolean;
   /** Hours are wall-clock, so they need a zone. Baku and Istanbul differ. */
   timezone: string;
+  /** Animal types this clinic accepts (migration 014, C3). */
+  accepted_animals: AnimalType[];
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   /** Computed server-side (view vets_public) — never trust a client clock. */
   open_now?: boolean;
   /** open_now AND has capacity. This is what the picker gates on. */
   accepting_now?: boolean;
+  /** Computed server-side (vets_public) — 0 with no ratings yet. */
+  rating_avg?: number;
+  rating_count?: number;
+  /**
+   * PRIVATE — the clinic's internal contact person, not necessarily the
+   * Supabase-auth account holder. Present only via get_my_vet() (own clinic)
+   * or admin_list_pending_vets() (admin review); absent from vets_public.
+   */
+  manager_name?: string;
+  manager_surname?: string;
+  manager_phone?: string;
+}
+
+/** Migration 014 (C1) — a file the vet submitted toward verification. */
+export interface VetDocument {
+  id: string;
+  vet_id: string;
+  path: string;
+  filename: string;
+  created_at: string;
+}
+
+/** Migration 014 (C2) — a rescuer's rating of the vet on one resolved case. */
+export interface VetRating {
+  id: string;
+  case_id: string;
+  vet_id: string;
+  rescuer_id: string;
+  rating: number;
+  note: string;
+  created_at: string;
 }
 
 export interface RescueCase {

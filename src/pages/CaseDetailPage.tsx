@@ -19,6 +19,8 @@ import {
   recordSafetyAck,
   addDeliveryPhoto,
   fetchDuplicateFlags,
+  fetchRatingForCase,
+  rateVet,
   resolveDuplicateFlag,
   confirmDelivery,
   dropCase,
@@ -37,7 +39,7 @@ import { IconBack, IconCamera } from '../components/Icons';
 import { hasKey, t } from '../i18n';
 import { SafetyAck, hasAcceptedSafety } from '../components/legal';
 import { Paw } from '../components/Ink';
-import type { DuplicateFlag } from '../lib/types';
+import type { DuplicateFlag, VetRating } from '../lib/types';
 import { timeAgo } from '../lib/time';
 import { getCurrentPosition } from '../lib/geo';
 
@@ -58,6 +60,11 @@ export default function CaseDetailPage() {
   const [busy, setBusy] = useState(false);
   const [vetNote, setVetNote] = useState('');
   const deliveryPhotoInput = useRef<HTMLInputElement>(null);
+  // C2: vet rating on a resolved case (rescuer only, once per case).
+  const [myRating, setMyRating] = useState<VetRating | null>(null);
+  const [ratingValue, setRatingValue] = useState(0);
+  const [ratingNote, setRatingNote] = useState('');
+  const [ratingBusy, setRatingBusy] = useState(false);
 
   useEffect(() => {
     if (id && user) isWatching(id, user.id).then(setWatching).catch(() => {});
@@ -75,6 +82,13 @@ export default function CaseDetailPage() {
   useEffect(() => {
     if (id) fetchDuplicateFlags(id).then(setDupFlags).catch(() => {});
   }, [id]);
+
+  // C2: has the rescuer already rated this resolved case's vet?
+  useEffect(() => {
+    if (caseData?.status === 'resolved' && user && caseData.rescuer_id === user.id) {
+      fetchRatingForCase(caseData.id).then(setMyRating).catch(() => {});
+    }
+  }, [caseData?.id, caseData?.status, user]);
 
   // Bonus feature: while en route, the rescuer's device shares a coarse
   // "last known location" every ~45s so watchers can follow along.
@@ -133,6 +147,34 @@ export default function CaseDetailPage() {
       setWatching(true);
     }
   });
+
+  const submitRating = async () => {
+    if (!user || !caseData.vet || ratingValue < 1) return;
+    setRatingBusy(true);
+    try {
+      await rateVet({
+        caseId: caseData.id,
+        vetId: caseData.vet.id,
+        rescuerId: user.id,
+        rating: ratingValue,
+        note: ratingNote,
+      });
+      setMyRating({
+        id: '',
+        case_id: caseData.id,
+        vet_id: caseData.vet.id,
+        rescuer_id: user.id,
+        rating: ratingValue,
+        note: ratingNote.trim(),
+        created_at: new Date().toISOString(),
+      });
+      toast(t('rating.thanks'));
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setRatingBusy(false);
+    }
+  };
 
   const onDeliveryPhoto = async (files: FileList | null) => {
     if (!files?.[0]) return;
@@ -272,6 +314,66 @@ export default function CaseDetailPage() {
           <div className="banner banner--success">{t('case.resolvedBanner')}</div>
         )}
 
+        {/* C2: rate the vet — rescuer only, once per case */}
+        {caseData.status === 'resolved' && user && caseData.rescuer_id === user.id && caseData.vet && (
+          <div className="card" style={{ padding: 14, marginBottom: 14 }}>
+            {myRating ? (
+              <>
+                <div className="field__label" style={{ marginBottom: 4 }}>{t('rating.yourRating')}</div>
+                <div style={{ fontSize: 22 }}>
+                  {'★'.repeat(myRating.rating)}
+                  <span style={{ color: 'var(--line)' }}>{'★'.repeat(5 - myRating.rating)}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="field__label" style={{ marginBottom: 8 }}>
+                  {t('rating.prompt', { clinic: caseData.vet.clinic_name })}
+                </div>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setRatingValue(n)}
+                      aria-label={t('rating.stars', { n })}
+                      style={{
+                        fontSize: 26,
+                        lineHeight: 1,
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        color: n <= ratingValue ? 'var(--coral)' : 'var(--line)',
+                      }}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                {ratingValue > 0 && (
+                  <>
+                    <input
+                      value={ratingNote}
+                      onChange={(e) => setRatingNote(e.target.value)}
+                      placeholder={t('rating.notePlaceholder')}
+                      maxLength={500}
+                      style={{ marginBottom: 8, width: '100%' }}
+                    />
+                    <button
+                      className="btn btn--primary btn--small"
+                      disabled={ratingBusy}
+                      onClick={() => void submitRating()}
+                    >
+                      {t('rating.submit')}
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         {/* People involved */}
         {caseData.rescuer && (
           <Link to={`/user/${caseData.rescuer.id}`} className="list-row">
@@ -351,7 +453,7 @@ export default function CaseDetailPage() {
             <>
               <div className="banner banner--info">
                 {t('case.arrivedAtVet', { clinic: caseData.vet.clinic_name })}
-                {caseData.vet.phone ? ` · ${caseData.vet.phone}` : ''}
+                {caseData.vet.contact_phone ? ` · ${caseData.vet.contact_phone}` : ''}
               </div>
               <button className="btn btn--primary" disabled={busy} onClick={run(() => startTransport(caseData.id))}>
                 🚗 {t('case.depart')}

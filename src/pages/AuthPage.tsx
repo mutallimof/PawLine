@@ -11,7 +11,9 @@ export default function AuthPage() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [isVet, setIsVet] = useState(false);
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
@@ -52,7 +54,9 @@ export default function AuthPage() {
         const { needsEmailConfirm } = await signUp(
           email.trim(),
           password,
-          displayName.trim() || 'New user',
+          firstName.trim(),
+          lastName.trim(),
+          phone.trim(),
           isVet ? 'vet' : 'user'
         );
         if (needsEmailConfirm) {
@@ -81,12 +85,40 @@ export default function AuthPage() {
       {info && <div className="banner banner--success">{info}</div>}
 
       {mode === 'signup' && (
-        <label className="field">
-          <span className="field__label">
-            {isVet ? t('vetSetup.clinicName') : t('auth.displayName')}
-          </span>
-          <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={60} />
-        </label>
+        <>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <label className="field" style={{ flex: 1 }}>
+              <span className="field__label">{t('auth.firstName')}</span>
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                maxLength={60}
+                autoComplete="given-name"
+              />
+            </label>
+            <label className="field" style={{ flex: 1 }}>
+              <span className="field__label">{t('auth.lastName')}</span>
+              <input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                maxLength={60}
+                autoComplete="family-name"
+              />
+            </label>
+          </div>
+          <label className="field">
+            <span className="field__label">{t('auth.phone')}</span>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              maxLength={30}
+              inputMode="tel"
+              autoComplete="tel"
+            />
+          </label>
+          {/* Vets name their clinic separately, right after signup, in Vet
+              Setup — this screen is only ever about the person signing up. */}
+        </>
       )}
 
       <label className="field">

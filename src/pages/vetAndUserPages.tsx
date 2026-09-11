@@ -2,7 +2,9 @@
  * Smaller pages grouped together:
  *  - UserProfilePage:  public profile with a "Message" button (chat system 1)
  *  - VetPublicPage:    public clinic page with contact + message
- *  - VetSetupPage:     clinic onboarding (name, address, phone, map pin)
+ *  - VetSetupPage:     clinic onboarding (public contact, private manager
+ *                      contact, accepted animals, hours, map pin, C1
+ *                      verification documents)
  *  - VetDashboardPage: incoming requests + active cases for a clinic
  */
 import { useEffect, useState } from 'react';
@@ -10,11 +12,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   blockUser,
+  deleteVetDocument,
+  fetchMyVet,
   fetchProfile,
   fetchVet,
+  fetchVetDocuments,
   getOrCreateDm,
+  getVetDocumentUrl,
   isUserBlocked,
   unblockUser,
+  uploadVetDocument,
   upsertVet,
 } from '../lib/api';
 import { useCases } from '../hooks/useRealtime';
@@ -23,7 +30,7 @@ import { PinDropMap } from '../components/maps';
 import { IconBack } from '../components/Icons';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
-import type { Profile, Vet } from '../lib/types';
+import type { AnimalType, Profile, Vet, VetDocument } from '../lib/types';
 
 // ---------------------------------------------------------------------------
 export function UserProfilePage() {
@@ -150,10 +157,26 @@ export function VetPublicPage() {
         <div style={{ fontSize: 42 }}>🏥</div>
         <h1 className="page-title" style={{ fontSize: 24 }}>{vet.clinic_name}</h1>
         <p className="page-subtitle">{vet.address}</p>
-        {vet.phone && (
-          <a href={`tel:${vet.phone}`} style={{ fontWeight: 800, color: 'var(--coral-deep)' }}>
-            {vet.phone}
+        {vet.contact_phone && (
+          <a href={`tel:${vet.contact_phone}`} style={{ fontWeight: 800, color: 'var(--coral-deep)' }}>
+            {vet.contact_phone}
           </a>
+        )}
+        {vet.contact_email && (
+          <p className="page-subtitle" style={{ marginTop: 4 }}>
+            <a href={`mailto:${vet.contact_email}`}>{vet.contact_email}</a>
+          </p>
+        )}
+        {/* C2: rating, once the clinic has at least one */}
+        {!!vet.rating_count && (
+          <p style={{ fontWeight: 700, margin: '8px 0 0' }}>
+            ★ {vet.rating_avg?.toFixed(1)} · {t('vets.ratingCount', { n: vet.rating_count })}
+          </p>
+        )}
+        {vet.accepted_animals?.length > 0 && (
+          <p className="page-subtitle" style={{ marginTop: 6 }}>
+            {vet.accepted_animals.map((a) => t(`animal.${a}` as const)).join(' · ')}
+          </p>
         )}
         {profile && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '12px 0' }}>
@@ -180,30 +203,57 @@ export function VetPublicPage() {
 }
 
 // ---------------------------------------------------------------------------
+const ANIMAL_TYPES: AnimalType[] = ['dog', 'cat', 'other'];
+
 export function VetSetupPage() {
   const { user, profile } = useAuth();
   const [vetStatus, setVetStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+
+  // Public contact
   const [clinicName, setClinicName] = useState('');
   const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [acceptedAnimals, setAcceptedAnimals] = useState<AnimalType[]>(['dog', 'cat', 'other']);
+
+  // Private — the clinic's internal contact, not necessarily the account holder
+  const [managerName, setManagerName] = useState('');
+  const [managerSurname, setManagerSurname] = useState('');
+  const [managerPhone, setManagerPhone] = useState('');
+
   const [isOpen, setIsOpen] = useState(true);
   const [opensAt, setOpensAt] = useState('09:00');
   const [closesAt, setClosesAt] = useState('18:00');
   const [is247, setIs247] = useState(false);
   const [location, setLocation] = useState<LatLng>(DEFAULT_CENTER);
   const [busy, setBusy] = useState(false);
+
+  // C1: verification documents — optional, no required types/validation.
+  const [documents, setDocuments] = useState<VetDocument[]>([]);
+  const [uploading, setUploading] = useState(false);
+
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Prefill from an existing clinic row (editing) or sensible defaults.
+  const reloadDocuments = () => {
+    if (user) fetchVetDocuments(user.id).then(setDocuments).catch(() => {});
+  };
+
+  // Prefill from the vet's own full row (incl. private fields — fetchVet()
+  // reads vets_public, which no longer carries manager_*/contact_email).
   useEffect(() => {
     if (!user) return;
-    fetchVet(user.id).then((v) => {
+    fetchMyVet().then((v) => {
       if (v) {
         setVetStatus(v.status);
         setClinicName(v.clinic_name);
         setAddress(v.address);
-        setPhone(v.phone);
+        setContactPhone(v.contact_phone);
+        setContactEmail(v.contact_email);
+        setAcceptedAnimals(v.accepted_animals?.length ? v.accepted_animals : ['dog', 'cat', 'other']);
+        setManagerName(v.manager_name ?? '');
+        setManagerSurname(v.manager_surname ?? '');
+        setManagerPhone(v.manager_phone ?? '');
         setIsOpen(v.is_open);
         // 'HH:MM:SS' from Postgres → 'HH:MM' for <input type="time">
         if (v.opens_at) setOpensAt(v.opens_at.slice(0, 5));
@@ -211,11 +261,12 @@ export function VetSetupPage() {
         setIs247(v.is_24_7);
         setLocation({ lat: v.lat, lng: v.lng });
       } else {
-        if (profile) setClinicName(profile.display_name);
         getCurrentPosition().then(setLocation).catch(() => {});
       }
     });
-  }, [user, profile]);
+    reloadDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Gate on `user` for auth; a still-loading profile gets a spinner, not an
   // error (same class of bug as the ProfilePage sign-in gate).
@@ -229,6 +280,12 @@ export function VetSetupPage() {
     return <div className="page"><div className="empty-state">{t('common.error')}</div></div>;
   }
 
+  const toggleAnimal = (a: AnimalType) => {
+    setAcceptedAnimals((prev) =>
+      prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]
+    );
+  };
+
   const save = async () => {
     if (!clinicName.trim()) return;
     setBusy(true);
@@ -237,7 +294,12 @@ export function VetSetupPage() {
         id: user.id,
         clinic_name: clinicName.trim(),
         address: address.trim(),
-        phone: phone.trim(),
+        contact_phone: contactPhone.trim(),
+        contact_email: contactEmail.trim(),
+        manager_name: managerName.trim(),
+        manager_surname: managerSurname.trim(),
+        manager_phone: managerPhone.trim(),
+        accepted_animals: acceptedAnimals,
         lat: location.lat,
         lng: location.lng,
         is_open: isOpen,
@@ -258,6 +320,35 @@ export function VetSetupPage() {
     }
   };
 
+  const onUploadDocument = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      await uploadVetDocument(file, user.id);
+      reloadDocuments();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onDeleteDocument = async (doc: VetDocument) => {
+    try {
+      await deleteVetDocument(doc.id, doc.path);
+      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    }
+  };
+
+  const viewDocument = (doc: VetDocument) => {
+    void getVetDocumentUrl(doc.path)
+      .then((url) => window.open(url, '_blank', 'noopener'))
+      .catch(() => toast(t('common.error')));
+  };
+
   return (
     <div className="page">
       <h1 className="page-title">{t('vetSetup.title')}</h1>
@@ -266,6 +357,8 @@ export function VetSetupPage() {
       {vetStatus === 'pending' && <div className="banner banner--warn">{t('vetSetup.pending')}</div>}
       {vetStatus === 'rejected' && <div className="banner banner--warn">{t('vetSetup.rejected')}</div>}
 
+      {/* Public contact — what rescuers and the public see. */}
+      <div className="section-label">{t('vetSetup.publicSection')}</div>
       <label className="field">
         <span className="field__label">{t('vetSetup.clinicName')}</span>
         <input value={clinicName} onChange={(e) => setClinicName(e.target.value)} maxLength={100} />
@@ -275,14 +368,55 @@ export function VetSetupPage() {
         <input value={address} onChange={(e) => setAddress(e.target.value)} maxLength={200} />
       </label>
       <label className="field">
-        <span className="field__label">{t('vetSetup.phone')}</span>
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} inputMode="tel" />
+        <span className="field__label">{t('vetSetup.contactPhone')}</span>
+        <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} maxLength={30} inputMode="tel" />
       </label>
+      <label className="field">
+        <span className="field__label">{t('vetSetup.contactEmail')}</span>
+        <input
+          type="email"
+          value={contactEmail}
+          onChange={(e) => setContactEmail(e.target.value)}
+          maxLength={120}
+        />
+      </label>
+
+      <span className="field__label">{t('vetSetup.acceptedAnimals')}</span>
+      <div className="segmented" style={{ margin: '6px 0 16px' }}>
+        {ANIMAL_TYPES.map((a) => (
+          <button
+            key={a}
+            type="button"
+            className={`segmented__option${acceptedAnimals.includes(a) ? ' active' : ''}`}
+            onClick={() => toggleAnimal(a)}
+          >
+            {t(`animal.${a}` as const)}
+          </button>
+        ))}
+      </div>
 
       <span className="field__label">{t('vetSetup.pin')}</span>
       <div style={{ margin: '8px 0 16px' }}>
         <PinDropMap value={location} onChange={setLocation} />
       </div>
+
+      {/* Private — the clinic's internal contact, kept off the public page. */}
+      <div className="section-label">{t('vetSetup.privateSection')}</div>
+      <p className="page-subtitle" style={{ marginTop: -4 }}>{t('vetSetup.privateSectionSub')}</p>
+      <div style={{ display: 'flex', gap: 12 }}>
+        <label className="field" style={{ flex: 1 }}>
+          <span className="field__label">{t('vetSetup.managerName')}</span>
+          <input value={managerName} onChange={(e) => setManagerName(e.target.value)} maxLength={60} />
+        </label>
+        <label className="field" style={{ flex: 1 }}>
+          <span className="field__label">{t('vetSetup.managerSurname')}</span>
+          <input value={managerSurname} onChange={(e) => setManagerSurname(e.target.value)} maxLength={60} />
+        </label>
+      </div>
+      <label className="field">
+        <span className="field__label">{t('vetSetup.managerPhone')}</span>
+        <input value={managerPhone} onChange={(e) => setManagerPhone(e.target.value)} maxLength={30} inputMode="tel" />
+      </label>
 
       {/* Opening hours — the whole point: rescuers stop being sent here the
           moment the clinic closes, WITHOUT anyone remembering to flip a
@@ -338,6 +472,45 @@ export function VetSetupPage() {
       <button className="btn btn--primary" onClick={() => void save()} disabled={busy || !clinicName.trim()}>
         {t('vetSetup.save')}
       </button>
+
+      {/* C1: verification documents — optional, any file, no validation.
+          Admin reviews these in the Vet approvals queue and can approve
+          with or without them. */}
+      <div className="section-label" style={{ marginTop: 24 }}>{t('vetSetup.documents')}</div>
+      <p className="page-subtitle" style={{ marginTop: -4 }}>{t('vetSetup.documentsSub')}</p>
+      <div className="card" style={{ padding: 14 }}>
+        {documents.length === 0 && (
+          <p className="page-subtitle" style={{ margin: 0 }}>{t('vetSetup.noDocuments')}</p>
+        )}
+        {documents.map((d) => (
+          <div key={d.id} className="list-row" style={{ boxShadow: 'none' }}>
+            <button
+              type="button"
+              className="link-btn"
+              style={{ flex: 1, textAlign: 'left' }}
+              onClick={() => viewDocument(d)}
+            >
+              📄 {d.filename || d.path}
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost btn--small"
+              onClick={() => void onDeleteDocument(d)}
+            >
+              {t('common.cancel')}
+            </button>
+          </div>
+        ))}
+        <label className="btn btn--secondary btn--small" style={{ marginTop: documents.length ? 10 : 0, display: 'inline-block' }}>
+          {uploading ? t('common.loading') : t('vetSetup.uploadDocument')}
+          <input
+            type="file"
+            hidden
+            disabled={uploading}
+            onChange={(e) => void onUploadDocument(e.target.files)}
+          />
+        </label>
+      </div>
     </div>
   );
 }

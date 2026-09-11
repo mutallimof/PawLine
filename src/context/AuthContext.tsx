@@ -48,7 +48,9 @@ interface AuthState {
   signUp: (
     email: string,
     password: string,
-    displayName: string,
+    firstName: string,
+    lastName: string,
+    phone: string,
     role: 'user' | 'vet'
   ) => Promise<{ needsEmailConfirm: boolean }>;
   signOut: () => Promise<void>;
@@ -143,15 +145,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = useCallback(
-    async (email: string, password: string, displayName: string, role: 'user' | 'vet') => {
-      // display_name / role / locale are read by the handle_new_user trigger,
-      // which creates the profiles row server-side. Passing the locale here
-      // preserves a language chosen while browsing as a guest.
+    async (
+      email: string,
+      password: string,
+      firstName: string,
+      lastName: string,
+      phone: string,
+      role: 'user' | 'vet'
+    ) => {
+      // first_name / last_name / phone / role / locale are read by the
+      // handle_new_user trigger (migration 014), which creates the profiles
+      // row server-side and computes display_name from first+last. Passing
+      // the locale here preserves a language chosen while browsing as a guest.
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { display_name: displayName, role, locale: getLocale() },
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone || undefined,
+            role,
+            locale: getLocale(),
+          },
         },
       });
       if (error) throw new Error(error.message);

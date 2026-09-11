@@ -21,6 +21,8 @@ import type {
   Profile,
   RescueCase,
   Vet,
+  VetDocument,
+  VetRating,
 } from './types';
 import { uploadCasePhoto } from './photos';
 import { computeDHash } from './phash';
@@ -248,12 +250,112 @@ export async function fetchVet(id: string): Promise<Vet | null> {
   return data as Vet | null;
 }
 
+/**
+ * The signed-in vet's OWN full clinic row, including the private manager_*
+ * fields and contact_email — vets_public (public column list only, migration
+ * 014) can't return those. Mirrors fetchMyProfile()/get_my_profile().
+ */
+export async function fetchMyVet(): Promise<Vet | null> {
+  const { data, error } = await supabase.rpc('get_my_vet');
+  if (error) throw new Error(error.message);
+  return ((data as Vet[] | null)?.[0] ?? null);
+}
+
 /** Clinic owners manage their details — verification status is admin-only. */
 export async function upsertVet(
-  vet: Omit<Vet, 'created_at' | 'status' | 'open_now' | 'accepting_now'>,
+  vet: Omit<Vet, 'created_at' | 'status' | 'open_now' | 'accepting_now' | 'rating_avg' | 'rating_count'>,
 ): Promise<void> {
   const { error } = await supabase.from('vets').upsert(vet);
   if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Vet verification documents (migration 014, C1)
+// ---------------------------------------------------------------------------
+
+/** Unique-enough storage filename — same rationale as photos.ts's safeId(). */
+function safeDocId(): string {
+  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/** Upload any file toward vet verification — no type/validation checks (simplified C1). */
+export async function uploadVetDocument(file: File, vetId: string): Promise<void> {
+  const path = `${vetId}/${safeDocId()}-${file.name}`;
+  const { error: upErr } = await supabase.storage.from('vet-documents').upload(path, file, {
+    upsert: false,
+  });
+  if (upErr) throw new Error(upErr.message);
+
+  const { error } = await supabase
+    .from('vet_documents')
+    .insert({ vet_id: vetId, path, filename: file.name });
+  if (error) throw new Error(error.message);
+}
+
+/** RLS already limits this to the vet's own documents, or any if caller is admin. */
+export async function fetchVetDocuments(vetId: string): Promise<VetDocument[]> {
+  const { data, error } = await supabase
+    .from('vet_documents')
+    .select('*')
+    .eq('vet_id', vetId)
+    .order('created_at', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as VetDocument[];
+}
+
+/** The bucket is private — a document is only ever viewed via a short-lived signed URL. */
+export async function getVetDocumentUrl(path: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from('vet-documents')
+    .createSignedUrl(path, 300); // 5 minutes — long enough to open, not to hoard
+  if (error) throw new Error(error.message);
+  return data.signedUrl;
+}
+
+export async function deleteVetDocument(id: string, path: string): Promise<void> {
+  const { error: rmErr } = await supabase.storage.from('vet-documents').remove([path]);
+  if (rmErr) throw new Error(rmErr.message);
+  const { error } = await supabase.from('vet_documents').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+// ---------------------------------------------------------------------------
+// Vet ratings (migration 014, C2)
+// ---------------------------------------------------------------------------
+
+/** null when this case hasn't been rated yet — used to show/hide the rating prompt. */
+export async function fetchRatingForCase(caseId: string): Promise<VetRating | null> {
+  const { data, error } = await supabase
+    .from('vet_ratings')
+    .select('*')
+    .eq('case_id', caseId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data as VetRating | null;
+}
+
+/**
+ * Insert-only, once per case — RLS enforces the rescuer actually received a
+ * confirmed delivery from this vet on this case (migration 014). A second
+ * attempt on the same case hits the case_id unique constraint.
+ */
+export async function rateVet(input: {
+  caseId: string;
+  vetId: string;
+  rescuerId: string;
+  rating: number;
+  note?: string;
+}): Promise<void> {
+  const { error } = await supabase.from('vet_ratings').insert({
+    case_id: input.caseId,
+    vet_id: input.vetId,
+    rescuer_id: input.rescuerId,
+    rating: input.rating,
+    note: input.note?.trim() ?? '',
+  });
+  if (error) throw new Error(error.message);
 }
 
 // ---------------------------------------------------------------------------
@@ -290,7 +392,18 @@ export async function fetchMyProfile(): Promise<Profile | null> {
 export async function updateProfile(
   id: string,
   patch: Partial<
-    Pick<Profile, 'display_name' | 'locale' | 'new_case_pref' | 'home_lat' | 'home_lng' | 'notify_radius_km'>
+    Pick<
+      Profile,
+      | 'display_name'
+      | 'locale'
+      | 'new_case_pref'
+      | 'home_lat'
+      | 'home_lng'
+      | 'notify_radius_km'
+      | 'first_name'
+      | 'last_name'
+      | 'phone'
+    >
   >
 ): Promise<void> {
   const { error } = await supabase.from('profiles').update(patch).eq('id', id);
@@ -513,12 +626,14 @@ export const adminResolveReport = (id: number, status: 'resolved' | 'dismissed')
 // Vet verification (admin)
 // ---------------------------------------------------------------------------
 
+/**
+ * Full rows (incl. manager_* / contact_email) for admin review — a plain
+ * table select can't do that once migration 014 narrows vets' column
+ * grants to the public list, so this goes through the admin RPC instead
+ * (SECURITY DEFINER, checks is_admin() itself).
+ */
 export async function fetchPendingVets(): Promise<Vet[]> {
-  const { data, error } = await supabase
-    .from('vets')
-    .select('*')
-    .eq('status', 'pending')
-    .order('created_at', { ascending: true });
+  const { data, error } = await supabase.rpc('admin_list_pending_vets');
   if (error) throw new Error(error.message);
   return (data ?? []) as Vet[];
 }
