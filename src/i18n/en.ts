@@ -8,6 +8,7 @@ export const en = {
   'nav.home': 'Cases',
   'nav.report': 'Report',
   'nav.messages': 'Messages',
+  'nav.vets': 'Vets',
   'nav.alerts': 'Alerts',
   'nav.profile': 'Profile',
 
@@ -104,6 +105,8 @@ export const en = {
   'dm.placeholder': 'Message…',
   'dm.signIn': 'Sign in to send and receive messages.',
   'dm.messageUser': 'Message',
+  'dm.caseChatTag': 'Case chat',
+  'dm.directTag': 'Direct',
 
   // Notifications
   'alerts.title': 'Alerts',

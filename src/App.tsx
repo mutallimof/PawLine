@@ -1,14 +1,16 @@
 /**
  * App shell — routing + global chrome.
  *
- * Chat threads render without the bottom nav (the composer takes its place);
- * everything else gets the four-tab bar with the raised Report button.
+ * Chat threads render without the bottom nav or top bell (the composer/chat
+ * header take their place); everything else gets the five-tab bottom bar
+ * (Home, Vets, raised Report, Messages, Profile) plus a top-right bell for
+ * notifications (Group D — desktop uses SideNav's own Alerts link instead).
  */
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useNotifications } from './hooks/useRealtime';
-import { BottomNav, SideNav, ToastProvider, useToast } from './components/ui';
+import { BottomNav, SideNav, ToastProvider, TopBar, useToast } from './components/ui';
 import { getLocale, subscribeLocale, t } from './i18n';
 import Onboarding, { shouldShowOnboarding } from './components/Onboarding';
 import { InkDefs } from './components/Ink';
@@ -100,6 +102,9 @@ function Shell() {
       {/* Desktop-only sidebar; phones keep the bottom tab bar (CSS-gated). */}
       <SideNav unreadAlerts={unread} />
       <div className="app-main">
+        {/* Mobile-only top-right bell (Group D) — desktop uses SideNav's own
+            Alerts link instead, so this is hidden there via CSS. */}
+        {!hideNav && <TopBar unreadAlerts={unread} />}
         {!online && (
           <div className="banner banner--warn" style={{ borderRadius: 0, margin: 0, textAlign: 'center' }}>
             {t('common.offline')}
@@ -136,7 +141,7 @@ function Shell() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
         </ErrorBoundary>
-        {!hideNav && <BottomNav unreadAlerts={unread} />}
+        {!hideNav && <BottomNav />}
       </div>
     </div>
   );

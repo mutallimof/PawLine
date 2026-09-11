@@ -10,6 +10,7 @@ export const az: Dict = {
   'nav.home': 'Hadisələr',
   'nav.report': 'Bildir',
   'nav.messages': 'Mesajlar',
+  'nav.vets': 'Baytarlar',
   'nav.alerts': 'Bildirişlər',
   'nav.profile': 'Profil',
 
@@ -106,6 +107,8 @@ export const az: Dict = {
   'dm.placeholder': 'Mesaj…',
   'dm.signIn': 'Mesaj göndərmək və almaq üçün daxil olun.',
   'dm.messageUser': 'Mesaj yaz',
+  'dm.caseChatTag': 'Hadisə çatı',
+  'dm.directTag': 'Şəxsi',
 
   // Notifications
   'alerts.title': 'Bildirişlər',

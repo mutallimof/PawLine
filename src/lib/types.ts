@@ -213,6 +213,24 @@ export interface InboxEntry {
   unread: boolean;
 }
 
+/**
+ * A case chat summary for the Messages inbox (Group D) — one row per case
+ * the user is attached to (reporter/rescuer/vet) or has posted in, that
+ * actually has at least one message.
+ *
+ * NOTE: unlike DMs, there's no per-user "last read" marker for case chats
+ * (conversation_participants has last_read_at; case_watchers does not), so
+ * there's no `unread` field here — only chronological ordering. Adding one
+ * would need a schema change; see the note in api.ts's fetchCaseChatInbox().
+ */
+export interface CaseChatInboxEntry {
+  caseId: string;
+  animal: AnimalType;
+  addressHint: string;
+  status: CaseStatus;
+  lastMessage: CaseMessage | null;
+}
+
 
 // ---------------------------------------------------------------------------
 // Production-pass additions (migration 003)

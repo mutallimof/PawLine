@@ -10,6 +10,7 @@ export const tr: Dict = {
   'nav.home': 'Vakalar',
   'nav.report': 'Bildir',
   'nav.messages': 'Mesajlar',
+  'nav.vets': 'Veterinerler',
   'nav.alerts': 'Bildirimler',
   'nav.profile': 'Profil',
 
@@ -106,6 +107,8 @@ export const tr: Dict = {
   'dm.placeholder': 'Mesaj…',
   'dm.signIn': 'Mesaj göndermek ve almak için giriş yapın.',
   'dm.messageUser': 'Mesaj gönder',
+  'dm.caseChatTag': 'Vaka sohbeti',
+  'dm.directTag': 'Özel',
 
   // Notifications
   'alerts.title': 'Bildirimler',

@@ -255,7 +255,11 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
   );
 }
 
-export function BottomNav({ unreadAlerts }: { unreadAlerts: number }) {
+/**
+ * Group D: Vets replaces Alerts here — notifications moved to the top-right
+ * bell (see TopBar below). Same five slots as before, just swapped.
+ */
+export function BottomNav() {
   const navigate = useNavigate();
   return (
     <nav className="bottom-nav" aria-label="Main">
@@ -263,12 +267,9 @@ export function BottomNav({ unreadAlerts }: { unreadAlerts: number }) {
         <IconMap />
         {t('nav.home')}
       </NavLink>
-      <NavLink
-        to="/messages"
-        className={({ isActive }) => `bottom-nav__item${isActive ? ' active' : ''}`}
-      >
-        <IconChat />
-        {t('nav.messages')}
+      <NavLink to="/vets" className={({ isActive }) => `bottom-nav__item${isActive ? ' active' : ''}`}>
+        <span className="bottom-nav__emoji" aria-hidden="true">🏥</span>
+        {t('nav.vets')}
       </NavLink>
       <div className="bottom-nav__report">
         <button
@@ -280,12 +281,11 @@ export function BottomNav({ unreadAlerts }: { unreadAlerts: number }) {
         </button>
       </div>
       <NavLink
-        to="/alerts"
+        to="/messages"
         className={({ isActive }) => `bottom-nav__item${isActive ? ' active' : ''}`}
       >
-        <IconBell />
-        {t('nav.alerts')}
-        {unreadAlerts > 0 && <span className="nav-badge">{Math.min(unreadAlerts, 99)}</span>}
+        <IconChat />
+        {t('nav.messages')}
       </NavLink>
       <NavLink
         to="/profile"
@@ -295,6 +295,22 @@ export function BottomNav({ unreadAlerts }: { unreadAlerts: number }) {
         {t('nav.profile')}
       </NavLink>
     </nav>
+  );
+}
+
+/**
+ * Group D: top-right bell, mobile only (CSS hides it at the ≥1024px
+ * breakpoint where SideNav's own Alerts link takes over — see side-nav in
+ * index.css). Replaces the bottom tab bar's old Alerts slot.
+ */
+export function TopBar({ unreadAlerts }: { unreadAlerts: number }) {
+  return (
+    <div className="top-bar">
+      <NavLink to="/alerts" className="top-bar__bell" aria-label={t('nav.alerts')}>
+        <IconBell size={22} />
+        {unreadAlerts > 0 && <span className="nav-badge">{Math.min(unreadAlerts, 99)}</span>}
+      </NavLink>
+    </div>
   );
 }
 

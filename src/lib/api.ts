@@ -10,6 +10,7 @@
 import { supabase } from './supabase';
 import type {
   AppNotification,
+  CaseChatInboxEntry,
   ContentReport,
   DuplicateFlag,
   Sponsor,
@@ -508,6 +509,71 @@ export async function fetchInbox(myId: string): Promise<InboxEntry[]> {
   entries.sort((a, b) =>
     (b.lastMessage?.created_at ?? '').localeCompare(a.lastMessage?.created_at ?? '')
   );
+  return entries;
+}
+
+/**
+ * Case chats the user is part of, one row per case (Group D — the Messages
+ * tab merges this with fetchInbox() into one list). Membership: cases
+ * they're attached to (reporter/rescuer/vet) OR have posted a message in —
+ * deliberately NOT case_watchers, since watching is a passive follow, not a
+ * conversation. Only cases with at least one message survive the
+ * latest-per-case reduction below, so this returns actual chats, not every
+ * case the user is merely attached to.
+ *
+ * NOTE: there is no per-user read marker for case chats (unlike DMs'
+ * conversation_participants.last_read_at — case_watchers has no equivalent
+ * column), so unlike fetchInbox() this can't compute an `unread` flag.
+ * Ordering by recency only for now; adding unread would need a schema
+ * change (e.g. a case_watchers.last_read_at column) — flagging, not
+ * building, per FIX_SPEC's "no new tables" for this group.
+ */
+export async function fetchCaseChatInbox(myId: string): Promise<CaseChatInboxEntry[]> {
+  const [{ data: attached }, { data: authored }] = await Promise.all([
+    supabase
+      .from('cases')
+      .select('id')
+      .or(`reporter_id.eq.${myId},rescuer_id.eq.${myId},vet_id.eq.${myId}`),
+    supabase.from('case_messages').select('case_id').eq('sender_id', myId),
+  ]);
+
+  const caseIds = Array.from(
+    new Set([
+      ...(attached ?? []).map((c) => c.id as string),
+      ...(authored ?? []).map((m) => m.case_id as string),
+    ])
+  );
+  if (caseIds.length === 0) return [];
+
+  const [{ data: cases }, { data: msgs }] = await Promise.all([
+    supabase.from('cases').select('id, animal, address_hint, status').in('id', caseIds),
+    supabase
+      .from('case_messages')
+      .select('*, sender:profiles (id, display_name, avatar_url, role)')
+      .in('case_id', caseIds)
+      .order('created_at', { ascending: false })
+      .limit(500),
+  ]);
+
+  const latest = new Map<string, CaseMessage>();
+  for (const m of (msgs ?? []) as unknown as CaseMessage[]) {
+    if (!latest.has(m.case_id)) latest.set(m.case_id, m);
+  }
+
+  const entries: CaseChatInboxEntry[] = [];
+  for (const c of (cases ?? []) as {
+    id: string;
+    animal: RescueCase['animal'];
+    address_hint: string;
+    status: RescueCase['status'];
+  }[]) {
+    const last = latest.get(c.id);
+    if (!last) continue; // no messages yet — not a chat to list
+    entries.push({ caseId: c.id, animal: c.animal, addressHint: c.address_hint, status: c.status, lastMessage: last });
+  }
+
+  // Newest activity first.
+  entries.sort((a, b) => b.lastMessage!.created_at.localeCompare(a.lastMessage!.created_at));
   return entries;
 }
 
