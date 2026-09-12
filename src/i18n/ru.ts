@@ -72,6 +72,7 @@ export const ru: Dict = {
   'case.guest': 'гость',
   'case.timeline': 'Хронология',
   'case.legendAnimal': 'Местонахождение животного',
+  'case.getDirections': 'Маршрут',
   'case.rescueProgress': 'Ход спасения',
   'case.currentRescue': 'Текущее спасение',
   'case.toClinic': 'В клинику {clinic}',

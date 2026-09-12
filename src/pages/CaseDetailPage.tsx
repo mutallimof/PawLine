@@ -217,6 +217,16 @@ export default function CaseDetailPage() {
         <div className="case-detail__map-pill">
           📍 {caseData.address_hint || t('case.locationUnknown')}
         </div>
+        {/* geo: URI (RFC 5870) — hands off to whatever map app the phone
+            already has, instead of forcing Google Maps specifically. */}
+        <a
+          className="case-detail__map-directions"
+          href={`geo:${caseData.lat},${caseData.lng}?q=${caseData.lat},${caseData.lng}(${encodeURIComponent(
+            caseData.address_hint || t('case.locationUnknown')
+          )})`}
+        >
+          🧭 {t('case.getDirections')}
+        </a>
       </div>
       <div className="case-detail__map-legend">
         <span className="case-detail__map-legend-item">
@@ -600,6 +610,7 @@ export default function CaseDetailPage() {
                   url={reportPhotos[0].url}
                   alt={caseData.description}
                   onError={() => markPhotoBroken(reportPhotos[0].id)}
+                  defaultRevealed
                 />
               ) : (
                 <div className="photo-unavailable">
@@ -613,7 +624,7 @@ export default function CaseDetailPage() {
             <div className="photo-grid" style={{ marginBottom: 12 }}>
               {reportPhotos.slice(1).map((p) =>
                 p.url && !brokenPhotoIds.has(p.id) ? (
-                  <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
+                  <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} defaultRevealed />
                 ) : (
                   <div key={p.id} className="photo-unavailable">
                     <span aria-hidden="true">🐾</span>
@@ -628,7 +639,7 @@ export default function CaseDetailPage() {
               <div className="photo-grid" style={{ marginBottom: 14 }}>
                 {deliveryPhotos.map((p) =>
                   p.url && !brokenPhotoIds.has(p.id) ? (
-                    <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
+                    <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} defaultRevealed />
                   ) : (
                     <div key={p.id} className="photo-unavailable">
                       <span aria-hidden="true">🐾</span>

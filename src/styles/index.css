@@ -2644,6 +2644,21 @@ body::before {
   font-weight: 700;
   color: var(--color-text-primary);
 }
+.case-detail__map-directions {
+  position: absolute;
+  right: var(--space-sm);
+  top: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-sm);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-brand-strong);
+  text-decoration: none;
+}
 .case-detail__map-legend {
   display: flex;
   flex-wrap: wrap;

@@ -70,6 +70,7 @@ export const en = {
   'case.guest': 'a guest',
   'case.timeline': 'Timeline',
   'case.legendAnimal': 'Animal location',
+  'case.getDirections': 'Get directions',
   'case.rescueProgress': 'Rescue progress',
   'case.currentRescue': 'Current rescue',
   'case.toClinic': 'To {clinic}',

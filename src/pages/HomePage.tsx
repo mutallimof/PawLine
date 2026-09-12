@@ -95,9 +95,9 @@ export default function HomePage() {
             <p className="page-subtitle">{t('app.tagline')}</p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
           {/* Map/feed toggle only exists on phones — desktop shows both. */}
-          <div className="segmented home-view-toggle" style={{ flex: 1 }}>
+          <div className="segmented home-view-toggle" style={{ flex: 1, minWidth: 120 }}>
             <button
               className={`segmented__option${view === 'map' ? ' active' : ''}`}
               onClick={() => setView('map')}
@@ -111,7 +111,7 @@ export default function HomePage() {
               {t('home.feed')}
             </button>
           </div>
-          <div className="segmented" style={{ flex: 1.4 }}>
+          <div className="segmented" style={{ flex: 1.4, minWidth: 160 }}>
             {(['active', 'all', 'resolved'] as Filter[]).map((f) => (
               <button
                 key={f}
@@ -127,6 +127,7 @@ export default function HomePage() {
           <button
             type="button"
             className={`chip${showFilters || activeFilterCount > 0 ? ' active' : ''}`}
+            style={{ flexShrink: 0 }}
             onClick={() => setShowFilters((v) => !v)}
           >
             ⚙️ {t('home.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}

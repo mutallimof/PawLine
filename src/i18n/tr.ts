@@ -72,6 +72,7 @@ export const tr: Dict = {
   'case.guest': 'bir misafir',
   'case.timeline': 'Zaman çizelgesi',
   'case.legendAnimal': 'Hayvanın konumu',
+  'case.getDirections': 'Yol tarifi al',
   'case.rescueProgress': 'Kurtarma süreci',
   'case.currentRescue': 'Devam eden kurtarma',
   'case.toClinic': '{clinic} kliniğine doğru',

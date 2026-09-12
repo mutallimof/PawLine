@@ -20,13 +20,19 @@ export function CasePhoto({
   alt,
   className,
   onError,
+  defaultRevealed,
 }: {
   url: string;
   alt: string;
   className?: string;
   onError?: () => void;
+  /** Case detail: opening a specific case is already an opt-in look, so it
+   * starts revealed there. The feed (default false) stays blurred — someone
+   * scrolling past shouldn't be surprised. Either way it can still be
+   * hidden/revealed by hand. */
+  defaultRevealed?: boolean;
 }) {
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(!!defaultRevealed);
 
   return (
     <div className={`case-photo${className ? ` ${className}` : ''}`}>

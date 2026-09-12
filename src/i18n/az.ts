@@ -72,6 +72,7 @@ export const az: Dict = {
   'case.guest': 'qonaq',
   'case.timeline': 'Xronologiya',
   'case.legendAnimal': 'Heyvanın yeri',
+  'case.getDirections': 'Yol tərifi al',
   'case.rescueProgress': 'Xilasetmə gedişatı',
   'case.currentRescue': 'Hazırkı xilasetmə',
   'case.toClinic': '{clinic} klinikasına',
