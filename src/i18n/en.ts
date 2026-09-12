@@ -131,6 +131,8 @@ export const en = {
   'auth.lastName': 'Last name',
   'auth.phone': 'Phone (optional)',
   'auth.clinicToggle': 'I’m registering a veterinary clinic',
+  'auth.roleCommunity': 'Community',
+  'auth.roleVet': 'Veterinary clinic',
   'auth.haveAccount': 'Already have an account? Sign in',
   'auth.noAccount': 'New here? Create an account',
   'auth.signOut': 'Sign out',

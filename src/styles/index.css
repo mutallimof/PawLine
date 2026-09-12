@@ -2329,3 +2329,190 @@ body::before {
   color: var(--coral);
 }
 .paw-bloom span { top: 0; }
+
+/* ============================================================================
+   18. SIGN-IN SCREEN — docs/DESIGN_TOKENS.md tokens (design/sign-in)
+   ----------------------------------------------------------------------------
+   Semantic token names from the design-tokens doc, added here as aliases to
+   the existing custom properties above — additive only, nothing else in this
+   file changes meaning. Scoped to .auth-card so no other screen is affected.
+   Values with NO equivalent token are called out below rather than hardcoded
+   as a bare px/hex — see the PR description for the full list.
+   ============================================================================ */
+:root {
+  --color-brand: var(--coral);
+  --color-brand-strong: var(--coral-deep);
+  --color-bg-app: var(--sand);
+  --color-bg-surface: var(--paper);
+  --color-bg-surface-alt: #f1e4dc; /* already the .segmented track's raw value */
+  --color-border-default: var(--line);
+  --color-border-hairline: rgba(238, 221, 212, 0.7);
+  --color-text-primary: var(--ink);
+  --color-text-secondary: var(--ink-soft);
+  --color-text-on-brand: #fff;
+  --color-focus-ring: rgba(232, 93, 74, 0.4);
+
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* --radius-sm (12px) and --radius-lg (24px) above already match the
+     design-tokens doc's names and values exactly — reused as-is. */
+  --radius-md: var(--radius);
+  --radius-pill: 999px;
+
+  --font-family-display: var(--font-display);
+  --font-family-body: var(--font-body);
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-3xl: 28px;
+
+  --shadow-md: var(--shadow-ink);
+  --shadow-lg: var(--shadow-ink-lift);
+  --shadow-focus: 0 0 0 3px rgba(232, 93, 74, 0.4);
+}
+
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 90dvh;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-sm);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-hairline);
+  /* Design calls for a 36px corner radius; the largest token is
+     --radius-lg (24px) — flagged, using the closest token instead of a
+     hardcoded 36px. */
+  border-radius: var(--radius-lg);
+  /* Design's card shadow is a large near-black-tinted drop shadow with no
+     equivalent token; --shadow-lg is the closest elevation step. */
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2xl) var(--space-xl);
+}
+
+.auth-card__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.auth-card__logo {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-brand);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+}
+
+.auth-card__wordmark {
+  font-family: var(--font-family-display);
+  font-weight: 600;
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+}
+
+.auth-card__tagline {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-family-display);
+  font-weight: 600;
+  font-size: var(--font-size-3xl);
+  line-height: 1.15;
+  color: var(--color-text-primary);
+}
+
+.auth-card__tabs.segmented {
+  background: var(--color-bg-surface-alt);
+  border-radius: var(--radius-md);
+}
+.auth-card__tabs .segmented__option {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+}
+.auth-card__tabs .segmented__option.active {
+  background: var(--color-brand);
+  color: var(--color-text-on-brand);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-card__row {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+/* Inputs: scoped to this card only, so Settings/Reset-password/Profile —
+   which reuse the same .field/.pw-wrap markup — are untouched. */
+.auth-card .field {
+  margin-bottom: 0; /* .auth-card's own gap controls spacing instead */
+}
+.auth-card .field__label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+.auth-card .field input,
+.auth-card .pw-wrap input {
+  min-height: 50px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-surface-alt);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+}
+.auth-card .field input:focus-visible,
+.auth-card .pw-wrap input:focus-visible {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: var(--shadow-focus);
+}
+.auth-card .pw-toggle {
+  color: var(--color-text-secondary);
+}
+
+.auth-card__forgot {
+  align-self: flex-end;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.auth-card .btn--primary.auth-card__cta {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-card__switch {
+  align-self: center;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.auth-card__guest,
+.auth-card__legal {
+  align-self: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+.auth-card__guest {
+  text-decoration: underline; /* matches the design's "Continue as guest" */
+}

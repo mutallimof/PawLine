@@ -133,6 +133,8 @@ export const ru: Dict = {
   'auth.lastName': 'Фамилия',
   'auth.phone': 'Телефон (необязательно)',
   'auth.clinicToggle': 'Я регистрирую ветеринарную клинику',
+  'auth.roleCommunity': 'Сообщество',
+  'auth.roleVet': 'Ветклиника',
   'auth.haveAccount': 'Уже есть аккаунт? Войти',
   'auth.noAccount': 'Впервые здесь? Создать аккаунт',
   'auth.signOut': 'Выйти',

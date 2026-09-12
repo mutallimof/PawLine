@@ -133,6 +133,8 @@ export const az: Dict = {
   'auth.lastName': 'Soyad',
   'auth.phone': 'Telefon (istəyə bağlı)',
   'auth.clinicToggle': 'Baytar klinikası qeydiyyatdan keçirirəm',
+  'auth.roleCommunity': 'İcma',
+  'auth.roleVet': 'Baytar klinikası',
   'auth.haveAccount': 'Hesabınız var? Daxil olun',
   'auth.noAccount': 'Yenisiniz? Hesab yaradın',
   'auth.signOut': 'Çıxış',

@@ -133,6 +133,8 @@ export const tr: Dict = {
   'auth.lastName': 'Soyad',
   'auth.phone': 'Telefon (isteğe bağlı)',
   'auth.clinicToggle': 'Bir veteriner kliniği kaydediyorum',
+  'auth.roleCommunity': 'Topluluk',
+  'auth.roleVet': 'Veteriner kliniği',
   'auth.haveAccount': 'Zaten hesabınız var mı? Giriş yapın',
   'auth.noAccount': 'Yeni misiniz? Hesap oluşturun',
   'auth.signOut': 'Çıkış yap',
