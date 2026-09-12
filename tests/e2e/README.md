@@ -1,5 +1,15 @@
 # E2E: full case state machine
 
+> **Status: not runnable yet.** This suite is not merged and stays on
+> `test/e2e-flows` until a staging Supabase project (and a staging Vercel
+> deployment pointed at it) exists. There is currently only one Supabase
+> project — the production one migrations 011–018 are live on — and this
+> suite creates real accounts, a real case, and a real vet clinic on
+> whatever project its target URL points at (see "What this creates, and
+> on what" below). Do not point `E2E_BASE_URL` at production. Once a
+> staging environment exists, update this note and the blockers below
+> still apply before the first run.
+
 Drives one case through report → accept → select vet → vet responds →
 transport → confirm delivery → rate, as three real accounts (reporter,
 rescuer, vet), each in its own browser context, against a **deployed**
