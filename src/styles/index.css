@@ -2342,6 +2342,7 @@ body::before {
 :root {
   --color-brand: var(--coral);
   --color-brand-strong: var(--coral-deep);
+  --color-brand-subtle: var(--coral-soft);
   --color-bg-app: var(--sand);
   --color-bg-surface: var(--paper);
   --color-bg-surface-alt: #f1e4dc; /* already the .segmented track's raw value */
@@ -2366,6 +2367,7 @@ body::before {
 
   --font-family-display: var(--font-display);
   --font-family-body: var(--font-body);
+  --font-size-xs: 11px;
   --font-size-sm: 12px;
   --font-size-base: 14px;
   --font-size-lg: 16px;
@@ -2527,4 +2529,81 @@ body::before {
 }
 .auth-card__guest {
   text-decoration: underline; /* matches the design's "Continue as guest" */
+}
+
+/* ============================================================================
+   19. HOME SCREEN — docs/DESIGN_TOKENS.md tokens (design/home)
+   ----------------------------------------------------------------------------
+   Scoped to .home-feed / .home-vet-banner so CaseCard's other callers
+   (ProfilePage, the vet dashboard) and .case-card--compact itself elsewhere
+   are untouched. Status-tinted card backgrounds and the status-badge pill's
+   own colors are existing behavior and are NOT changed here — only the
+   photo size/inset, card height, and description length come from the
+   design; layout/spacing only, per instruction.
+   ============================================================================ */
+.home-feed .case-card--compact {
+  align-items: center;
+  padding: var(--space-xs);
+  min-height: 160px;
+}
+.home-feed .case-card--compact .case-card__photo {
+  width: 140px;
+  min-width: 140px;
+  height: 140px;
+  border-radius: var(--radius-sm);
+  align-self: center;
+}
+.home-feed .case-card--compact .case-card__body {
+  padding: 0 0 0 var(--space-sm);
+  gap: var(--space-2xs);
+}
+.home-feed .case-card--compact .case-card__desc {
+  -webkit-line-clamp: 2;
+}
+.home-feed .case-card--compact .case-card__meta {
+  font-size: var(--font-size-xs);
+}
+
+/* "3 vet clinics nearby" banner */
+.home-vet-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-sm);
+  margin-top: var(--space-sm);
+  background: var(--color-brand-subtle);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+.home-vet-banner__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-brand);
+  font-size: var(--font-size-lg);
+}
+.home-vet-banner__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-vet-banner__title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.home-vet-banner__sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+.home-vet-banner__chevron {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
 }

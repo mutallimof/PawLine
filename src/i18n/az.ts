@@ -42,6 +42,8 @@ export const az: Dict = {
   'home.filterAnimal': 'Heyvan',
   'home.filterStatus': 'Status',
   'home.filterClear': 'Filtrləri təmizlə',
+  'home.vetsNearby': 'Yaxınlıqda {n} baytar klinikası',
+  'home.vetsNearbyHint': 'Yol tərifi və iş saatları üçün toxunun',
 
   // Report flow
   'report.title': 'Heyvan barədə bildir',

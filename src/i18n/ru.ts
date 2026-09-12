@@ -42,6 +42,8 @@ export const ru: Dict = {
   'home.filterAnimal': 'Животное',
   'home.filterStatus': 'Статус',
   'home.filterClear': 'Сбросить фильтры',
+  'home.vetsNearby': 'Рядом {n} ветклиник',
+  'home.vetsNearbyHint': 'Нажмите, чтобы увидеть маршрут и часы работы',
 
   // Report flow
   'report.title': 'Сообщить о животном',

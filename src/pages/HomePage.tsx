@@ -4,6 +4,7 @@
  *  - Feed: photo-forward cards, nearest info first if location is known.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useCases } from '../hooks/useRealtime';
 import { fetchVets } from '../lib/api';
 import type { AnimalType, CaseStatus, Vet } from '../lib/types';
@@ -76,6 +77,14 @@ export default function HomePage() {
       return b.created_at.localeCompare(a.created_at);
     });
   }, [cases, filter, radiusKm, userLocation, animalFilter, statusFilter]);
+
+  // "N vet clinics nearby" banner: within 25km if we know where the user is
+  // (matches the Filters panel's own distance semantics), otherwise every
+  // registered vet — never a made-up number.
+  const nearbyVetCount = useMemo(() => {
+    if (!userLocation) return vets.length;
+    return vets.filter((v) => distanceKm(userLocation, { lat: v.lat, lng: v.lng }) <= 25).length;
+  }, [vets, userLocation]);
 
   return (
     <div className="page page--flush">
@@ -191,6 +200,17 @@ export default function HomePage() {
               </button>
             )}
           </div>
+        )}
+
+        {nearbyVetCount > 0 && (
+          <Link to="/vets" className="home-vet-banner">
+            <span className="home-vet-banner__icon" aria-hidden="true">🏥</span>
+            <span className="home-vet-banner__text">
+              <span className="home-vet-banner__title">{t('home.vetsNearby', { n: nearbyVetCount })}</span>
+              <span className="home-vet-banner__sub">{t('home.vetsNearbyHint')}</span>
+            </span>
+            <span className="home-vet-banner__chevron" aria-hidden="true">›</span>
+          </Link>
         )}
       </div>
 

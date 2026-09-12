@@ -40,6 +40,8 @@ export const en = {
   'home.filterAnimal': 'Animal',
   'home.filterStatus': 'Status',
   'home.filterClear': 'Clear filters',
+  'home.vetsNearby': '{n} vet clinics nearby',
+  'home.vetsNearbyHint': 'Tap to see directions & hours',
 
   // Report flow
   'report.title': 'Report an animal',
