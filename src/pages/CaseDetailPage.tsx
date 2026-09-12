@@ -212,41 +212,51 @@ export default function CaseDetailPage() {
           (there's no reverse-geocoded address — see note in FIX_SPEC
           follow-up); the mini map gives it real visual weight.
          ================================================================== */}
-      <div className="card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <span style={{ fontSize: 22 }} aria-hidden="true">📍</span>
-          <span style={{ fontSize: 17, fontWeight: 800 }}>
-            {caseData.address_hint || t('case.locationUnknown')}
-          </span>
-        </div>
+      <div className="case-detail__map-card">
         <CaseLocationMap caseData={caseData} />
+        <div className="case-detail__map-pill">
+          📍 {caseData.address_hint || t('case.locationUnknown')}
+        </div>
+      </div>
+      <div className="case-detail__map-legend">
+        <span className="case-detail__map-legend-item">
+          <span className="case-detail__map-legend-dot case-detail__map-legend-dot--case" aria-hidden="true" />
+          {t('case.legendAnimal')}
+        </span>
+        {caseData.vet && (
+          <span className="case-detail__map-legend-item">
+            <span className="case-detail__map-legend-dot case-detail__map-legend-dot--vet" aria-hidden="true" />
+            {caseData.vet.clinic_name}
+          </span>
+        )}
       </div>
 
       {/* ==================================================================
           2. TITLE AND DESCRIPTION
          ================================================================== */}
-      <div style={{ marginBottom: 14 }}>
+      <div style={{ marginBottom: 'var(--space-xl)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>
             {animalEmoji(caseData.animal)} {t(`animal.${caseData.animal}` as const)}
           </h1>
           <StatusBadge status={caseData.status} />
         </div>
-        <p style={{ fontSize: 16, marginBottom: 6 }}>{caseData.description}</p>
-        <p className="page-subtitle">
+        <p className="page-subtitle" style={{ marginBottom: 6 }}>
           {t('case.reportedBy', {
             name: caseData.reporter?.display_name ?? caseData.guest_name ?? t('case.guest'),
           })}
           {' · '}
           {timeAgo(caseData.created_at)}
         </p>
+        <p className="case-detail__quote">{caseData.description}</p>
       </div>
 
       {/* ==================================================================
           3. STATUS TIMELINE — the pipeline, its history, who's involved,
           and everything that can move it forward, grouped as one idea.
          ================================================================== */}
-      <div className="card" style={{ padding: '4px 8px 12px', marginBottom: 14 }}>
+      <div className="section-label">{t('case.rescueProgress')}</div>
+      <div className="card" style={{ padding: 'var(--space-2xs) var(--space-xs) var(--space-sm)', marginBottom: 'var(--space-xl)' }}>
         <PawTrail status={caseData.status} />
       </div>
 
@@ -390,13 +400,23 @@ export default function CaseDetailPage() {
 
       {/* People involved */}
       {caseData.rescuer && (
-        <Link to={`/user/${caseData.rescuer.id}`} className="list-row">
-          <Avatar name={caseData.rescuer.display_name} url={caseData.rescuer.avatar_url} />
-          <div className="list-row__main">
-            <div className="list-row__title">{caseData.rescuer.display_name}</div>
-            <div className="list-row__sub">{t('status.accepted')}</div>
-          </div>
-        </Link>
+        <>
+          <div className="section-label">{t('case.currentRescue')}</div>
+          <Link
+            to={`/user/${caseData.rescuer.id}`}
+            className="list-row"
+            style={{ marginBottom: 'var(--space-xl)' }}
+          >
+            <Avatar name={caseData.rescuer.display_name} url={caseData.rescuer.avatar_url} />
+            <div className="list-row__main">
+              <div className="list-row__title">{caseData.rescuer.display_name}</div>
+              <div className="list-row__sub">{t('status.accepted')}</div>
+              {caseData.vet && (
+                <div className="list-row__sub">{t('case.toClinic', { clinic: caseData.vet.clinic_name })}</div>
+              )}
+            </div>
+          </Link>
+        </>
       )}
       {caseData.vet && (
         <Link to={`/vet/${caseData.vet.id}`} className="list-row">
@@ -546,30 +566,26 @@ export default function CaseDetailPage() {
           hidden
           onChange={(e) => void onDeliveryPhoto(e.target.files)}
         />
-
-        {/* Anyone signed in can flag abusive/fake content for admin review */}
-        {user && (
-          <ReportButton reporterId={user.id} targetType="case" targetCase={caseData.id} />
-        )}
       </div>
 
       {/* Event log */}
       <div className="section-label">{t('case.timeline')}</div>
-      <div className="card" style={{ padding: '6px 14px', marginBottom: 14 }}>
-        {events.length === 0 && (
-          <p className="page-subtitle" style={{ padding: '8px 0' }}>—</p>
-        )}
-        {events.map((ev) => (
-          <div key={ev.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>
-              {/* Machine-generated pipeline events are localized by type;
-                  free-text updates (vet notes etc.) show verbatim. */}
-              {hasKey(`event.${ev.type}`) ? t(`event.${ev.type}` as never) : ev.note}
-            </div>
-            <div className="page-subtitle" style={{ margin: 0 }}>{timeAgo(ev.created_at)}</div>
-          </div>
-        ))}
-      </div>
+      {events.length === 0 ? (
+        <p className="page-subtitle">—</p>
+      ) : (
+        <ol className="case-detail__timeline">
+          {events.map((ev) => (
+            <li key={ev.id} className="case-detail__timeline-item">
+              <div className="case-detail__timeline-time">{timeAgo(ev.created_at)}</div>
+              <div className="case-detail__timeline-text">
+                {/* Machine-generated pipeline events are localized by type;
+                    free-text updates (vet notes etc.) show verbatim. */}
+                {hasKey(`event.${ev.type}`) ? t(`event.${ev.type}` as never) : ev.note}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
 
       {/* ==================================================================
           4. PHOTO
@@ -628,14 +644,19 @@ export default function CaseDetailPage() {
       {/* ==================================================================
           5. CASE CHAT
          ================================================================== */}
-      <div style={{ display: 'flex', gap: 10 }}>
-        <Link to={`/case/${caseData.id}/chat`} className="btn btn--secondary">
+      <div className="case-detail__actions-stack">
+        <Link to={`/case/${caseData.id}/chat`} className="btn btn--primary">
           💬 {t('case.openChat')}
         </Link>
         {user && !isRescuer && !isVet && (
           <button className={`btn ${watching ? 'btn--ghost' : 'btn--secondary'}`} disabled={busy} onClick={toggleWatch}>
             {watching ? `✓ ${t('case.watching')}` : `🔔 ${t('case.watch')}`}
           </button>
+        )}
+        {user && (
+          <div className="case-detail__report-link">
+            <ReportButton reporterId={user.id} targetType="case" targetCase={caseData.id} />
+          </div>
         )}
       </div>
 

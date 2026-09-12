@@ -641,9 +641,9 @@ export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
     };
   }, [map, caseData]);
 
-  if (failed) return <MapUnavailable height={160} />;
+  if (failed) return <MapUnavailable height={190} />;
   return (
-    <div className="map-wrap" style={{ height: 160, borderRadius: 'var(--radius)' }}>
+    <div className="map-wrap" style={{ height: 190, borderRadius: 'var(--radius-lg)' }}>
       <div ref={ref} style={{ width: '100%', height: '100%' }} />
       {!map && <div className="map-skeleton" aria-hidden="true" />}
     </div>

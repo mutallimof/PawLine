@@ -2357,6 +2357,7 @@ body::before {
   --space-xs: 8px;
   --space-sm: 12px;
   --space-md: 16px;
+  --space-lg: 20px;
   --space-xl: 24px;
   --space-2xl: 32px;
 
@@ -2606,4 +2607,161 @@ body::before {
   color: var(--color-text-secondary);
   font-size: var(--font-size-lg);
   flex-shrink: 0;
+}
+
+/* ============================================================================
+   20. CASE DETAIL — docs/DESIGN_TOKENS.md tokens (design/case-detail)
+   ----------------------------------------------------------------------------
+   CaseLocationMap/PawTrail have exactly one caller (this page), so their
+   rules below are edited directly rather than scoped under a wrapper class.
+   Status labels, the event log's own data, and every role/status-gated
+   action button are unchanged — this section is presentation only.
+   ============================================================================ */
+
+/* ---- Map card ---- */
+.case-detail__map-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-sm);
+}
+.case-detail__map-pill {
+  position: absolute;
+  left: var(--space-sm);
+  bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-sm);
+  max-width: calc(100% - 2 * var(--space-sm));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.case-detail__map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+.case-detail__map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+.case-detail__map-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.case-detail__map-legend-dot--case { background: var(--status-open); }
+.case-detail__map-legend-dot--vet { background: var(--status-enroute); }
+
+/* ---- Description quote ---- */
+.case-detail__quote {
+  margin: 0;
+  padding-left: var(--space-sm);
+  border-left: 3px solid var(--color-brand);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+}
+
+/* ---- Timeline (event log) ---- */
+.case-detail__timeline {
+  list-style: none;
+  margin: 0 0 var(--space-xl);
+  padding: var(--space-2xs) 0 var(--space-2xs) var(--space-lg);
+  position: relative;
+}
+.case-detail__timeline::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: var(--space-sm);
+  bottom: var(--space-sm);
+  width: 2px;
+  background: var(--color-border-default);
+}
+.case-detail__timeline-item {
+  position: relative;
+  padding-bottom: var(--space-md);
+}
+.case-detail__timeline-item:last-child {
+  padding-bottom: 0;
+}
+.case-detail__timeline-item::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--space-lg) + 1px);
+  top: 3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  border: 2px solid var(--color-bg-surface);
+}
+.case-detail__timeline-time {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.case-detail__timeline-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+/* ---- Bottom button stack ---- */
+.case-detail__actions-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+.case-detail__report-link {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-2xs);
+}
+
+/* ---- Rescue-progress bar: icon-in-a-circle nodes + connecting line,
+   replacing the old plain-emoji/opacity treatment. Same 5 steps, same
+   per-status labels (TRAIL_STEPS in ui.tsx) — visual only. ---- */
+.paw-trail__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 14px;
+  background: var(--color-bg-surface-alt);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+  opacity: 1;
+  filter: none;
+  transition: background var(--t-fast), border-color var(--t-fast), width var(--t-fast), height var(--t-fast), box-shadow var(--t-fast);
+}
+.paw-trail__step.done .paw-trail__icon,
+.paw-trail__step.current .paw-trail__icon {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: var(--color-text-on-brand);
+}
+.paw-trail__step.current .paw-trail__icon {
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+.paw-trail__connector {
+  top: 15px;
 }
