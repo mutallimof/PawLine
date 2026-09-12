@@ -516,6 +516,48 @@ export function VetSetupPage() {
 }
 
 // ---------------------------------------------------------------------------
+/**
+ * Persistent (not dismissible) reminder that an unapproved clinic is
+ * invisible to rescuers — shown on the vet's profile and dashboard, the two
+ * places a vet might otherwise assume everything is fine. VetSetupPage
+ * already shows a pending/rejected banner on the form itself; this covers
+ * the pages that previously showed nothing at all.
+ */
+export function VetVisibilityNotice() {
+  const { user, profile } = useAuth();
+  const [vet, setVet] = useState<Vet | null>(null);
+  const [docCount, setDocCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user || profile?.role !== 'vet') return;
+    fetchMyVet().then(setVet).catch(() => {});
+  }, [user, profile?.role]);
+
+  useEffect(() => {
+    if (!user || !vet) return;
+    fetchVetDocuments(user.id).then((docs) => setDocCount(docs.length)).catch(() => {});
+  }, [user, vet]);
+
+  if (!vet || vet.status === 'approved') return null;
+
+  const missingDetails = !vet.address.trim() || !vet.contact_phone.trim();
+  const message =
+    vet.status === 'rejected'
+      ? t('vetSetup.rejected')
+      : missingDetails
+      ? t('vetVisibility.needsDetails')
+      : docCount === 0
+      ? t('vetVisibility.needsDocuments')
+      : t('vetSetup.pending');
+
+  return (
+    <div className="banner banner--warn" role="status" style={{ marginBottom: 14 }}>
+      {message}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 export function VetDashboardPage() {
   const { user } = useAuth();
   const { cases } = useCases(); // live — new requests appear instantly
@@ -542,6 +584,7 @@ export function VetDashboardPage() {
   return (
     <div className="page">
       <h1 className="page-title">{t('vetDash.title')}</h1>
+      <VetVisibilityNotice />
 
       <div className="section-label">{t('vetDash.incoming')}</div>
       {incoming.length === 0 && <p className="page-subtitle">{t('vetDash.none')}</p>}

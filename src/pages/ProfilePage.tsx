@@ -9,6 +9,7 @@ import { updateProfile } from '../lib/api';
 import { disablePush, enablePush, getPushSubscription, pushSupported } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { Avatar, CaseCard, LanguageSwitcher, TierBadge, useToast } from '../components/ui';
+import { VetVisibilityNotice } from './vetAndUserPages';
 import { tierForXp, tierName } from '../lib/xp';
 import { getCurrentPosition } from '../lib/geo';
 import { t } from '../i18n';
@@ -138,10 +139,13 @@ export default function ProfilePage() {
 
       {/* Vet entry points */}
       {profile.role === 'vet' && (
-        <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
-          <Link to="/vet-dashboard" className="btn btn--primary">🏥 {t('profile.vetDashboard')}</Link>
-          <Link to="/vet-setup" className="btn btn--secondary">{t('vetSetup.title')}</Link>
-        </div>
+        <>
+          <VetVisibilityNotice />
+          <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
+            <Link to="/vet-dashboard" className="btn btn--primary">🏥 {t('profile.vetDashboard')}</Link>
+            <Link to="/vet-setup" className="btn btn--secondary">{t('vetSetup.title')}</Link>
+          </div>
+        </>
       )}
 
       {/* Language */}

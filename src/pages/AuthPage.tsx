@@ -6,6 +6,14 @@ import { LanguageSwitcher, PasswordField, useToast } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 
+// Set right when a vet signs up, consumed on whichever sign-in actually
+// starts their session next — immediately below if email confirmation is
+// off, or after they confirm their email and come back to sign in by hand
+// (the common case in production). Keyed by email, not just "a vet is
+// pending", so a different account signing in on the same browser first
+// doesn't get redirected by mistake.
+const VET_SETUP_PENDING_KEY = 'pawline-vet-setup-pending-email';
+
 export default function AuthPage() {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -49,8 +57,15 @@ export default function AuthPage() {
     try {
       if (mode === 'signin') {
         await signIn(email.trim(), password);
-        navigate('/');
+        const pendingVetEmail = localStorage.getItem(VET_SETUP_PENDING_KEY);
+        if (pendingVetEmail && pendingVetEmail === email.trim().toLowerCase()) {
+          localStorage.removeItem(VET_SETUP_PENDING_KEY);
+          navigate('/vet-setup');
+        } else {
+          navigate('/');
+        }
       } else {
+        if (isVet) localStorage.setItem(VET_SETUP_PENDING_KEY, email.trim().toLowerCase());
         const { needsEmailConfirm } = await signUp(
           email.trim(),
           password,
@@ -64,6 +79,7 @@ export default function AuthPage() {
         } else {
           // Session created immediately (email confirmation disabled) —
           // send new vets straight to clinic setup.
+          if (isVet) localStorage.removeItem(VET_SETUP_PENDING_KEY);
           navigate(isVet ? '/vet-setup' : '/');
         }
       }

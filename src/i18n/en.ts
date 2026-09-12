@@ -268,6 +268,8 @@ export const en = {
   'privacy.link': 'Privacy policy',
   'vetSetup.pending': 'Your clinic is awaiting verification by the PawLine team. It will appear to rescuers once approved.',
   'vetSetup.rejected': 'Your clinic wasn’t approved. If you believe this is a mistake, contact the PawLine team.',
+  'vetVisibility.needsDetails': 'Rescuers can’t find you yet — finish your clinic’s address and phone number in Clinic setup.',
+  'vetVisibility.needsDocuments': 'Rescuers can’t find you yet. Your clinic is awaiting review — adding verification documents can help speed up approval.',
   'sponsors.title': 'Supported by',
   'partners.title': 'Partners',
   'admin.title': 'Admin',

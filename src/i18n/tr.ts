@@ -270,6 +270,8 @@ export const tr: Dict = {
   'privacy.link': 'Gizlilik politikası',
   'vetSetup.pending': 'Kliniğiniz PawLine ekibi tarafından doğrulanmayı bekliyor. Onaylandığında kurtarıcılara görünecek.',
   'vetSetup.rejected': 'Kliniğiniz onaylanmadı. Bunun bir hata olduğunu düşünüyorsanız PawLine ekibiyle iletişime geçin.',
+  'vetVisibility.needsDetails': 'Kurtarıcılar sizi henüz bulamıyor — Klinik ayarlarında adresinizi ve telefon numaranızı tamamlayın.',
+  'vetVisibility.needsDocuments': 'Kurtarıcılar sizi henüz bulamıyor. Kliniğiniz inceleniyor — doğrulama belgeleri eklemek onayı hızlandırabilir.',
   'sponsors.title': 'Destekleyenler',
   'partners.title': 'Ortaklar',
   'admin.title': 'Yönetici',
