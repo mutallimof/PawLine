@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",
@@ -27,6 +29,7 @@
     "workbox-strategies": "^7.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@types/google.maps": "^3.58.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

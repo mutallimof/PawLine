@@ -11,3 +11,8 @@ dev-dist/
 # Editor/OS noise
 .DS_Store
 *.log
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
