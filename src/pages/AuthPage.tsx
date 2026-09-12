@@ -93,6 +93,9 @@ export default function AuthPage() {
         {info && <div className="banner banner--success">{info}</div>}
 
         {mode === 'signup' && (
+          <span className="field__label">{t('auth.roleLabel')}</span>
+        )}
+        {mode === 'signup' && (
           <div className="segmented auth-card__tabs" role="group" aria-label={t('auth.clinicToggle')}>
             <button
               type="button"
@@ -179,6 +182,16 @@ export default function AuthPage() {
         >
           {mode === 'signin' ? t('auth.signIn') : t('auth.signUp')}
         </button>
+
+        {mode === 'signup' && (
+          <p className="auth-card__terms">
+            {t('auth.termsPrefix')}
+            <Link to="/terms">{t('legal.terms')}</Link>
+            {t('auth.termsMiddle')}
+            <Link to="/privacy">{t('legal.privacy')}</Link>
+            {t('auth.termsSuffix')}
+          </p>
+        )}
 
         <button
           type="button"
