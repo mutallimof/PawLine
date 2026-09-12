@@ -1828,7 +1828,14 @@ body {
    ============================================================================ */
 
 /* Blur-by-default case photos (4e) */
-.case-photo { position: relative; overflow: hidden; border-radius: var(--radius-lg); }
+.case-photo { position: relative; overflow: hidden; border-radius: var(--radius-lg); width: 100%; height: 100%; }
+/* Grid thumbnails are fixed 88px flex items, not the hero's aspect-ratio box —
+   match .photo-grid img's own sizing instead of stretching to 100%. */
+.photo-grid .case-photo { width: 88px; height: 88px; border-radius: var(--radius-sm); flex-shrink: 0; }
+/* Compact card photo is flush against the card body on its right edge —
+   let the card's own overflow:hidden round the outer corners, same as
+   .photo-unavailable does for the empty-state fallback in this same slot. */
+.case-card__photo .case-photo { border-radius: inherit; }
 .case-photo__img--blurred { filter: blur(24px); transform: scale(1.08); }
 .case-photo__reveal {
   position: absolute; inset: 0; display: flex; flex-direction: column;

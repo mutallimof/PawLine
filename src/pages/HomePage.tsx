@@ -4,7 +4,6 @@
  *  - Feed: photo-forward cards, nearest info first if location is known.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useCases } from '../hooks/useRealtime';
 import { fetchVets } from '../lib/api';
 import type { AnimalType, CaseStatus, Vet } from '../lib/types';
@@ -86,10 +85,6 @@ export default function HomePage() {
             <h1 className="page-title">{t('app.name')}</h1>
             <p className="page-subtitle">{t('app.tagline')}</p>
           </div>
-          {/* Always-available vet browsing — not tied to any rescue case. */}
-          <Link to="/vets" className="chip active" style={{ marginTop: 10, textDecoration: 'none' }}>
-            🏥 {t('home.browseVets')}
-          </Link>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Map/feed toggle only exists on phones — desktop shows both. */}

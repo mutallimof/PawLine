@@ -19,10 +19,12 @@ export function CasePhoto({
   url,
   alt,
   className,
+  onError,
 }: {
   url: string;
   alt: string;
   className?: string;
+  onError?: () => void;
 }) {
   const [revealed, setRevealed] = useState(false);
 
@@ -33,6 +35,7 @@ export function CasePhoto({
         alt={alt}
         className={revealed ? '' : 'case-photo__img--blurred'}
         draggable={false}
+        onError={onError}
       />
       {!revealed ? (
         <button

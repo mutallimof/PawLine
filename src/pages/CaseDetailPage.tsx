@@ -40,6 +40,7 @@ import {
 import { CaseLocationMap, EnRouteMap } from '../components/maps';
 import { Avatar, PawTrail, StatusBadge, useToast } from '../components/ui';
 import { ReportButton } from '../components/Report';
+import { CasePhoto } from '../components/CasePhoto';
 import { animalEmoji, IconBack, IconCamera } from '../components/Icons';
 import { hasKey, t } from '../i18n';
 import { SafetyAck, hasAcceptedSafety } from '../components/legal';
@@ -579,8 +580,8 @@ export default function CaseDetailPage() {
           {reportPhotos[0] && (
             <div className="photo-hero" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 12 }}>
               {reportPhotos[0].url && !brokenPhotoIds.has(reportPhotos[0].id) ? (
-                <img
-                  src={reportPhotos[0].url}
+                <CasePhoto
+                  url={reportPhotos[0].url}
                   alt={caseData.description}
                   onError={() => markPhotoBroken(reportPhotos[0].id)}
                 />
@@ -596,7 +597,7 @@ export default function CaseDetailPage() {
             <div className="photo-grid" style={{ marginBottom: 12 }}>
               {reportPhotos.slice(1).map((p) =>
                 p.url && !brokenPhotoIds.has(p.id) ? (
-                  <img key={p.id} src={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
+                  <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
                 ) : (
                   <div key={p.id} className="photo-unavailable">
                     <span aria-hidden="true">🐾</span>
@@ -611,7 +612,7 @@ export default function CaseDetailPage() {
               <div className="photo-grid" style={{ marginBottom: 14 }}>
                 {deliveryPhotos.map((p) =>
                   p.url && !brokenPhotoIds.has(p.id) ? (
-                    <img key={p.id} src={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
+                    <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} />
                   ) : (
                     <div key={p.id} className="photo-unavailable">
                       <span aria-hidden="true">🐾</span>

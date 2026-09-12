@@ -17,6 +17,7 @@ import { timeAgo } from '../lib/time';
 import { distanceKm, formatDistance, type LatLng } from '../lib/geo';
 import { tierForXp, tierName } from '../lib/xp';
 import { animalEmoji, IconBell, IconChat, IconMap, IconPlus, IconUser } from './Icons';
+import { CasePhoto } from './CasePhoto';
 
 // ---------------------------------------------------------------------------
 // Status
@@ -117,8 +118,8 @@ export function CaseCard({
     >
       <div className={`case-card__photo${showPhoto ? '' : ' case-card__photo--empty'}`}>
         {showPhoto ? (
-          <img
-            src={photo!.url!}
+          <CasePhoto
+            url={photo!.url!}
             alt={`${caseData.animal} — ${statusLabel(caseData.status)}`}
             onError={() => setPhotoBroken(true)}
           />
