@@ -2540,6 +2540,25 @@ body::before {
   box-shadow: var(--shadow-lg);
 }
 
+.auth-card__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.auth-card__divider::before,
+.auth-card__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-hairline);
+}
+
+.auth-card .btn--ghost.auth-card__google {
+  border-radius: var(--radius-md);
+}
+
 .auth-card__terms {
   margin: 0;
   text-align: center;

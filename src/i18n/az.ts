@@ -135,6 +135,8 @@ export const az: Dict = {
   // Auth
   'auth.signIn': 'Daxil ol',
   'auth.signUp': 'Hesab yarat',
+  'auth.orDivider': 'və ya',
+  'auth.continueWithGoogle': 'Google ilə davam et',
   'auth.email': 'E-poçt',
   'auth.password': 'Şifrə',
   'auth.displayName': 'Adınız',
@@ -196,6 +198,10 @@ export const az: Dict = {
   'profile.setHome': 'Hazırkı yerimi ərazim kimi yadda saxla',
   'profile.homeSet': 'Ərazi yadda saxlanıldı',
   'profile.vetDashboard': 'Klinika paneli',
+  'profile.registerClinic': 'Klinikanızı qeydiyyatdan keçirin',
+  'profile.registerClinicConfirmTitle': 'Siz baytarlıq klinikasısınızmı?',
+  'profile.registerClinicConfirmBody': 'Bu, hesabınızı klinika hesabına dəyişəcək və tətbiqdən geri qaytarıla bilməz.',
+  'profile.registerClinicConfirmAction': 'Bəli, klinika hesabına keç',
   'profile.platformStats': 'PawLine indiyə qədər',
   'profile.install': 'Tam təcrübə üçün PawLine-ı əsas ekranınıza quraşdırın.',
 

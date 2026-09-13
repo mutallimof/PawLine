@@ -150,6 +150,41 @@ export function PlatformStats() {
 }
 
 // ---------------------------------------------------------------------------
+// Confirm modal — the styled .modal-overlay/.modal-sheet pattern SafetyAck
+// (components/legal.tsx) already uses for a "make sure before you commit"
+// gate, generalized to a plain title/body/confirm so other irreversible
+// one-tap actions (e.g. Profile's "Register your clinic") can use the same
+// look instead of a raw window.confirm.
+// ---------------------------------------------------------------------------
+
+export function ConfirmModal({
+  title,
+  body,
+  confirmLabel,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  body: string;
+  confirmLabel: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="modal-sheet">
+        <h2 className="modal-sheet__title">{title}</h2>
+        <p className="modal-sheet__intro">{body}</p>
+        <button className="btn btn--primary" onClick={onConfirm}>{confirmLabel}</button>
+        <button className="link-btn" onClick={onCancel} style={{ marginTop: 8, width: '100%' }}>
+          {t('common.cancel')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Case card (feed)
 // ---------------------------------------------------------------------------
 

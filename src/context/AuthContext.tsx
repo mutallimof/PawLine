@@ -55,6 +55,8 @@ interface AuthState {
   ) => Promise<{ needsEmailConfirm: boolean }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  /** Full-page redirect to Google; resolves before navigation only if it fails to start. */
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -180,6 +182,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
+  // Google users are never vets (handle_new_user defaults role to 'user'
+  // when raw_user_meta_data has no 'role' key, which OAuth identities never
+  // do), so there's no vet-setup-pending redirect to preserve here the way
+  // signIn/signUp's callers handle — landing at '/' is the whole story.
+  // detectSessionInUrl (supabase.ts) + the onAuthStateChange listener above
+  // pick up the session once Google redirects back; no separate callback
+  // route needed.
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) throw new Error(error.message);
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     if (!userId) return;
     try {
@@ -192,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile }}
+      value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile, signInWithGoogle }}
     >
       {children}
     </AuthContext.Provider>

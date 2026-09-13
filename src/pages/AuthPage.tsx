@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher, PasswordField, useToast } from '../components/ui';
+import { IconGoogle } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 
@@ -15,7 +16,7 @@ import { t } from '../i18n';
 const VET_SETUP_PENDING_KEY = 'pawline-vet-setup-pending-email';
 
 export default function AuthPage() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -86,6 +87,23 @@ export default function AuthPage() {
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
     } finally {
+      setBusy(false);
+    }
+  };
+
+  // Same button, same handler, for both sign-in and sign-up — Supabase
+  // resolves "new account or existing" transparently for OAuth, and a
+  // Google account is never a vet (handle_new_user defaults role to 'user'
+  // when there's no 'role' in raw_user_meta_data, which is always the case
+  // for OAuth identities), so there's no isVet branch to carry here. This
+  // redirects the whole page to Google; it only returns if that redirect
+  // itself failed to start.
+  const continueWithGoogle = async () => {
+    setBusy(true);
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
       setBusy(false);
     }
   };
@@ -197,6 +215,20 @@ export default function AuthPage() {
           disabled={busy || !email || !password}
         >
           {mode === 'signin' ? t('auth.signIn') : t('auth.signUp')}
+        </button>
+
+        <div className="auth-card__divider">
+          <span>{t('auth.orDivider')}</span>
+        </div>
+
+        <button
+          type="button"
+          className="btn btn--ghost auth-card__google"
+          onClick={() => void continueWithGoogle()}
+          disabled={busy}
+        >
+          <IconGoogle size={18} />
+          {t('auth.continueWithGoogle')}
         </button>
 
         {mode === 'signup' && (

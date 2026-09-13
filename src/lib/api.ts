@@ -1126,3 +1126,14 @@ export async function recordSafetyAck(): Promise<void> {
   const { error } = await supabase.rpc('record_safety_ack');
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Second on-ramp to role='vet' (migration 025) — the signup toggle is the
+ * first. No-op if already a vet (or on a guest session with no profile
+ * row); the server re-derives the caller from auth.uid() and hardcodes the
+ * target role, so this call carries no arguments at all.
+ */
+export async function becomeVet(): Promise<void> {
+  const { error } = await supabase.rpc('become_vet');
+  if (error) throw new Error(error.message);
+}
