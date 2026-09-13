@@ -38,7 +38,7 @@ import {
   watchCase,
 } from '../lib/api';
 import { CaseLocationMap, EnRouteMap } from '../components/maps';
-import { Avatar, PawTrail, StatusBadge, useToast } from '../components/ui';
+import { Avatar, PawTrail, StatusBadge, UrgencyBadge, useToast } from '../components/ui';
 import { ReportButton } from '../components/Report';
 import { CasePhoto } from '../components/CasePhoto';
 import { animalEmoji, IconBack, IconCamera } from '../components/Icons';
@@ -246,6 +246,7 @@ export default function CaseDetailPage() {
             {animalEmoji(caseData.animal)} {t(`animal.${caseData.animal}` as const)}
           </h1>
           <StatusBadge status={caseData.status} />
+          <UrgencyBadge level={caseData.urgency} />
         </div>
         <p className="page-subtitle" style={{ marginBottom: 6 }}>
           {t('case.reportedBy', {

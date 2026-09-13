@@ -1,7 +1,7 @@
 /** Shared UI building blocks. */
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import type { CaseStatus, CaseWithDetails, Profile } from '../lib/types';
+import type { CaseStatus, CaseWithDetails, Profile, UrgencyLevel } from '../lib/types';
 import {
   getLocale,
   LOCALE_NAMES,
@@ -52,6 +52,31 @@ export function StatusBadge({
     >
       <span className={`status-dot${live ? ' status-dot--pulse' : ''}`} />
       {statusLabel(status)}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Urgency (migration 022) — purely descriptive, reporter-picked at report
+// time. A separate scale from CaseStatus above: this is "how urgent did
+// the reporter say it is", not "what stage is this case at".
+// ---------------------------------------------------------------------------
+
+export const URGENCY_COLOR: Record<UrgencyLevel, string> = {
+  low: 'var(--urgency-low)',
+  medium: 'var(--urgency-medium)',
+  high: 'var(--urgency-high)',
+  critical: 'var(--urgency-critical)',
+};
+
+export function urgencyLabel(level: UrgencyLevel): string {
+  return t(`urgency.${level}` as const);
+}
+
+export function UrgencyBadge({ level }: { level: UrgencyLevel }) {
+  return (
+    <span className="urgency-badge" style={{ background: URGENCY_COLOR[level] }}>
+      {urgencyLabel(level)}
     </span>
   );
 }
@@ -169,6 +194,7 @@ export function CaseCard({
       <div className="case-card__body">
         <div className="case-card__meta">
           <StatusBadge status={caseData.status} />
+          <UrgencyBadge level={caseData.urgency} />
           <span>{animalEmoji(caseData.animal)} {t(`animal.${caseData.animal}` as const)}</span>
         </div>
         <p className="case-card__desc">{caseData.description}</p>

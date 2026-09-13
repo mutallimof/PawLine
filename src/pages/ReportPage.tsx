@@ -11,8 +11,8 @@ import { PinDropMap } from '../components/maps';
 import { useToast } from '../components/ui';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
-import type { AnimalType, InjuryType, SpotType } from '../lib/types';
-import { INJURY_TYPES, SPOT_TYPES } from '../lib/types';
+import type { AnimalType, InjuryType, SpotType, UrgencyLevel } from '../lib/types';
+import { INJURY_TYPES, SPOT_TYPES, URGENCY_LEVELS } from '../lib/types';
 import { animalEmoji, IconCamera } from '../components/Icons';
 
 export default function ReportPage() {
@@ -29,6 +29,10 @@ export default function ReportPage() {
   const [addressHint, setAddressHint] = useState('');
   const [injuryType, setInjuryType] = useState<InjuryType | null>(null);
   const [spotType, setSpotType] = useState<SpotType | null>(null);
+  // Defaults to 'medium', not null — unlike injury/spot, urgency always
+  // has some value; pre-selecting saves a mandatory tap while staying
+  // adjustable.
+  const [urgency, setUrgency] = useState<UrgencyLevel>('medium');
   const [guestName, setGuestName] = useState('');
   const [location, setLocation] = useState<LatLng>(DEFAULT_CENTER);
   // Audit P2: DEFAULT_CENTER is a plausible-looking wrong location. Track
@@ -111,6 +115,7 @@ export default function ReportPage() {
       reporterId: user?.id ?? null,
       injuryType,
       spotType,
+      urgency,
       photos: photos.map((p) => p.file),
     };
 
@@ -206,6 +211,21 @@ export default function ReportPage() {
             onClick={() => setAnimal(a)}
           >
             {animalEmoji(a)} {t(`animal.${a}` as const)}
+          </button>
+        ))}
+      </div>
+
+      {/* Urgency */}
+      <span className="field__label">{t('report.urgencyLabel')}</span>
+      <div className="chip-row" style={{ marginBottom: 16 }}>
+        {URGENCY_LEVELS.map((u) => (
+          <button
+            key={u}
+            type="button"
+            className={`chip chip--urgency-${u}${urgency === u ? ' active' : ''}`}
+            onClick={() => setUrgency(u)}
+          >
+            {t(`urgency.${u}` as const)}
           </button>
         ))}
       </div>

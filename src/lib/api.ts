@@ -189,6 +189,7 @@ export interface NewCaseInput {
   reporterId: string | null;
   injuryType: import('./types').InjuryType | null;
   spotType: import('./types').SpotType | null;
+  urgency: import('./types').UrgencyLevel;
   photos: File[];
 }
 
@@ -233,6 +234,7 @@ export async function createCase(input: NewCaseInput): Promise<string> {
       address_hint: input.addressHint,
       injury_type: input.injuryType,
       spot_type: input.spotType,
+      urgency: input.urgency,
       guest_name: input.guestName,
       reporter_id: input.reporterId,
     })

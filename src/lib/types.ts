@@ -136,6 +136,7 @@ export interface RescueCase {
   closed_reason: 'community' | 'expired' | null;
   injury_type: InjuryType | null;
   spot_type: SpotType | null;
+  urgency: UrgencyLevel;
   created_at: string;
   accepted_at: string | null;
   resolved_at: string | null;
@@ -145,6 +146,10 @@ export type InjuryType = 'limping' | 'bleeding' | 'hit_by_car' | 'weak' | 'skin'
 export type SpotType = 'street' | 'park' | 'dumpster' | 'building' | 'courtyard' | 'roadside';
 export const INJURY_TYPES: InjuryType[] = ['limping','bleeding','hit_by_car','weak','skin','trapped','unknown'];
 export const SPOT_TYPES: SpotType[] = ['street','park','dumpster','building','courtyard','roadside'];
+
+/** Migration 022 — purely descriptive, reporter-picked. Default 'medium'. */
+export type UrgencyLevel = 'low' | 'medium' | 'high' | 'critical';
+export const URGENCY_LEVELS: UrgencyLevel[] = ['low', 'medium', 'high', 'critical'];
 
 /** A case joined with the bits the UI always needs. */
 export interface CaseWithDetails extends RescueCase {

@@ -23,6 +23,15 @@
   --status-enroute: #3f7fae;     /* moving — calm blue */
   --status-resolved: #3f9b6c;    /* safe — green */
 
+  /* Urgency colors (migration 022) — a separate ramp from status above, on
+     purpose: urgency and pipeline stage appear side by side on the same
+     card, and reusing --status-* for both would conflate "what stage is
+     this case at" with "how urgent did the reporter say it is". */
+  --urgency-low: #6b9b6e;        /* calm sage green */
+  --urgency-medium: #e0a526;     /* amber */
+  --urgency-high: #e0672c;       /* orange */
+  --urgency-critical: #c22a1f;   /* alarming deep red */
+
   /* Type — Fraunces is the *voice* (the hand), Noto Sans does the work.
      Direction A: low optical-size + heavy weights give Fraunces its warm,
      slightly-wonky, hand-cut character instead of a cold geometric serif. */
@@ -1864,6 +1873,29 @@ body {
 }
 .chip-row .chip.active {
   background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep);
+}
+
+/* Urgency selector chips tint to their own level color when picked, rather
+   than the generic coral active state — same colors as .urgency-badge.
+   Prefixed with .chip-row to match (not lose to) .chip-row .chip.active
+   above on specificity. */
+.chip-row .chip--urgency-low.active { background: #eaf2e9; border-color: var(--urgency-low); color: var(--urgency-low); }
+.chip-row .chip--urgency-medium.active { background: #fbf1de; border-color: var(--urgency-medium); color: #9c7217; }
+.chip-row .chip--urgency-high.active { background: #fbe6da; border-color: var(--urgency-high); color: var(--urgency-high); }
+.chip-row .chip--urgency-critical.active { background: #fadedb; border-color: var(--urgency-critical); color: var(--urgency-critical); }
+
+/* Urgency badge — feed card + case detail, same shape as .status-badge
+   minus the pulsing dot (urgency isn't "live" the way pipeline status is). */
+.urgency-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 11px;
+  text-transform: uppercase;
 }
 
 /* Legal / long-form doc pages */
