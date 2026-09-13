@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../lib/api';
 import { disablePush, enablePush, getPushSubscription, pushSupported } from '../lib/push';
 import { supabase } from '../lib/supabase';
-import { Avatar, CaseCard, LanguageSwitcher, TierBadge, useToast } from '../components/ui';
+import { Avatar, CaseCard, LanguageSwitcher, PlatformStats, TierBadge, useToast } from '../components/ui';
 import { VetVisibilityNotice } from './vetAndUserPages';
 import { tierForXp, tierName } from '../lib/xp';
 import { getCurrentPosition } from '../lib/geo';
@@ -136,6 +136,8 @@ export default function ProfilePage() {
           {t('profile.level')}: {tierName(tier)}
         </span>
       </div>
+
+      <PlatformStats />
 
       {/* Vet entry points */}
       {profile.role === 'vet' && (

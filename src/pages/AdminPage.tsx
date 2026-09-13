@@ -37,18 +37,26 @@ import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
 import type { ContentReport, Profile, Sponsor, Vet, VetDocument } from '../lib/types';
 
-/** C1: a pending vet's uploaded verification documents — private bucket, so
- * each is only ever viewed via a short-lived signed URL, fetched on click. */
-function VetDocumentsList({ vetId }: { vetId: string }) {
+/**
+ * C1: a pending vet's uploaded verification documents — private bucket, so
+ * each is only ever viewed via a short-lived signed URL, fetched on click.
+ * Reports its document count up to the parent via onCount, so the approve
+ * button can warn when a clinic has none.
+ */
+function VetDocumentsList({ vetId, onCount }: { vetId: string; onCount: (n: number) => void }) {
   const [docs, setDocs] = useState<VetDocument[]>([]);
   const [loaded, setLoaded] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
     fetchVetDocuments(vetId)
-      .then(setDocs)
+      .then((d) => {
+        setDocs(d);
+        onCount(d.length);
+      })
       .catch(() => {})
       .finally(() => setLoaded(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vetId]);
 
   if (!loaded) return null;
@@ -84,6 +92,9 @@ export default function AdminPage() {
   const { profile } = useAuth();
   const [tab, setTab] = useState<Tab>('stats');
   const [pendingVets, setPendingVets] = useState<Vet[]>([]);
+  // Document count per pending vet, reported up by VetDocumentsList — gates
+  // the approve-with-no-documents warning (C1 follow-up).
+  const [vetDocCounts, setVetDocCounts] = useState<Record<string, number>>({});
   const [reports, setReports] = useState<ContentReport[]>([]);
   const [flagged, setFlagged] = useState<ReportedAccount[]>([]);
   const [flagWindow, setFlagWindow] = useState(7);
@@ -228,12 +239,23 @@ export default function AdminPage() {
                   {v.accepted_animals.map((a) => t(`animal.${a}` as const)).join(', ')}
                 </div>
               )}
-              <VetDocumentsList vetId={v.id} />
+              <VetDocumentsList
+                vetId={v.id}
+                onCount={(n) => setVetDocCounts((prev) => ({ ...prev, [v.id]: n }))}
+              />
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <button
                   className="btn btn--success btn--small"
                   disabled={busy}
-                  onClick={run(() => adminSetVetStatus(v.id, 'approved'))}
+                  onClick={run(() => {
+                    if (
+                      !vetDocCounts[v.id] &&
+                      !window.confirm(t('admin.vetApproveNoDocsConfirm', { name: v.clinic_name }))
+                    ) {
+                      return Promise.resolve();
+                    }
+                    return adminSetVetStatus(v.id, 'approved');
+                  })}
                 >
                   ✓ {t('admin.approve')}
                 </button>

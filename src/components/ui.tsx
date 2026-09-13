@@ -1,5 +1,5 @@
 /** Shared UI building blocks. */
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import type { CaseStatus, CaseWithDetails, Profile } from '../lib/types';
 import {
@@ -10,7 +10,7 @@ import {
   t,
   type LocaleCode,
 } from '../i18n';
-import { updateProfile } from '../lib/api';
+import { fetchPublicImpact, updateProfile, type PublicImpact } from '../lib/api';
 import { IconEye, IconEyeOff } from './Icons';
 import { useAuth } from '../context/AuthContext';
 import { timeAgo } from '../lib/time';
@@ -82,6 +82,45 @@ export function TierBadge({ xp }: { xp: number }) {
     <span className="tier-badge" style={{ background: tier.color }}>
       ★ {tierName(tier)}
     </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Platform stats — the three headline numbers from the public /impact page
+// (total helped, active rescuers, verified clinics), sized for a profile
+// section rather than the full showcase. Self-contained: fetches and
+// renders its own data, so a page just drops in <PlatformStats />.
+// ---------------------------------------------------------------------------
+
+export function PlatformStats() {
+  const [impact, setImpact] = useState<PublicImpact | null>(null);
+
+  useEffect(() => {
+    fetchPublicImpact().then(setImpact).catch(() => {});
+  }, []);
+
+  if (!impact) return null;
+
+  return (
+    <>
+      <div className="section-label">{t('profile.platformStats')}</div>
+      <div className="card" style={{ padding: 14, marginBottom: 14 }}>
+        <div className="platform-stats">
+          <div className="platform-stats__item">
+            <div className="platform-stats__value">{impact.helped_total}</div>
+            <div className="platform-stats__label">{t('impact.helpedTotal')}</div>
+          </div>
+          <div className="platform-stats__item">
+            <div className="platform-stats__value">{impact.rescuers_30d}</div>
+            <div className="platform-stats__label">{t('impact.rescuers')}</div>
+          </div>
+          <div className="platform-stats__item">
+            <div className="platform-stats__value">{impact.clinics}</div>
+            <div className="platform-stats__label">{t('impact.clinics')}</div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 

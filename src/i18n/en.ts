@@ -192,6 +192,7 @@ export const en = {
   'profile.setHome': 'Use current location as my area',
   'profile.homeSet': 'Area saved',
   'profile.vetDashboard': 'Clinic dashboard',
+  'profile.platformStats': 'PawLine so far',
   'profile.install': 'Install PawLine on your home screen for the full experience.',
 
   // Vet dashboard
@@ -293,6 +294,7 @@ export const en = {
   'admin.vetDocuments': 'Documents',
   'admin.vetNoDocuments': 'No documents uploaded.',
   'admin.vetManager': 'Manager contact',
+  'admin.vetApproveNoDocsConfirm': '{name} has no verification documents uploaded. Approve anyway?',
   'admin.banUser': 'Ban user',
   'admin.dismiss': 'Dismiss',
   'admin.none': 'Nothing waiting. 🎉',

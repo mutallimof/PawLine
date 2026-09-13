@@ -2168,6 +2168,31 @@ body {
   opacity: 0.8;
 }
 
+/* ---- Platform stats (ProfilePage) — the three /impact headline numbers,
+   condensed into a profile section. Its own tiles, not a reuse of
+   .impact-stat above (that class ships with no base layout/label rule of
+   its own to build on). ---- */
+.platform-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  text-align: center;
+}
+.platform-stats__value {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-variation-settings: var(--fraunces-soft);
+  font-size: clamp(20px, 6vw, 28px);
+  line-height: 1.1;
+  color: var(--coral);
+}
+.platform-stats__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
 
 /* ---- Onboarding in Direction A ---- */
 .onboarding__icon .ink-scene { color: var(--coral-deep); opacity: 0.92; }

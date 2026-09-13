@@ -194,6 +194,7 @@ export const ru: Dict = {
   'profile.setHome': 'Использовать текущее местоположение как мой район',
   'profile.homeSet': 'Район сохранён',
   'profile.vetDashboard': 'Панель клиники',
+  'profile.platformStats': 'PawLine на сегодня',
   'profile.install': 'Установите PawLine на главный экран для полного удобства.',
 
   // Vet dashboard
@@ -295,6 +296,7 @@ export const ru: Dict = {
   'admin.vetDocuments': 'Документы',
   'admin.vetNoDocuments': 'Документы не загружены.',
   'admin.vetManager': 'Контакт ответственного лица',
+  'admin.vetApproveNoDocsConfirm': 'У клиники «{name}» нет загруженных документов для проверки. Всё равно одобрить?',
   'admin.banUser': 'Заблокировать пользователя',
   'admin.dismiss': 'Отклонить',
   'admin.none': 'Ничего в ожидании. 🎉',

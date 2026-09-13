@@ -194,6 +194,7 @@ export const az: Dict = {
   'profile.setHome': 'Hazırkı yerimi ərazim kimi yadda saxla',
   'profile.homeSet': 'Ərazi yadda saxlanıldı',
   'profile.vetDashboard': 'Klinika paneli',
+  'profile.platformStats': 'PawLine indiyə qədər',
   'profile.install': 'Tam təcrübə üçün PawLine-ı əsas ekranınıza quraşdırın.',
 
   // Vet dashboard
@@ -295,6 +296,7 @@ export const az: Dict = {
   'admin.vetDocuments': 'Sənədlər',
   'admin.vetNoDocuments': 'Sənəd yüklənməyib.',
   'admin.vetManager': 'Məsul şəxsin əlaqəsi',
+  'admin.vetApproveNoDocsConfirm': '{name} üçün heç bir doğrulama sənədi yüklənməyib. Yenə də təsdiqlənsin?',
   'admin.banUser': 'İstifadəçini blokla',
   'admin.dismiss': 'İmtina et',
   'admin.none': 'Gözləyən heç nə yoxdur. 🎉',

@@ -194,6 +194,7 @@ export const tr: Dict = {
   'profile.setHome': 'Mevcut konumumu bölgem olarak kaydet',
   'profile.homeSet': 'Bölge kaydedildi',
   'profile.vetDashboard': 'Klinik paneli',
+  'profile.platformStats': 'Şu ana kadar PawLine',
   'profile.install': 'Tam deneyim için PawLine’ı ana ekranınıza ekleyin.',
 
   // Vet dashboard
@@ -295,6 +296,7 @@ export const tr: Dict = {
   'admin.vetDocuments': 'Belgeler',
   'admin.vetNoDocuments': 'Belge yüklenmedi.',
   'admin.vetManager': 'Yetkili iletişim',
+  'admin.vetApproveNoDocsConfirm': '{name} için yüklenmiş doğrulama belgesi yok. Yine de onaylansın mı?',
   'admin.banUser': 'Kullanıcıyı yasakla',
   'admin.dismiss': 'Yok say',
   'admin.none': 'Bekleyen bir şey yok. 🎉',
