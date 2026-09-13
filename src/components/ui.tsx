@@ -86,10 +86,10 @@ export function TierBadge({ xp }: { xp: number }) {
 }
 
 // ---------------------------------------------------------------------------
-// Platform stats — the three headline numbers from the public /impact page
-// (total helped, active rescuers, verified clinics), sized for a profile
-// section rather than the full showcase. Self-contained: fetches and
-// renders its own data, so a page just drops in <PlatformStats />.
+// Platform stats — total helped, active rescuers, verified clinics — via
+// the same public, no-PII get_public_impact() RPC the old standalone
+// /impact page used before it was folded into Profile. Self-contained:
+// fetches and renders its own data, so a page just drops in <PlatformStats />.
 // ---------------------------------------------------------------------------
 
 export function PlatformStats() {
@@ -292,9 +292,6 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
       <NavLink to="/alerts" className={({ isActive }) => item(isActive)}>
         <IconBell /> {t('nav.alerts')}
         {unreadAlerts > 0 && <span className="nav-badge">{Math.min(unreadAlerts, 99)}</span>}
-      </NavLink>
-      <NavLink to="/impact" className={({ isActive }) => item(isActive)}>
-        <span className="side-nav__emoji">💚</span> {t('impact.title')}
       </NavLink>
       <NavLink to="/profile" className={({ isActive }) => item(isActive)}>
         <IconUser /> {t('nav.profile')}

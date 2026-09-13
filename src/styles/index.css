@@ -2125,25 +2125,11 @@ body {
 }
 
 
-/* ---- Impact page: the showcase (Direction A) ---- */
-.impact-hero { text-align: center; padding: 8px 0 6px; }
-.impact-hero .ink-scene { color: var(--coral-deep); opacity: 0.92; }
-.impact-hero__title { font-size: 30px; margin: 6px 0 4px; }
-.impact-hero__sub { max-width: 40ch; margin: 0 auto; }
-
+/* ---- impact-* stat tiles: still used by AdminPage's Stats tab (the
+   /impact page these were originally built for is gone — folded into
+   ProfilePage's .platform-stats below). Hero/divider/page-chrome rules
+   that only that page used were removed with it. ---- */
 .impact-grid { margin-top: 8px; }
-.impact-stat--hero {
-  grid-column: 1 / -1;
-  position: relative;
-  background: linear-gradient(180deg, #fff6ee 0%, #fdeee3 100%);
-  border: 1px solid #f4dccb;
-  border-radius: 26px 18px 28px 16px;   /* hand-placed */
-  box-shadow: var(--depth-card);
-  padding: 24px 18px 20px;
-  overflow: hidden;
-  transform: rotate(-0.35deg);
-}
-.impact-stat--hero .impact-stat__paw { color: var(--coral); margin-bottom: 2px; }
 .impact-stat__value--big {
   font-family: var(--font-display);
   font-weight: 900;   /* the heavy end — Direction A's punch */
@@ -2160,13 +2146,6 @@ body {
   letter-spacing: -0.02em;
 }
 .impact-stat:nth-child(even) { transform: rotate(0.4deg); }
-.impact-divider {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: center;
-  padding: 6px 0 2px;
-  opacity: 0.8;
-}
 
 /* ---- Platform stats (ProfilePage) — the three /impact headline numbers,
    condensed into a profile section. Its own tiles, not a reuse of

@@ -26,7 +26,6 @@ import DmThreadPage from './pages/DmThreadPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AuthPage from './pages/AuthPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import ImpactPage from './pages/ImpactPage';
 import VetsPage from './pages/VetsPage';
 import AdminPage from './pages/AdminPage';
 import { PrivacyPage } from './components/extras';
@@ -137,7 +136,6 @@ function Shell() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/impact" element={<ImpactPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
         </ErrorBoundary>

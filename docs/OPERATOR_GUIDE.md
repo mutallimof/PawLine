@@ -154,7 +154,8 @@ your bill.
    its case from the other account → a push notification arrives. ✅
 7. Airplane mode → try to report → "saved, will send when online" → turn
    the network back on → it submits itself. ✅
-8. Visit `/impact` → public numbers page loads. ✅
+8. Sign in → Profile → the "PawLine so far" section loads its three
+   platform-wide numbers. ✅
 
 If any step fails: the matching section of `docs/DEPLOYMENT.md` has the
 technical detail, and the error message + step number is exactly what to
