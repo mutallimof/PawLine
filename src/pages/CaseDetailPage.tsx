@@ -474,11 +474,21 @@ export default function CaseDetailPage() {
           </>
         )}
 
-        {/* Rescuer: choose a vet */}
+        {/* Rescuer: choose a vet — reworded when we're back here because the
+            last vet declined (events is ascending, so the tail is latest),
+            so the rescuer can tell that happened instead of seeing the same
+            first-pick CTA. */}
         {isRescuer && caseData.status === 'accepted' && (
-          <Link to={`/case/${caseData.id}/vets`} className="btn btn--primary">
-            🏥 {t('case.chooseVet')}
-          </Link>
+          <>
+            {events[events.length - 1]?.type === 'vet_declined' && (
+              <div className="banner banner--warn">{t('event.vet_declined')}</div>
+            )}
+            <Link to={`/case/${caseData.id}/vets`} className="btn btn--primary">
+              🏥 {events[events.length - 1]?.type === 'vet_declined'
+                ? t('case.chooseAnotherVet')
+                : t('case.chooseVet')}
+            </Link>
+          </>
         )}
 
         {/* Rescuer: waiting for vet confirmation */}

@@ -81,6 +81,7 @@ export const tr: Dict = {
   'case.drop': 'Bu vakayı bırak',
   'case.dropConfirm': 'Bu vaka bırakılsın mı? Diğer kurtarıcılara yeniden açılacak.',
   'case.chooseVet': 'Veteriner seç',
+  'case.chooseAnotherVet': 'Başka bir veteriner seç',
   'case.waitingVet': '{clinic} onayı bekleniyor…',
   'case.pickAnotherVet': 'Başka veteriner seç',
   'case.depart': 'Yola çıkıyorum',

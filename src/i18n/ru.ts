@@ -81,6 +81,7 @@ export const ru: Dict = {
   'case.drop': 'Отказаться от случая',
   'case.dropConfirm': 'Отказаться от этого случая? Он снова станет доступен другим спасателям.',
   'case.chooseVet': 'Выбрать клинику',
+  'case.chooseAnotherVet': 'Выбрать другую клинику',
   'case.waitingVet': 'Ожидание подтверждения от «{clinic}»…',
   'case.pickAnotherVet': 'Выбрать другую клинику',
   'case.depart': 'Я в пути',

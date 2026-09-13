@@ -81,6 +81,7 @@ export const az: Dict = {
   'case.drop': 'Bu hadisədən imtina et',
   'case.dropConfirm': 'Bu hadisədən imtina edilsin? Digər xilasedicilər üçün yenidən açılacaq.',
   'case.chooseVet': 'Baytar seç',
+  'case.chooseAnotherVet': 'Başqa baytar seç',
   'case.waitingVet': '{clinic} klinikasının təsdiqi gözlənilir…',
   'case.pickAnotherVet': 'Başqa baytar seç',
   'case.depart': 'Yola düşürəm',

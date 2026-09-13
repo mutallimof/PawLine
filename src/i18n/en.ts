@@ -79,6 +79,7 @@ export const en = {
   'case.drop': 'Drop this case',
   'case.dropConfirm': 'Drop this case? It will reopen for other rescuers.',
   'case.chooseVet': 'Choose a vet',
+  'case.chooseAnotherVet': 'Choose another vet',
   'case.waitingVet': 'Waiting for {clinic} to confirm…',
   'case.pickAnotherVet': 'Pick another vet',
   'case.depart': 'I’m on my way',
