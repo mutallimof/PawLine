@@ -2,7 +2,9 @@
  * Leveling / tier system (presentation layer).
  *
  * The raw XP number is truth and lives in the database (awarded by the
- * award_xp trigger when a case resolves: rescuer +50, vet +30, reporter +10).
+ * award_xp trigger when a case resolves: rescuer +10, reporter +5 — only if
+ * the case isn't hidden. No vet XP; vets are rated by stars, see
+ * VetRating/vets_public.rating_avg instead. Migration 023.)
  * Tier names and thresholds are presentation and live here, so they can be
  * tuned without a migration.
  */
@@ -17,8 +19,8 @@ export interface Tier {
 export const TIERS: Tier[] = [
   { key: 'bronze', minXp: 0, color: '#B0754B' },
   { key: 'silver', minXp: 150, color: '#8C97A6' },
-  { key: 'gold', minXp: 400, color: '#D9A035' },
-  { key: 'platinum', minXp: 1000, color: '#5D7B8A' },
+  { key: 'gold', minXp: 350, color: '#D9A035' },
+  { key: 'platinum', minXp: 650, color: '#5D7B8A' },
 ];
 
 export interface TierProgress {

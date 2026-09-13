@@ -17,11 +17,15 @@ import {
   adminSetPartner,
   fetchAdminStats,
   fetchReportedAccounts,
+  fetchHiddenRatioAccounts,
+  fetchHighVolumeReporters,
   fetchVetDocuments,
   getVetDocumentUrl,
   searchProfiles,
   type AdminStats,
   type ReportedAccount,
+  type HiddenRatioAccount,
+  type HighVolumeReporter,
   adminDeleteSponsor,
   adminHideCase,
   adminHideCaseMessage,
@@ -98,6 +102,10 @@ export default function AdminPage() {
   const [reports, setReports] = useState<ContentReport[]>([]);
   const [flagged, setFlagged] = useState<ReportedAccount[]>([]);
   const [flagWindow, setFlagWindow] = useState(7);
+  // Migration 023 — review-only signals, surfaced next to the report-count
+  // list above. Neither ever calls adminFlagAccount itself.
+  const [hiddenRatio, setHiddenRatio] = useState<HiddenRatioAccount[]>([]);
+  const [highVolume, setHighVolume] = useState<HighVolumeReporter[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
   // Partner badge management
@@ -115,18 +123,22 @@ export default function AdminPage() {
 
   const reload = useCallback(async () => {
     try {
-      const [v, r, fl, s, st] = await Promise.all([
+      const [v, r, fl, s, st, hr, hv] = await Promise.all([
         fetchPendingVets(),
         fetchOpenReports(),
         fetchReportedAccounts(flagWindow),
         fetchSponsors(),
         fetchAdminStats(),
+        fetchHiddenRatioAccounts(),
+        fetchHighVolumeReporters(),
       ]);
       setPendingVets(v);
       setReports(r);
       setFlagged(fl);
       setSponsors(s);
       setStats(st);
+      setHiddenRatio(hr);
+      setHighVolume(hv);
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
     }
@@ -384,6 +396,66 @@ export default function AdminPage() {
               </div>
               <div className="list-row__sub">
                 {timeAgo(a.first_report_at)} → {timeAgo(a.last_report_at)}
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <Link to={`/user/${a.profile_id}`} className="btn btn--ghost btn--small">
+                  {t('admin.viewProfile')}
+                </Link>
+                <button
+                  className="btn btn--danger btn--small"
+                  disabled={busy}
+                  onClick={() => {
+                    if (!window.confirm(t('admin.flagConfirm', { name: a.display_name }))) return;
+                    void run(() => adminFlagAccount(a.profile_id))();
+                  }}
+                >
+                  {t('admin.flagAction')}
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Migration 023 — review-only signals. Same shape/action as the
+              report-count list above; neither list here auto-bans. */}
+          <div className="section-label">{t('admin.hiddenRatioTitle')}</div>
+          <p className="page-subtitle" style={{ marginTop: -4 }}>{t('admin.hiddenRatioSub')}</p>
+          {hiddenRatio.length === 0 && <div className="empty-state">{t('admin.none')}</div>}
+          {hiddenRatio.map((a) => (
+            <div key={a.profile_id} className="card" style={{ padding: 14, marginBottom: 12 }}>
+              <div className="list-row__title">{a.display_name}</div>
+              <div className="list-row__sub">
+                {t('admin.hiddenRatioCounts', {
+                  pct: Math.round(a.hidden_ratio * 100),
+                  hidden: a.hidden_cases,
+                  total: a.total_cases,
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <Link to={`/user/${a.profile_id}`} className="btn btn--ghost btn--small">
+                  {t('admin.viewProfile')}
+                </Link>
+                <button
+                  className="btn btn--danger btn--small"
+                  disabled={busy}
+                  onClick={() => {
+                    if (!window.confirm(t('admin.flagConfirm', { name: a.display_name }))) return;
+                    void run(() => adminFlagAccount(a.profile_id))();
+                  }}
+                >
+                  {t('admin.flagAction')}
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <div className="section-label">{t('admin.highVolumeTitle')}</div>
+          <p className="page-subtitle" style={{ marginTop: -4 }}>{t('admin.highVolumeSub')}</p>
+          {highVolume.length === 0 && <div className="empty-state">{t('admin.none')}</div>}
+          {highVolume.map((a) => (
+            <div key={a.profile_id} className="card" style={{ padding: 14, marginBottom: 12 }}>
+              <div className="list-row__title">{a.display_name}</div>
+              <div className="list-row__sub">
+                {t('admin.highVolumeCounts', { hour: a.cases_1h, day: a.cases_24h })}
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <Link to={`/user/${a.profile_id}`} className="btn btn--ghost btn--small">

@@ -921,6 +921,53 @@ export const adminFlagAccount = (profileId: string) =>
   rpc('admin_flag_account', { p_profile: profileId });
 
 // ---------------------------------------------------------------------------
+// Abuse-signal review lists (migration 023) — surface-only, never auto-ban.
+// The admin reviews these and presses adminFlagAccount() manually, same as
+// ReportedAccount above.
+// ---------------------------------------------------------------------------
+
+export interface HiddenRatioAccount {
+  profile_id: string;
+  display_name: string;
+  total_cases: number;
+  hidden_cases: number;
+  hidden_ratio: number;
+}
+
+/** Accounts whose own reports get hidden unusually often (min case floor avoids 1-of-1). */
+export async function fetchHiddenRatioAccounts(
+  minCases = 3,
+  minRatio = 0.5,
+): Promise<HiddenRatioAccount[]> {
+  const { data, error } = await supabase.rpc('admin_hidden_ratio_accounts', {
+    p_min_cases: minCases,
+    p_min_ratio: minRatio,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as HiddenRatioAccount[];
+}
+
+export interface HighVolumeReporter {
+  profile_id: string;
+  display_name: string;
+  cases_1h: number;
+  cases_24h: number;
+}
+
+/** Accounts currently at/above the case-creation rate-limit windows (021) — visibility, not a new block. */
+export async function fetchHighVolumeReporters(
+  hourThreshold = 4,
+  dayThreshold = 7,
+): Promise<HighVolumeReporter[]> {
+  const { data, error } = await supabase.rpc('admin_high_volume_reporters', {
+    p_hour_threshold: hourThreshold,
+    p_day_threshold: dayThreshold,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as HighVolumeReporter[];
+}
+
+// ---------------------------------------------------------------------------
 // Duplicate flags
 // ---------------------------------------------------------------------------
 
