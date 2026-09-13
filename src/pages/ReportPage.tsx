@@ -5,13 +5,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createCase, openVetsNear } from '../lib/api';
+import { createCase, fetchCases, openVetsNear } from '../lib/api';
 import { isNetworkError, queueReport } from '../lib/offlineQueue';
 import { PinDropMap } from '../components/maps';
 import { useToast } from '../components/ui';
-import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
+import { DEFAULT_CENTER, distanceKm, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
-import type { AnimalType, InjuryType, SpotType, UrgencyLevel } from '../lib/types';
+import type { AnimalType, CaseWithDetails, InjuryType, SpotType, UrgencyLevel } from '../lib/types';
 import { INJURY_TYPES, SPOT_TYPES, URGENCY_LEVELS } from '../lib/types';
 import { animalEmoji, IconCamera } from '../components/Icons';
 
@@ -68,6 +68,11 @@ export default function ReportPage() {
     setLocationTouched(true);
   };
   const [submitting, setSubmitting] = useState(false);
+  // Proximity warning (advisory only — see submit()/finalize() below): an
+  // open case found within ~50m of this report's location, shown once,
+  // right before the report is sent. Neither of its two buttons skips
+  // creating this report; they only change where the reporter lands after.
+  const [nearbyCase, setNearbyCase] = useState<CaseWithDetails | null>(null);
 
   // Center the pin on the reporter's location as soon as the page opens —
   // in the field, the reporter is almost always standing next to the animal.
@@ -105,6 +110,36 @@ export default function ReportPage() {
     // Audit P2: don't let a never-touched default pin ship silently.
     if (!locationTouched && !window.confirm(t('report.confirmDefaultLoc'))) return;
 
+    // Proximity warning — advisory only, never a gate. Reuses the exact
+    // client-side fetch-then-distanceKm-filter pattern HomePage's own
+    // radius filter already uses (fetchCases() + distanceKm()), rather
+    // than a new DB function — a ~50m check doesn't need one. Skipped
+    // outright when offline, same as the rest of this online-only path;
+    // any failure here (network blip) must never block the actual report.
+    if (navigator.onLine) {
+      try {
+        const cases = await fetchCases();
+        const nearby = cases.find(
+          (c) => c.status === 'open' && distanceKm(location, { lat: c.lat, lng: c.lng }) <= 0.05
+        );
+        if (nearby) {
+          setNearbyCase(nearby);
+          return; // paused — the modal's two buttons both call finalize()
+        }
+      } catch {
+        // Couldn't check — fall through and report anyway.
+      }
+    }
+
+    await finalize();
+  };
+
+  // Actually creates the report. `existingCaseId`, when set (the "it's the
+  // same one" path), only changes where we navigate afterward — the report
+  // itself is created either way, so a reporter who was right to flag it
+  // still has a durable record, and one who was wrong hasn't lost anything.
+  const finalize = async (existingCaseId?: string) => {
+    setNearbyCase(null);
     const input = {
       animal,
       description: description.trim(),
@@ -134,7 +169,7 @@ export default function ReportPage() {
       const caseId = await createCase(input);
       photos.forEach((p) => URL.revokeObjectURL(p.url));
       toast(t('report.success'));
-      navigate(`/case/${caseId}`);
+      navigate(`/case/${existingCaseId ?? caseId}`);
     } catch (e) {
       if (isNetworkError(e)) {
         // Signal died mid-flight (audit P1) — persist and reassure.
@@ -154,6 +189,32 @@ export default function ReportPage() {
 
   return (
     <div className="page">
+      {/* Proximity warning — advisory only. Neither button skips creating
+          this report; "same one" only changes where we navigate after. */}
+      {nearbyCase && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={t('report.nearbyTitle')}>
+          <div className="modal-sheet">
+            <h2 className="modal-sheet__title">{t('report.nearbyTitle')}</h2>
+            <p className="modal-sheet__intro">{t('report.nearbyBody')}</p>
+            <button
+              className="btn btn--secondary"
+              disabled={submitting}
+              onClick={() => void finalize(nearbyCase.id)}
+            >
+              {t('report.nearbySame')}
+            </button>
+            <button
+              className="btn btn--primary"
+              style={{ marginTop: 8 }}
+              disabled={submitting}
+              onClick={() => void finalize()}
+            >
+              {t('report.nearbyDifferent')}
+            </button>
+          </div>
+        </div>
+      )}
+
       <h1 className="page-title">{t('report.title')}</h1>
       <p className="page-subtitle">{t('report.subtitle')}</p>
 
