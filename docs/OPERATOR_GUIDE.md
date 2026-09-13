@@ -234,8 +234,9 @@ requires actively fighting the safety rails; still, now you know.
 or nonsense descriptions), fake "clinics" registering, or bank-detail scams
 in case chats ("send treatment money to this card").
 
-**What's already automatic:** per-device limits (4/hour, 15/day), a
-platform-wide guest circuit breaker (40 guest reports/hour total → guests
+**What's already automatic:** per-device limits (4/hour, 7/day, and no
+more than 3 open reports at once — resolve or drop one to report another),
+a platform-wide guest circuit breaker (40 guest reports/hour total → guests
 are politely asked to create an account, registered users unaffected),
 duplicate-photo flagging, vet invisibility until you approve, and the ⚑
 report queue.
