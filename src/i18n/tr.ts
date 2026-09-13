@@ -171,8 +171,10 @@ export const tr: Dict = {
   'vetSetup.documentsSub': 'İsteğe bağlı. Kliniğinizi doğrulamaya yardımcı olacak herhangi bir belge yükleyin — lisans, kayıt, kimlik. Belgesiz de onaylanabilirsiniz.',
   'vetSetup.noDocuments': 'Henüz belge yüklenmedi.',
   'vetSetup.uploadDocument': 'Belge yükle',
+  'vetSetup.saveBeforeUpload': 'Önce klinik bilgilerinizi kaydedin — belgeler ancak klinik kaydedildikten sonra eklenebilir.',
   'vetSetup.pin': 'Kliniğinizi haritada işaretleyin',
   'vetSetup.save': 'Kliniği kaydet',
+  'vetSetup.saveFailed': 'Klinik kaydedilemedi: {error}',
   'vetSetup.isOpen': 'Şu anda hayvan kabul ediyor',
 
   // Profile

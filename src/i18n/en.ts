@@ -169,8 +169,10 @@ export const en = {
   'vetSetup.documentsSub': 'Optional. Upload anything that helps us verify your clinic — a license, registration, ID. You can be approved with or without them.',
   'vetSetup.noDocuments': 'No documents uploaded yet.',
   'vetSetup.uploadDocument': 'Upload a document',
+  'vetSetup.saveBeforeUpload': 'Save your clinic details first — documents can only be attached after your clinic is saved.',
   'vetSetup.pin': 'Pin your clinic on the map',
   'vetSetup.save': 'Save clinic',
+  'vetSetup.saveFailed': 'Could not save your clinic: {error}',
   'vetSetup.isOpen': 'Currently receiving animals',
 
   // Profile

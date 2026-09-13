@@ -380,12 +380,41 @@ export async function fetchMyVet(): Promise<Vet | null> {
   return ((data as Vet[] | null)?.[0] ?? null);
 }
 
-/** Clinic owners manage their details — verification status is admin-only. */
+/**
+ * Clinic owners manage their details — verification status is admin-only.
+ *
+ * Goes through the upsert_my_vet() RPC (migration 020), not a direct
+ * `.from('vets').upsert()`: PostgREST's upsert needs UPDATE privilege on
+ * every submitted column, and manager_name/manager_surname/manager_phone
+ * are deliberately never grantable for SELECT (private — see get_my_vet()),
+ * which Postgres requires alongside UPDATE for an RLS-guarded table. The
+ * RPC's own SECURITY DEFINER covers the write instead, and re-derives the
+ * caller from auth.uid() server-side — id is never accepted from the client.
+ */
 export async function upsertVet(
-  vet: Omit<Vet, 'created_at' | 'status' | 'open_now' | 'accepting_now' | 'rating_avg' | 'rating_count'>,
+  vet: Omit<
+    Vet,
+    'id' | 'created_at' | 'status' | 'open_now' | 'accepting_now' | 'rating_avg' | 'rating_count'
+  >,
 ): Promise<void> {
-  const { error } = await supabase.from('vets').upsert(vet);
-  if (error) throw error;
+  const { error } = await supabase.rpc('upsert_my_vet', {
+    p_clinic_name: vet.clinic_name,
+    p_address: vet.address,
+    p_contact_phone: vet.contact_phone,
+    p_contact_email: vet.contact_email,
+    p_lat: vet.lat,
+    p_lng: vet.lng,
+    p_manager_name: vet.manager_name ?? '',
+    p_manager_surname: vet.manager_surname ?? '',
+    p_manager_phone: vet.manager_phone ?? '',
+    p_accepted_animals: vet.accepted_animals,
+    p_is_open: vet.is_open,
+    p_opens_at: vet.opens_at,
+    p_closes_at: vet.closes_at,
+    p_is_24_7: vet.is_24_7,
+    p_timezone: vet.timezone,
+  });
+  if (error) throw new Error(error.message);
 }
 
 // ---------------------------------------------------------------------------

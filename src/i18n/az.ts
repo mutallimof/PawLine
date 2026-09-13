@@ -171,8 +171,10 @@ export const az: Dict = {
   'vetSetup.documentsSub': 'İstəyə bağlıdır. Klinikanızı doğrulamağa kömək edəcək istənilən sənədi yükləyin — lisenziya, qeydiyyat, şəxsiyyət. Sənədsiz də təsdiqlənə bilərsiniz.',
   'vetSetup.noDocuments': 'Hələ sənəd yüklənməyib.',
   'vetSetup.uploadDocument': 'Sənəd yüklə',
+  'vetSetup.saveBeforeUpload': 'Əvvəlcə klinika məlumatlarını yadda saxlayın — sənədləri yalnız klinika yadda saxlandıqdan sonra əlavə edə bilərsiniz.',
   'vetSetup.pin': 'Klinikanızı xəritədə nişanlayın',
   'vetSetup.save': 'Klinikanı yadda saxla',
+  'vetSetup.saveFailed': 'Klinika yadda saxlanmadı: {error}',
   'vetSetup.isOpen': 'Hazırda heyvan qəbul edir',
 
   // Profile

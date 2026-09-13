@@ -208,6 +208,10 @@ const ANIMAL_TYPES: AnimalType[] = ['dog', 'cat', 'other'];
 export function VetSetupPage() {
   const { user, profile } = useAuth();
   const [vetStatus, setVetStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+  // Whether a `vets` row for this user actually exists yet — vet_documents.vet_id
+  // is a FK into vets, so document upload must never fire before this is true
+  // (otherwise it 23503s on vet_documents_vet_id_fkey).
+  const [hasClinic, setHasClinic] = useState(false);
 
   // Public contact
   const [clinicName, setClinicName] = useState('');
@@ -245,6 +249,7 @@ export function VetSetupPage() {
     if (!user) return;
     fetchMyVet().then((v) => {
       if (v) {
+        setHasClinic(true);
         setVetStatus(v.status);
         setClinicName(v.clinic_name);
         setAddress(v.address);
@@ -291,7 +296,6 @@ export function VetSetupPage() {
     setBusy(true);
     try {
       await upsertVet({
-        id: user.id,
         clinic_name: clinicName.trim(),
         address: address.trim(),
         contact_phone: contactPhone.trim(),
@@ -312,9 +316,12 @@ export function VetSetupPage() {
         // market default; Turkish clinics are an hour behind.
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Baku',
       });
+      // Only now does the vets row (which vet_documents.vet_id references)
+      // actually exist — document upload stays gated until this succeeds.
+      setHasClinic(true);
       navigate('/vet-dashboard');
     } catch (e) {
-      toast(e instanceof Error ? e.message : t('common.error'));
+      toast(t('vetSetup.saveFailed').replace('{error}', e instanceof Error ? e.message : String(e)));
     } finally {
       setBusy(false);
     }
@@ -323,6 +330,12 @@ export function VetSetupPage() {
   const onUploadDocument = async (files: FileList | null) => {
     const file = files?.[0];
     if (!file || !user) return;
+    // Guard against the FK violation: vet_documents.vet_id references vets.id,
+    // so there must be a saved clinic row before a document can attach to it.
+    if (!hasClinic) {
+      toast(t('vetSetup.saveBeforeUpload'));
+      return;
+    }
     setUploading(true);
     try {
       await uploadVetDocument(file, user.id);
@@ -501,15 +514,21 @@ export function VetSetupPage() {
             </button>
           </div>
         ))}
-        <label className="btn btn--secondary btn--small" style={{ marginTop: documents.length ? 10 : 0, display: 'inline-block' }}>
-          {uploading ? t('common.loading') : t('vetSetup.uploadDocument')}
-          <input
-            type="file"
-            hidden
-            disabled={uploading}
-            onChange={(e) => void onUploadDocument(e.target.files)}
-          />
-        </label>
+        {hasClinic ? (
+          <label className="btn btn--secondary btn--small" style={{ marginTop: documents.length ? 10 : 0, display: 'inline-block' }}>
+            {uploading ? t('common.loading') : t('vetSetup.uploadDocument')}
+            <input
+              type="file"
+              hidden
+              disabled={uploading}
+              onChange={(e) => void onUploadDocument(e.target.files)}
+            />
+          </label>
+        ) : (
+          <p className="page-subtitle" style={{ margin: documents.length ? '10px 0 0' : 0 }}>
+            {t('vetSetup.saveBeforeUpload')}
+          </p>
+        )}
       </div>
     </div>
   );
