@@ -123,6 +123,11 @@ export default function VetsPage() {
                   {km !== undefined ? `${formatDistance(km)} · ` : ''}
                   {vet.address}
                 </div>
+                {!!vet.rating_count && (
+                  <div className="list-row__sub">
+                    ★ {vet.rating_avg?.toFixed(1)} ({vet.rating_count})
+                  </div>
+                )}
                 {vet.open_now === false ? (
                   <div className="list-row__sub list-row__sub--closed">
                     {vet.opens_at
