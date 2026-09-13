@@ -1,0 +1,22 @@
+-- ============================================================================
+-- PawLine — migration 019: fix vets upsert 403 (missing UPDATE grant on id)
+-- ----------------------------------------------------------------------------
+-- upsertVet() does an upsert (Prefer: resolution=merge-duplicates), which
+-- PostgREST implements as INSERT ... ON CONFLICT (id) DO UPDATE SET <every
+-- submitted column> — including id = excluded.id. Postgres requires UPDATE
+-- privilege on every column in that SET clause, checked BEFORE RLS ever
+-- runs (same class of gap 004's header describes). No prior migration ever
+-- granted UPDATE on vets.id (004/010/014 all list other columns only), so
+-- every first-time clinic Save 403ed with "permission denied for table
+-- vets" — RLS was never reached, let alone violated.
+--
+-- Confirmed live: a plain INSERT (ignore-duplicates) succeeds; the upsert
+-- 403s with hint "GRANT UPDATE ON public.vets TO authenticated" and no
+-- other missing privilege.
+--
+-- Safe to grant: "vet updates own clinic" (using (auth.uid() = id), no
+-- separate WITH CHECK) still uses USING as the check for the new row too,
+-- so a vet can no-op id back to itself but can never reassign it.
+-- ============================================================================
+
+grant update (id) on public.vets to authenticated;
