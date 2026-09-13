@@ -92,16 +92,17 @@ export default function AuthPage() {
   };
 
   // Same button, same handler, for both sign-in and sign-up — Supabase
-  // resolves "new account or existing" transparently for OAuth, and a
-  // Google account is never a vet (handle_new_user defaults role to 'user'
-  // when there's no 'role' in raw_user_meta_data, which is always the case
-  // for OAuth identities), so there's no isVet branch to carry here. This
+  // resolves "new account or existing" transparently for OAuth. The vet
+  // toggle only renders (and only means anything) in signup mode, exactly
+  // like the email path below, whose role selection only ever happens
+  // inside signUp(), never signIn() — so wantsVet is false in sign-in mode
+  // even if isVet is stale-true from an earlier, abandoned toggle. This
   // redirects the whole page to Google; it only returns if that redirect
   // itself failed to start.
   const continueWithGoogle = async () => {
     setBusy(true);
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(mode === 'signup' && isVet);
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
       setBusy(false);

@@ -198,10 +198,6 @@ export const ru: Dict = {
   'profile.setHome': 'Использовать текущее местоположение как мой район',
   'profile.homeSet': 'Район сохранён',
   'profile.vetDashboard': 'Панель клиники',
-  'profile.registerClinic': 'Зарегистрировать клинику',
-  'profile.registerClinicConfirmTitle': 'Вы ветеринарная клиника?',
-  'profile.registerClinicConfirmBody': 'Это переключит ваш аккаунт на аккаунт клиники, и отменить это в приложении будет нельзя.',
-  'profile.registerClinicConfirmAction': 'Да, переключить на аккаунт клиники',
   'profile.platformStats': 'PawLine на сегодня',
   'profile.install': 'Установите PawLine на главный экран для полного удобства.',
 

@@ -5,10 +5,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { becomeVet, updateProfile } from '../lib/api';
+import { updateProfile } from '../lib/api';
 import { disablePush, enablePush, getPushSubscription, pushSupported } from '../lib/push';
 import { supabase } from '../lib/supabase';
-import { Avatar, CaseCard, ConfirmModal, LanguageSwitcher, PlatformStats, TierBadge, useToast } from '../components/ui';
+import { Avatar, CaseCard, LanguageSwitcher, PlatformStats, TierBadge, useToast } from '../components/ui';
 import { VetVisibilityNotice } from './vetAndUserPages';
 import { tierForXp, tierName } from '../lib/xp';
 import { getCurrentPosition } from '../lib/geo';
@@ -20,8 +20,6 @@ export default function ProfilePage() {
   const { user, profile, signOut, refreshProfile } = useAuth();
   const [myCases, setMyCases] = useState<CaseWithDetails[]>([]);
   const [pushOn, setPushOn] = useState(false);
-  const [becomingVet, setBecomingVet] = useState(false);
-  const [showVetConfirm, setShowVetConfirm] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -101,26 +99,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Second on-ramp to role='vet' (migration 025) — the signup toggle is the
-  // first. refreshProfile() re-fetches get_my_profile() before navigating,
-  // so VetSetupPage's role==='vet' gate already sees the new role on the
-  // very first render — no stale-cache flash back to the "not a vet" state.
-  // Gated behind a confirm (below): one tap otherwise permanently switches
-  // role='user' → 'vet' with no UI way back.
-  const registerClinic = async () => {
-    setShowVetConfirm(false);
-    setBecomingVet(true);
-    try {
-      await becomeVet();
-      await refreshProfile();
-      navigate('/vet-setup');
-    } catch (e) {
-      toast(e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBecomingVet(false);
-    }
-  };
-
   return (
     <div className="page">
       {/* Identity + tier */}
@@ -170,32 +148,6 @@ export default function ProfilePage() {
             <Link to="/vet-setup" className="btn btn--secondary">{t('vetSetup.title')}</Link>
           </div>
         </>
-      )}
-
-      {/* Second on-ramp to becoming a vet (migration 025) — the signup
-          toggle is the first; this covers OAuth sign-ups and anyone who
-          started as a community member and now wants to register a clinic.
-          Confirmed first: one tap otherwise permanently switches
-          role='user' → 'vet' with no UI way back. */}
-      {profile.role === 'user' && (
-        <button
-          className="btn btn--secondary"
-          style={{ marginBottom: 14 }}
-          disabled={becomingVet}
-          onClick={() => setShowVetConfirm(true)}
-        >
-          🏥 {t('profile.registerClinic')}
-        </button>
-      )}
-
-      {showVetConfirm && (
-        <ConfirmModal
-          title={t('profile.registerClinicConfirmTitle')}
-          body={t('profile.registerClinicConfirmBody')}
-          confirmLabel={t('profile.registerClinicConfirmAction')}
-          onConfirm={() => void registerClinic()}
-          onCancel={() => setShowVetConfirm(false)}
-        />
       )}
 
       {/* Language */}

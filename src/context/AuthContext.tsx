@@ -35,7 +35,7 @@ import {
 } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { fetchMyProfile } from '../lib/api';
+import { becomeVet, fetchMyProfile } from '../lib/api';
 import type { Profile } from '../lib/types';
 import { getLocale, setLocale, SUPPORTED_LOCALES, type LocaleCode } from '../i18n';
 
@@ -55,13 +55,28 @@ interface AuthState {
   ) => Promise<{ needsEmailConfirm: boolean }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-  /** Full-page redirect to Google; resolves before navigation only if it fails to start. */
-  signInWithGoogle: () => Promise<void>;
+  /**
+   * Full-page redirect to Google; resolves before navigation only if it
+   * fails to start. `wantsVet` persists the signup toggle's choice across
+   * the redirect (OAuth carries no role metadata of our own) — the profile
+   * effect below consumes it once the Google session lands and calls the
+   * same become_vet() RPC the Profile page's "Register your clinic" button
+   * uses. Pass false for sign-in, or when the toggle is on Community.
+   */
+  signInWithGoogle: (wantsVet: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
 
 const PROFILE_RETRIES = 4; // 1s, 2s, 4s, 8s backoff
+
+// Set right before a Google redirect chosen with the signup toggle on
+// "Veterinary clinic"; consumed by the profile-loading effect below the
+// moment a Google-authenticated session lands, then always cleared —
+// whatever sign-in happens next (even an abandoned Google attempt followed
+// by an unrelated email sign-in in the same browser) never acts on a stale
+// flag, since it's gone after the very next profile load either way.
+const OAUTH_VET_PENDING_KEY = 'pawline-oauth-vet-pending';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -107,9 +122,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const load = async (attempt: number) => {
       try {
-        const p = await fetchMyProfile();
+        let p = await fetchMyProfile();
         if (cancelled) return;
         if (!p) throw new Error('profile row not found (yet)');
+
+        // Consume the pending-vet flag on the very first profile load after
+        // ANY sign-in, not just Google's — clearing it here (regardless of
+        // whether it actually applies) is what makes an abandoned Google
+        // attempt followed by an unrelated email sign-in safe: the flag is
+        // gone before it could be misread as "this account wants to be a
+        // vet". Only acted on when this session is actually Google's,
+        // confirmed via app_metadata.provider — never inferred from the
+        // flag's mere presence.
+        let pendingVet = false;
+        try {
+          pendingVet = localStorage.getItem(OAUTH_VET_PENDING_KEY) === '1';
+          if (pendingVet) localStorage.removeItem(OAUTH_VET_PENDING_KEY);
+        } catch {
+          /* storage blocked — no pending-vet flag to honor either way */
+        }
+        if (pendingVet && p.role !== 'vet' && user?.app_metadata?.provider === 'google') {
+          await becomeVet();
+          const refetched = await fetchMyProfile();
+          if (cancelled) return;
+          if (refetched) p = refetched;
+        }
+
         setProfile(p);
         // The profile's saved locale is authoritative once signed in.
         if (p.locale && p.locale in SUPPORTED_LOCALES) {
@@ -182,14 +220,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
-  // Google users are never vets (handle_new_user defaults role to 'user'
-  // when raw_user_meta_data has no 'role' key, which OAuth identities never
-  // do), so there's no vet-setup-pending redirect to preserve here the way
-  // signIn/signUp's callers handle — landing at '/' is the whole story.
-  // detectSessionInUrl (supabase.ts) + the onAuthStateChange listener above
-  // pick up the session once Google redirects back; no separate callback
-  // route needed.
-  const signInWithGoogle = useCallback(async () => {
+  // handle_new_user (014/024) always sets role='user' for a fresh Google
+  // identity — OAuth metadata has no 'role' key the way the email signup
+  // form's payload does. wantsVet persists the signup toggle's choice
+  // across the redirect via OAUTH_VET_PENDING_KEY; the profile-loading
+  // effect above calls become_vet() once the Google session actually
+  // lands, so the account is role='vet' by the time anything reads
+  // `profile`. detectSessionInUrl (supabase.ts) + the onAuthStateChange
+  // listener above pick up the session itself; no separate callback route
+  // needed either way.
+  const signInWithGoogle = useCallback(async (wantsVet: boolean) => {
+    try {
+      if (wantsVet) localStorage.setItem(OAUTH_VET_PENDING_KEY, '1');
+      else localStorage.removeItem(OAUTH_VET_PENDING_KEY);
+    } catch {
+      /* storage blocked — become_vet() simply won't be called on return */
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/` },

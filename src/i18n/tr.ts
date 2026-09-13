@@ -198,10 +198,6 @@ export const tr: Dict = {
   'profile.setHome': 'Mevcut konumumu bölgem olarak kaydet',
   'profile.homeSet': 'Bölge kaydedildi',
   'profile.vetDashboard': 'Klinik paneli',
-  'profile.registerClinic': 'Kliniğinizi kaydedin',
-  'profile.registerClinicConfirmTitle': 'Bir veteriner klinik misiniz?',
-  'profile.registerClinicConfirmBody': 'Bu, hesabınızı bir klinik hesabına çevirir ve uygulama üzerinden geri alınamaz.',
-  'profile.registerClinicConfirmAction': 'Evet, klinik hesabına geç',
   'profile.platformStats': 'Şu ana kadar PawLine',
   'profile.install': 'Tam deneyim için PawLine’ı ana ekranınıza ekleyin.',
 

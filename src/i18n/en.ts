@@ -196,10 +196,6 @@ export const en = {
   'profile.setHome': 'Use current location as my area',
   'profile.homeSet': 'Area saved',
   'profile.vetDashboard': 'Clinic dashboard',
-  'profile.registerClinic': 'Register your clinic',
-  'profile.registerClinicConfirmTitle': 'Are you a veterinary clinic?',
-  'profile.registerClinicConfirmBody': 'This switches your account to a clinic account and can’t be undone from the app.',
-  'profile.registerClinicConfirmAction': 'Yes, switch to a clinic account',
   'profile.platformStats': 'PawLine so far',
   'profile.install': 'Install PawLine on your home screen for the full experience.',
 
