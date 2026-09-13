@@ -217,12 +217,9 @@ export default function CaseDetailPage() {
         <div className="case-detail__map-pill">
           📍 {caseData.address_hint || t('case.locationUnknown')}
         </div>
-        {href={`https://www.google.com/maps/search/?api=1&query=${caseData.lat},${caseData.lng}`}}
         <a
           className="case-detail__map-directions"
-          href={`geo:${caseData.lat},${caseData.lng}?q=${caseData.lat},${caseData.lng}(${encodeURIComponent(
-            caseData.address_hint || t('case.locationUnknown')
-          )})`}
+          href={`https://www.google.com/maps/search/?api=1&query=${caseData.lat},${caseData.lng}`}
         >
           🧭 {t('case.getDirections')}
         </a>
