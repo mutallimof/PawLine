@@ -115,6 +115,9 @@ export const ru: Dict = {
   'caseChat.placeholder': 'Написать сообщение…',
   'caseChat.signIn': 'Войдите, чтобы присоединиться к беседе.',
   'caseChat.empty': 'Сообщений пока нет. Поздоровайтесь и обсудите спасение.',
+  'caseChat.pinned': 'Закреплено клиникой',
+  'caseChat.pin': 'Закрепить сверху',
+  'caseChat.unpin': 'Открепить',
 
   // Messages (DMs)
   'dm.title': 'Сообщения',

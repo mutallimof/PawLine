@@ -783,6 +783,19 @@ export async function fetchCaseChatInbox(myId: string): Promise<CaseChatInboxEnt
 export const markCaseChatRead = (caseId: string) =>
   rpc('mark_case_chat_read', { p_case: caseId });
 
+/**
+ * Pin / unpin the one message held at the top of a case chat (migration 027).
+ * "Only the vet on this case" is enforced inside these SECURITY DEFINER
+ * functions, not here — a pin decides which money-related message the app
+ * visually endorses, so the check has to be somewhere a REST call can't skip.
+ * The button is hidden for everyone else purely as UI; the server is the rule.
+ */
+export const pinCaseMessage = (caseId: string, messageId: number) =>
+  rpc('pin_case_message', { p_case: caseId, p_message: messageId });
+
+export const unpinCaseMessage = (caseId: string) =>
+  rpc('unpin_case_message', { p_case: caseId });
+
 export async function fetchMessages(conversationId: string): Promise<DirectMessage[]> {
   const { data, error } = await supabase
     .from('messages')

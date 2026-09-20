@@ -140,6 +140,12 @@ export interface RescueCase {
   created_at: string;
   accepted_at: string | null;
   resolved_at: string | null;
+  /**
+   * The one message the case's vet has pinned to the top of its chat
+   * (migration 027). Optional, not just nullable: it reads as undefined until
+   * that migration is applied, and the UI treats undefined and null alike.
+   */
+  pinned_message_id?: number | null;
 }
 
 export type InjuryType = 'limping' | 'bleeding' | 'hit_by_car' | 'weak' | 'skin' | 'trapped' | 'unknown';

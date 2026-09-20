@@ -730,6 +730,50 @@ select {
   z-index: 10;
 }
 
+/* Pinned case message (027). A sibling ABOVE .chat-scroll rather than a
+   sticky child of it, so it genuinely cannot scroll away — this usually holds
+   a clinic's bank details, and someone scrolling back through a long thread
+   has to be able to see where to send money at any point. */
+.chat-pinned {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: var(--coral-soft);
+  border-bottom: 1px solid var(--coral);
+}
+.chat-pinned__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--coral-deep);
+  margin-bottom: 4px;
+}
+.chat-pinned__unpin {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  color: var(--ink-soft);
+  text-decoration: underline;
+}
+.chat-pinned__body {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--ink);
+  /* Card numbers and amounts are usually typed on their own lines — keep them
+     as the clinic wrote them, and let people select the text to copy it. */
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  user-select: text;
+}
+.bubble__pin {
+  margin-left: 6px;
+  font-size: 11px;
+  opacity: 0.55;
+}
+
 .chat-scroll {
   flex: 1;
   overflow-y: auto;
@@ -2695,9 +2739,15 @@ body::before {
   white-space: nowrap;
   background: var(--color-bg-surface);
   border-radius: var(--radius-pill);
-  font-size: var(--font-size-sm);
+  /* Was --font-size-sm (12px) with no border or shadow: near-white pill on a
+     light map, so the landmark text had nothing separating it from the tiles
+     underneath and read as barely there. The colour was never the problem
+     (--ink on --paper is ~13:1) — the size and the lack of an edge were. */
+  font-size: var(--font-size-base);
   font-weight: 700;
   color: var(--color-text-primary);
+  border: 1px solid var(--color-border-hairline);
+  box-shadow: var(--shadow-soft);
 }
 .case-detail__map-directions {
   position: absolute;
@@ -2709,10 +2759,14 @@ body::before {
   padding: var(--space-2xs) var(--space-sm);
   background: var(--color-bg-surface);
   border-radius: var(--radius-pill);
-  font-size: var(--font-size-sm);
+  /* Same treatment as the landmark pill opposite it, so the two overlay
+     controls stay a matched pair. */
+  font-size: var(--font-size-base);
   font-weight: 700;
   color: var(--color-brand-strong);
   text-decoration: none;
+  border: 1px solid var(--color-border-hairline);
+  box-shadow: var(--shadow-soft);
 }
 .case-detail__map-legend {
   display: flex;

@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
-import { blockUser, markCaseChatRead, sendCaseMessage } from '../lib/api';
+import { blockUser, markCaseChatRead, pinCaseMessage, sendCaseMessage, unpinCaseMessage } from '../lib/api';
 import { Avatar, StatusBadge, useToast } from '../components/ui';
 import { ReportButton } from '../components/Report';
 import { IconBack, IconSend } from '../components/Icons';
@@ -41,13 +41,36 @@ export default function CaseChatPage() {
   // NOT NULL FK into profiles, which a guest has no row in. So gate the
   // composer and the per-message actions, never the thread itself.
   const isRegistered = !!user && !isGuest;
-  const { caseData } = useCase(id);
+  const { caseData, reload: reloadCase } = useCase(id);
   const { messages, loading } = useCaseChat(id);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const toast = useToast();
+
+  // Only the clinic assigned to THIS case may pin. The server enforces it too
+  // (pin_case_message, 027) — this just decides whether to offer the control.
+  const isCaseVet = isRegistered && !!caseData && caseData.vet_id === user.id;
+
+  // Resolved from the messages already loaded rather than joined onto the case
+  // query: an embed would need 027's FK to exist, and a cases query that fails
+  // on a missing relation takes the whole case view down. Reads as undefined
+  // until that migration is applied, so nothing renders and nothing breaks.
+  const pinned = caseData?.pinned_message_id
+    ? messages.find((m) => m.id === caseData.pinned_message_id) ?? null
+    : null;
+
+  const setPin = async (messageId: number | null) => {
+    if (!id) return;
+    try {
+      if (messageId === null) await unpinCaseMessage(id);
+      else await pinCaseMessage(id, messageId);
+      await reloadCase(); // don't wait on the realtime echo of our own write
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    }
+  };
 
   // Keep the newest message in view.
   useEffect(() => {
@@ -88,6 +111,20 @@ export default function CaseChatPage() {
         </div>
         {caseData && <StatusBadge status={caseData.status} />}
       </header>
+
+      {pinned && (
+        <div className="chat-pinned">
+          <div className="chat-pinned__label">
+            📌 {t('caseChat.pinned')}
+            {isCaseVet && (
+              <button className="chat-pinned__unpin" onClick={() => void setPin(null)}>
+                {t('caseChat.unpin')}
+              </button>
+            )}
+          </div>
+          <div className="chat-pinned__body">{pinned.body}</div>
+        </div>
+      )}
 
       <div className="chat-scroll" ref={scrollRef}>
         <div className="banner banner--info" style={{ fontWeight: 600 }}>
@@ -134,6 +171,16 @@ export default function CaseChatPage() {
               )}
               {m.body}
               <span className="bubble__time">{clockTime(m.created_at)}</span>
+              {isCaseVet && m.id !== caseData?.pinned_message_id && (
+                <button
+                  className="bubble__pin"
+                  title={t('caseChat.pin')}
+                  aria-label={t('caseChat.pin')}
+                  onClick={() => void setPin(m.id)}
+                >
+                  📌
+                </button>
+              )}
               {/* Report (B2): per-message, so every message keeps this —
                   unlike the name/block above, unrelated to run-grouping. */}
               {!mine && isRegistered && (

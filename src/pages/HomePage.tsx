@@ -161,12 +161,20 @@ export default function HomePage() {
               </p>
             )}
 
+            {/* chip-row, not the .segmented pill track. .segmented__option is
+                `flex: 1` (so flex-basis 0) plus `white-space: nowrap; overflow:
+                hidden; text-overflow: ellipsis` — with more than about three
+                options they never wrap, they just compress until every label
+                ellipsises away to nothing. Chips size to their content and
+                genuinely wrap, which is why ReportPage already uses them for
+                its multi-option pickers. */}
             <div className="field__label" style={{ marginBottom: 6 }}>{t('home.filterAnimal')}</div>
-            <div className="segmented" style={{ marginBottom: 12, flexWrap: 'wrap' }}>
+            <div className="chip-row" style={{ marginBottom: 12 }}>
               {ANIMAL_TYPES.map((a) => (
                 <button
                   key={a}
-                  className={`segmented__option${animalFilter.includes(a) ? ' active' : ''}`}
+                  type="button"
+                  className={`chip${animalFilter.includes(a) ? ' active' : ''}`}
                   onClick={() => setAnimalFilter((prev) => toggleIn(prev, a))}
                 >
                   {t(`animal.${a}` as const)}
@@ -175,11 +183,12 @@ export default function HomePage() {
             </div>
 
             <div className="field__label" style={{ marginBottom: 6 }}>{t('home.filterStatus')}</div>
-            <div className="segmented" style={{ flexWrap: 'wrap', marginBottom: activeFilterCount > 0 ? 12 : 0 }}>
+            <div className="chip-row" style={{ marginBottom: activeFilterCount > 0 ? 12 : 0 }}>
               {STATUS_TYPES.map((s) => (
                 <button
                   key={s}
-                  className={`segmented__option${statusFilter.includes(s) ? ' active' : ''}`}
+                  type="button"
+                  className={`chip${statusFilter.includes(s) ? ' active' : ''}`}
                   onClick={() => setStatusFilter((prev) => toggleIn(prev, s))}
                 >
                   {t(`status.${s}` as const)}

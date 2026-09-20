@@ -113,6 +113,9 @@ export const en = {
   'caseChat.placeholder': 'Write a message…',
   'caseChat.signIn': 'Sign in to join the conversation.',
   'caseChat.empty': 'No messages yet. Say hello and coordinate the rescue.',
+  'caseChat.pinned': 'Pinned by the clinic',
+  'caseChat.pin': 'Pin to top',
+  'caseChat.unpin': 'Unpin',
 
   // Messages (DMs)
   'dm.title': 'Messages',

@@ -115,6 +115,9 @@ export const az: Dict = {
   'caseChat.placeholder': 'Mesaj yazın…',
   'caseChat.signIn': 'Söhbətə qoşulmaq üçün daxil olun.',
   'caseChat.empty': 'Hələ mesaj yoxdur. Salam deyin və xilasetməni əlaqələndirin.',
+  'caseChat.pinned': 'Klinika tərəfindən sabitləndi',
+  'caseChat.pin': 'Yuxarıya sabitlə',
+  'caseChat.unpin': 'Sabitləməni ləğv et',
 
   // Messages (DMs)
   'dm.title': 'Mesajlar',
