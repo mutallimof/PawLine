@@ -116,6 +116,8 @@ export const en = {
   'caseChat.pinned': 'Pinned by the clinic',
   'caseChat.pin': 'Pin to top',
   'caseChat.unpin': 'Unpin',
+  'caseChat.pinHint': 'You can pin a message — e.g. your bank details for donations — so it stays at the top of this chat.',
+  'caseChat.hintGotIt': 'Got it',
 
   // Messages (DMs)
   'dm.title': 'Messages',

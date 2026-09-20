@@ -118,6 +118,8 @@ export const tr: Dict = {
   'caseChat.pinned': 'Klinik tarafından sabitlendi',
   'caseChat.pin': 'Yukarıya sabitle',
   'caseChat.unpin': 'Sabitlemeyi kaldır',
+  'caseChat.pinHint': 'Bir mesajı sabitleyebilirsiniz — örneğin bağışlar için banka bilgilerinizi — böylece bu sohbetin en üstünde kalır.',
+  'caseChat.hintGotIt': 'Anladım',
 
   // Messages (DMs)
   'dm.title': 'Mesajlar',

@@ -25,6 +25,21 @@ const SENDER_COLORS = [
   '#c2402f', '#3f7fae', '#3f9b6c', '#8a5cb5',
   '#b5762f', '#4a7a6b', '#a8477a', '#5c6bc0',
 ];
+/**
+ * Whether this device has already been shown the "you can pin a message" hint.
+ * Same posture as legal.tsx's safety ACK_KEY: on a storage error we treat it as
+ * already seen, so a blocked-storage browser is never nagged on every open.
+ */
+const PIN_HINT_KEY = 'pawline-pin-hint-seen';
+
+function pinHintSeen(): boolean {
+  try {
+    return localStorage.getItem(PIN_HINT_KEY) === 'yes';
+  } catch {
+    return true;
+  }
+}
+
 function senderColor(id: string): string {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
@@ -60,6 +75,19 @@ export default function CaseChatPage() {
   const pinned = caseData?.pinned_message_id
     ? messages.find((m) => m.id === caseData.pinned_message_id) ?? null
     : null;
+
+  // The pin only exists for the assigned clinic, and only once a vet has been
+  // selected on the case — so it is easy to never discover. Show a one-time
+  // hint, which also retires itself as soon as anything is pinned.
+  const [hintSeen, setHintSeen] = useState(pinHintSeen);
+  const dismissHint = () => {
+    setHintSeen(true);
+    try {
+      localStorage.setItem(PIN_HINT_KEY, 'yes');
+    } catch {
+      /* storage blocked — the hint just reappears next time, which is fine */
+    }
+  };
 
   const setPin = async (messageId: number | null) => {
     if (!id) return;
@@ -126,6 +154,15 @@ export default function CaseChatPage() {
         </div>
       )}
 
+      {isCaseVet && !pinned && !hintSeen && (
+        <div className="chat-pin-hint">
+          <span>💡 {t('caseChat.pinHint')}</span>
+          <button className="chat-pin-hint__dismiss" onClick={dismissHint}>
+            {t('caseChat.hintGotIt')}
+          </button>
+        </div>
+      )}
+
       <div className="chat-scroll" ref={scrollRef}>
         <div className="banner banner--info" style={{ fontWeight: 600 }}>
           {t('caseChat.subtitle')}
@@ -170,29 +207,32 @@ export default function CaseChatPage() {
                 </div>
               )}
               {m.body}
-              <span className="bubble__time">{clockTime(m.created_at)}</span>
-              {isCaseVet && m.id !== caseData?.pinned_message_id && (
-                <button
-                  className="bubble__pin"
-                  title={t('caseChat.pin')}
-                  aria-label={t('caseChat.pin')}
-                  onClick={() => void setPin(m.id)}
-                >
-                  📌
-                </button>
-              )}
-              {/* Report (B2): per-message, so every message keeps this —
-                  unlike the name/block above, unrelated to run-grouping. */}
-              {!mine && isRegistered && (
-                <ReportButton
-                  reporterId={user.id}
-                  targetType="case_message"
-                  targetCase={m.case_id}
-                  targetMessage={m.id}
-                  targetProfile={m.sender_id}
-                  small
-                />
-              )}
+              {/* One footer row for the timestamp and the per-message actions.
+                  .bubble__time is `display: block` and shared with
+                  DmThreadPage, so it keeps that — but anything rendered after
+                  it therefore landed on its own line, which is how the pin
+                  ended up an unfindable 11px mark under the clock. The row
+                  overrides the time's display locally instead. */}
+              <div className="bubble__footer">
+                <span className="bubble__time">{clockTime(m.created_at)}</span>
+                {isCaseVet && m.id !== caseData?.pinned_message_id && (
+                  <button className="bubble__action" onClick={() => void setPin(m.id)}>
+                    📌 {t('caseChat.pin')}
+                  </button>
+                )}
+                {/* Report (B2): per-message, so every message keeps this —
+                    unlike the name/block above, unrelated to run-grouping. */}
+                {!mine && isRegistered && (
+                  <ReportButton
+                    reporterId={user.id}
+                    targetType="case_message"
+                    targetCase={m.case_id}
+                    targetMessage={m.id}
+                    targetProfile={m.sender_id}
+                    small
+                  />
+                )}
+              </div>
             </div>
           );
         })}

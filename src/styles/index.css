@@ -735,10 +735,16 @@ select {
    a clinic's bank details, and someone scrolling back through a long thread
    has to be able to see where to send money at any point. */
 .chat-pinned {
+  /* A flex sibling of .chat-scroll inside .chat-page (flex column, 100dvh),
+     so it holds its place while the thread scrolls under it. The left accent
+     bar and lift are deliberate: this usually carries a clinic's donation
+     details and should read as the most important thing on the screen. */
   flex-shrink: 0;
-  padding: 10px 14px;
+  padding: 12px 14px;
   background: var(--coral-soft);
+  border-left: 4px solid var(--coral);
   border-bottom: 1px solid var(--coral);
+  box-shadow: var(--shadow-soft);
 }
 .chat-pinned__label {
   display: flex;
@@ -753,13 +759,18 @@ select {
 }
 .chat-pinned__unpin {
   margin-left: auto;
+  flex-shrink: 0;
+  min-height: 30px;
+  padding: 2px 12px;
+  border: 1px solid var(--coral);
+  border-radius: var(--radius-pill);
+  background: var(--card);
   font-size: var(--font-size-xs);
   font-weight: 800;
-  color: var(--ink-soft);
-  text-decoration: underline;
+  color: var(--coral-deep);
 }
 .chat-pinned__body {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--ink);
   /* Card numbers and amounts are usually typed on their own lines — keep them
@@ -768,10 +779,61 @@ select {
   overflow-wrap: break-word;
   user-select: text;
 }
-.bubble__pin {
-  margin-left: 6px;
-  font-size: 11px;
-  opacity: 0.55;
+/* One row for a bubble's timestamp and its actions. .bubble__time is
+   `display: block` globally (DmThreadPage relies on that), so it is overridden
+   only inside this row — otherwise every action after it starts a new line. */
+.bubble__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.bubble__footer .bubble__time {
+  display: inline;
+  margin-top: 0;
+  margin-right: auto;
+}
+
+/* The pin control: a labelled pill with a real tap target, not a faint glyph. */
+.bubble__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 4px 12px;
+  border: 1px solid var(--coral);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--coral-deep);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* One-time nudge so the assigned clinic discovers pinning exists at all. */
+.chat-pin-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+.chat-pin-hint__dismiss {
+  margin-left: auto;
+  flex-shrink: 0;
+  min-height: 30px;
+  padding: 2px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  color: var(--ink-soft);
 }
 
 .chat-scroll {

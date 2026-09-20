@@ -118,6 +118,8 @@ export const ru: Dict = {
   'caseChat.pinned': 'Закреплено клиникой',
   'caseChat.pin': 'Закрепить сверху',
   'caseChat.unpin': 'Открепить',
+  'caseChat.pinHint': 'Вы можете закрепить сообщение — например, банковские реквизиты для донатов — чтобы оно оставалось наверху этого чата.',
+  'caseChat.hintGotIt': 'Понятно',
 
   // Messages (DMs)
   'dm.title': 'Сообщения',
