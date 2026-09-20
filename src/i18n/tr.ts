@@ -464,6 +464,7 @@ export const tr: Dict = {
   'safety.ackFine': 'Devam ederek bu riskleri anladığınızı ve kendi kararınızla hareket ettiğinizi onaylarsınız. PawLine bir koordinasyon aracıdır, kurtarma veya acil servis değildir.',
   'safety.ackConfirm': 'Anladım — devam et',
   'report.captchaFailed': 'İnsan olduğunuz doğrulanamadı. Lütfen tekrar deneyin veya bildirmek için ücretsiz bir hesap oluşturun.',
+  'report.submitFailed': 'Bildiriminiz gönderilemedi. Lütfen birazdan tekrar deneyin.',
 
   // Vet operating hours (migration 010)
   'vets.always': '7/24',

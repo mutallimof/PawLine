@@ -180,7 +180,12 @@ export default function ReportPage() {
       } else if (e instanceof Error && e.message === 'captcha-failed') {
         toast(t('report.captchaFailed'));
       } else {
-        toast(e instanceof Error ? e.message : t('common.error'));
+        // A raw RLS rejection (42501, e.g. the guest-session race this flow
+        // guards against) is Postgres-speak, not something a reporter can
+        // act on — show a plain, always-visible message instead of either
+        // that jargon or nothing at all.
+        const code = (e as { code?: string } | null)?.code;
+        toast(code === '42501' ? t('report.submitFailed') : e instanceof Error ? e.message : t('common.error'));
       }
     } finally {
       setSubmitting(false);

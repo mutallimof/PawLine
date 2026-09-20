@@ -194,6 +194,25 @@ export interface NewCaseInput {
 }
 
 /**
+ * signInAnonymously() resolving does not guarantee the client has finished
+ * updating the internal auth state that the NEXT request's headers are
+ * built from — on a genuinely fresh, signed-out visit this loses the race
+ * with the very next insert, which then hits RLS unauthenticated (403 /
+ * 42501). Poll getSession() (cheap — in-memory, no network call once the
+ * session is set) for a short window rather than trusting the outer await
+ * alone.
+ */
+async function waitForActiveSession(timeoutMs = 3000): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.access_token) return;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  throw new Error('Could not start a session — please check your connection and try again.');
+}
+
+/**
  * Create a case (guest or registered) and upload its photos.
  * The insert itself triggers the "new case" notification fan-out.
  *
@@ -221,6 +240,10 @@ export async function createCase(input: NewCaseInput): Promise<string> {
         captchaToken ? { options: { captchaToken } } : undefined
       );
       if (anonErr) throw new Error(anonErr.message);
+      // Don't fire the insert until the new session is actually live — see
+      // waitForActiveSession() above for why the sign-in await alone isn't
+      // enough.
+      await waitForActiveSession();
     }
   }
 

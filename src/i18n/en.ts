@@ -462,6 +462,7 @@ export const en = {
   'safety.ackFine': 'By continuing you confirm you understand these risks and act on your own judgement. PawLine is a coordination tool, not a rescue or emergency service.',
   'safety.ackConfirm': 'I understand — continue',
   'report.captchaFailed': 'Couldn’t verify you’re human. Please try again, or create a free account to report.',
+  'report.submitFailed': 'Couldn’t submit your report. Please try again in a moment.',
 
   // Vet operating hours (migration 010)
   'vets.always': '24/7',
