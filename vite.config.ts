@@ -45,8 +45,8 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'PawLine — Stray Animal Rescue',
-        short_name: 'PawLine',
+        name: 'Stray’s Call — Stray Animal Rescue',
+        short_name: 'Stray’s Call',
         description:
           'Report injured stray animals, rescue them, and get them to a vet — together.',
         theme_color: '#E85D4A',

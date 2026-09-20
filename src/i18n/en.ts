@@ -1,7 +1,7 @@
 /** English strings. Copy this file to az.ts / tr.ts to translate. */
 export const en = {
   // App
-  'app.name': 'PawLine',
+  'app.name': 'Stray’s Call',
   'app.tagline': 'Every stray deserves a way back.',
 
   // Navigation
@@ -109,7 +109,7 @@ export const en = {
 
   // Case chat
   'caseChat.title': 'Case chat',
-  'caseChat.subtitle': 'Coordinate help and chip in for treatment. Vets may post their bank details here — payments happen outside PawLine, directly between you and the clinic.',
+  'caseChat.subtitle': 'Coordinate help and chip in for treatment. Vets may post their bank details here — payments happen outside Stray’s Call, directly between you and the clinic.',
   'caseChat.placeholder': 'Write a message…',
   'caseChat.signIn': 'Sign in to join the conversation.',
   'caseChat.empty': 'No messages yet. Say hello and coordinate the rescue.',
@@ -151,7 +151,7 @@ export const en = {
   'auth.roleCommunity': 'Community',
   'auth.roleVet': 'Veterinary clinic',
   'auth.roleLabel': 'I’m signing up as',
-  'auth.termsPrefix': 'By creating an account, you agree to PawLine’s ',
+  'auth.termsPrefix': 'By creating an account, you agree to our ',
   'auth.termsMiddle': ' and ',
   'auth.termsSuffix': '.',
   'auth.haveAccount': 'Already have an account? Sign in',
@@ -192,7 +192,7 @@ export const en = {
   'profile.toNext': '{xp} XP to {tier}',
   'profile.maxTier': 'Top tier reached',
   'profile.casesHelped': 'Animals helped',
-  'profile.memberSince': 'On PawLine since {date}',
+  'profile.memberSince': 'On Stray’s Call since {date}',
   'profile.myCases': 'My cases',
   'profile.settings': 'Notifications',
   'profile.pref.all': 'All',
@@ -203,8 +203,8 @@ export const en = {
   'profile.setHome': 'Use current location as my area',
   'profile.homeSet': 'Area saved',
   'profile.vetDashboard': 'Clinic dashboard',
-  'profile.platformStats': 'PawLine so far',
-  'profile.install': 'Install PawLine on your home screen for the full experience.',
+  'profile.platformStats': 'Stray’s Call so far',
+  'profile.install': 'Install Stray’s Call on your home screen for the full experience.',
 
   // Vet dashboard
   'vetDash.title': 'Clinic dashboard',
@@ -279,10 +279,10 @@ export const en = {
   'push.disable': 'Disable push notifications',
   'push.enabled': 'Push notifications are on for this device.',
   'push.denied': 'Notifications are blocked for this site — enable them in your browser settings.',
-  'push.unsupported': 'Push isn’t available here. On iPhone, first add PawLine to your home screen.',
+  'push.unsupported': 'Push isn’t available here. On iPhone, first add Stray’s Call to your home screen.',
   'privacy.link': 'Privacy policy',
-  'vetSetup.pending': 'Your clinic is awaiting verification by the PawLine team. It will appear to rescuers once approved.',
-  'vetSetup.rejected': 'Your clinic wasn’t approved. If you believe this is a mistake, contact the PawLine team.',
+  'vetSetup.pending': 'Your clinic is awaiting verification by the Stray’s Call team. It will appear to rescuers once approved.',
+  'vetSetup.rejected': 'Your clinic wasn’t approved. If you believe this is a mistake, contact the Stray’s Call team.',
   'vetVisibility.needsDetails': 'Rescuers can’t find you yet — finish your clinic’s address and phone number in Clinic setup.',
   'vetVisibility.needsDocuments': 'Rescuers can’t find you yet. Your clinic is awaiting review — adding verification documents can help speed up approval.',
   'sponsors.title': 'Supported by',
@@ -427,7 +427,7 @@ export const en = {
   'case.closedCommunity': 'Closed: the community reported this animal is no longer here or already helped.',
   'case.closedExpired': 'Archived: this case was open for 24 hours without a rescuer. The animal may still be in the area.',
   'safety.title': 'Before you help — please read',
-  'safety.body': 'PawLine connects people; it is not a rescue service, veterinary service, or emergency responder. An injured or frightened animal can bite or scratch, and some carry disease. Approach slowly and calmly, keep children and pets back, use a towel or blanket and gloves if you can, and don’t put yourself in traffic or danger. If you’re unsure or the animal is aggressive, wait for someone experienced or contact a local organization. You accept these risks yourself.',
+  'safety.body': 'Stray’s Call connects people; it is not a rescue service, veterinary service, or emergency responder. An injured or frightened animal can bite or scratch, and some carry disease. Approach slowly and calmly, keep children and pets back, use a towel or blanket and gloves if you can, and don’t put yourself in traffic or danger. If you’re unsure or the animal is aggressive, wait for someone experienced or contact a local organization. You accept these risks yourself.',
   'safety.agree': 'I understand and accept these risks',
   'safety.readFull': 'Read the full safety guide',
   'settings.title': 'Settings',
@@ -450,7 +450,7 @@ export const en = {
   'legal.terms': 'Terms of Service',
   'legal.safety': 'Safety Guide',
   'legal.conduct': 'Community Guidelines',
-  'legal.about': 'About PawLine',
+  'legal.about': 'About Stray’s Call',
   'legal.contact': 'Contact Us',
   'legal.faq': 'FAQ',
   'error.title': 'Something went wrong',
@@ -466,7 +466,7 @@ export const en = {
   'settings.notifManageSub': 'Choose which new cases alert you, and your area',
   'settings.exportSub': 'Download everything tied to your account as a file.',
   'safety.ackIntro': 'Before your first rescue, a quick word on staying safe. This appears once.',
-  'safety.ackFine': 'By continuing you confirm you understand these risks and act on your own judgement. PawLine is a coordination tool, not a rescue or emergency service.',
+  'safety.ackFine': 'By continuing you confirm you understand these risks and act on your own judgement. Stray’s Call is a coordination tool, not a rescue or emergency service.',
   'safety.ackConfirm': 'I understand — continue',
   'report.captchaFailed': 'Couldn’t verify you’re human. Please try again, or create a free account to report.',
   'report.submitFailed': 'Couldn’t submit your report. Please try again in a moment.',

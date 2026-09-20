@@ -3,7 +3,7 @@ import type { Dict } from './index';
 
 export const az: Dict = {
   // App
-  'app.name': 'PawLine',
+  'app.name': 'Stray’s Call',
   'app.tagline': 'Hər sahibsiz heyvan geri dönüş yoluna layiqdir.',
 
   // Navigation
@@ -111,7 +111,7 @@ export const az: Dict = {
 
   // Case chat
   'caseChat.title': 'Hadisə çatı',
-  'caseChat.subtitle': 'Köməyi əlaqələndirin və müalicəyə dəstək olun. Baytarlar bank rekvizitlərini burada paylaşa bilər — ödənişlər PawLine-dan kənarda, birbaşa siz və klinika arasında baş verir.',
+  'caseChat.subtitle': 'Köməyi əlaqələndirin və müalicəyə dəstək olun. Baytarlar bank rekvizitlərini burada paylaşa bilər — ödənişlər Stray’s Call-dan kənarda, birbaşa siz və klinika arasında baş verir.',
   'caseChat.placeholder': 'Mesaj yazın…',
   'caseChat.signIn': 'Söhbətə qoşulmaq üçün daxil olun.',
   'caseChat.empty': 'Hələ mesaj yoxdur. Salam deyin və xilasetməni əlaqələndirin.',
@@ -153,7 +153,7 @@ export const az: Dict = {
   'auth.roleCommunity': 'İcma',
   'auth.roleVet': 'Baytar klinikası',
   'auth.roleLabel': 'Qeydiyyatdan keçirəm:',
-  'auth.termsPrefix': 'Hesab yaratmaqla PawLine-ın ',
+  'auth.termsPrefix': 'Hesab yaratmaqla bizim ',
   'auth.termsMiddle': ' və ',
   'auth.termsSuffix': ' şərtlərini qəbul edirsiniz.',
   'auth.haveAccount': 'Hesabınız var? Daxil olun',
@@ -194,7 +194,7 @@ export const az: Dict = {
   'profile.toNext': '{tier} üçün {xp} XP qalıb',
   'profile.maxTier': 'Ən yüksək səviyyəyə çatdınız',
   'profile.casesHelped': 'Kömək edilən heyvanlar',
-  'profile.memberSince': '{date} tarixindən PawLine-da',
+  'profile.memberSince': '{date} tarixindən Stray’s Call-da',
   'profile.myCases': 'Mənim hadisələrim',
   'profile.settings': 'Bildirişlər',
   'profile.pref.all': 'Hamısı',
@@ -205,8 +205,8 @@ export const az: Dict = {
   'profile.setHome': 'Hazırkı yerimi ərazim kimi yadda saxla',
   'profile.homeSet': 'Ərazi yadda saxlanıldı',
   'profile.vetDashboard': 'Klinika paneli',
-  'profile.platformStats': 'PawLine indiyə qədər',
-  'profile.install': 'Tam təcrübə üçün PawLine-ı əsas ekranınıza quraşdırın.',
+  'profile.platformStats': 'Stray’s Call indiyə qədər',
+  'profile.install': 'Tam təcrübə üçün Stray’s Call-ı əsas ekranınıza quraşdırın.',
 
   // Vet dashboard
   'vetDash.title': 'Klinika paneli',
@@ -281,10 +281,10 @@ export const az: Dict = {
   'push.disable': 'Push bildirişlərini söndür',
   'push.enabled': 'Bu cihazda push bildirişləri aktivdir.',
   'push.denied': 'Bu sayt üçün bildirişlər bloklanıb — brauzer parametrlərindən aktiv edin.',
-  'push.unsupported': 'Push burada mövcud deyil. iPhone-da əvvəlcə PawLine-ı əsas ekrana əlavə edin.',
+  'push.unsupported': 'Push burada mövcud deyil. iPhone-da əvvəlcə Stray’s Call-ı əsas ekrana əlavə edin.',
   'privacy.link': 'Məxfilik siyasəti',
-  'vetSetup.pending': 'Klinikanız PawLine komandası tərəfindən yoxlanılır. Təsdiqlənəndən sonra xilasedicilərə görünəcək.',
-  'vetSetup.rejected': 'Klinikanız təsdiqlənmədi. Səhv olduğunu düşünürsünüzsə, PawLine komandası ilə əlaqə saxlayın.',
+  'vetSetup.pending': 'Klinikanız Stray’s Call komandası tərəfindən yoxlanılır. Təsdiqlənəndən sonra xilasedicilərə görünəcək.',
+  'vetSetup.rejected': 'Klinikanız təsdiqlənmədi. Səhv olduğunu düşünürsünüzsə, Stray’s Call komandası ilə əlaqə saxlayın.',
   'vetVisibility.needsDetails': 'Xilasedicilər sizi hələ tapa bilmir — Klinika parametrlərində ünvanı və telefonu tamamlayın.',
   'vetVisibility.needsDocuments': 'Xilasedicilər sizi hələ tapa bilmir. Klinikanız yoxlanılır — doğrulama sənədləri əlavə etmək təsdiqi sürətləndirə bilər.',
   'sponsors.title': 'Dəstəkləyənlər',
@@ -429,7 +429,7 @@ export const az: Dict = {
   'case.closedCommunity': 'Bağlandı: icma bu heyvanın artıq burada olmadığını və ya kömək edildiyini bildirdi.',
   'case.closedExpired': 'Arxivləndi: bu hadisə 24 saat xilasedici olmadan açıq qaldı. Heyvan hələ də ərazidə ola bilər.',
   'safety.title': 'Kömək etməzdən əvvəl — zəhmət olmasa oxuyun',
-  'safety.body': 'PawLine insanları birləşdirir; o, xilasetmə, baytarlıq və ya təcili yardım xidməti deyil. Yaralı və ya qorxmuş heyvan dişləyə və ya cırmaqlaya bilər, bəziləri xəstəlik daşıyır. Yavaş və sakit yaxınlaşın, uşaqları və ev heyvanlarını uzaq tutun, mümkünsə dəsmal və ya əlcək istifadə edin, özünüzü nəqliyyat və ya təhlükə altına salmayın. Əmin deyilsinizsə və ya heyvan aqressivdirsə, təcrübəli birini gözləyin. Bu riskləri özünüz qəbul edirsiniz.',
+  'safety.body': 'Stray’s Call insanları birləşdirir; o, xilasetmə, baytarlıq və ya təcili yardım xidməti deyil. Yaralı və ya qorxmuş heyvan dişləyə və ya cırmaqlaya bilər, bəziləri xəstəlik daşıyır. Yavaş və sakit yaxınlaşın, uşaqları və ev heyvanlarını uzaq tutun, mümkünsə dəsmal və ya əlcək istifadə edin, özünüzü nəqliyyat və ya təhlükə altına salmayın. Əmin deyilsinizsə və ya heyvan aqressivdirsə, təcrübəli birini gözləyin. Bu riskləri özünüz qəbul edirsiniz.',
   'safety.agree': 'Bu riskləri başa düşürəm və qəbul edirəm',
   'safety.readFull': 'Tam təhlükəsizlik bələdçisini oxuyun',
   'settings.title': 'Parametrlər',
@@ -452,7 +452,7 @@ export const az: Dict = {
   'legal.terms': 'İstifadə Şərtləri',
   'legal.safety': 'Təhlükəsizlik Bələdçisi',
   'legal.conduct': 'İcma Qaydaları',
-  'legal.about': 'PawLine haqqında',
+  'legal.about': 'Stray’s Call haqqında',
   'legal.contact': 'Bizimlə əlaqə',
   'legal.faq': 'Tez-tez verilən suallar',
   'error.title': 'Nəsə səhv getdi',
@@ -468,7 +468,7 @@ export const az: Dict = {
   'settings.notifManageSub': 'Hansı yeni hadisələrin sizə xəbər verəcəyini və ərazinizi seçin',
   'settings.exportSub': 'Hesabınıza bağlı hər şeyi fayl kimi endirin.',
   'safety.ackIntro': 'İlk xilasetmənizdən əvvəl təhlükəsizlik haqqında qısa söz. Bu, bir dəfə görünür.',
-  'safety.ackFine': 'Davam etməklə bu riskləri anladığınızı və öz mühakimənizlə hərəkət etdiyinizi təsdiqləyirsiniz. PawLine əlaqələndirmə vasitəsidir, xilasetmə və ya təcili yardım xidməti deyil.',
+  'safety.ackFine': 'Davam etməklə bu riskləri anladığınızı və öz mühakimənizlə hərəkət etdiyinizi təsdiqləyirsiniz. Stray’s Call əlaqələndirmə vasitəsidir, xilasetmə və ya təcili yardım xidməti deyil.',
   'safety.ackConfirm': 'Anladım — davam et',
   'report.captchaFailed': 'İnsan olduğunuzu təsdiqləmək mümkün olmadı. Yenidən cəhd edin və ya bildirmək üçün pulsuz hesab yaradın.',
   'report.submitFailed': 'Bildirişinizi göndərmək mümkün olmadı. Zəhmət olmasa bir az sonra yenidən cəhd edin.',

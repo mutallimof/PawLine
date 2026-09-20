@@ -105,7 +105,7 @@ self.addEventListener('push', (event: PushEvent) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title ?? 'PawLine', {
+    self.registration.showNotification(data.title ?? 'Stray’s Call', {
       body: data.body ?? '',
       icon: '/pwa-192.png',
       badge: '/pwa-192.png',

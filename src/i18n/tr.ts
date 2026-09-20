@@ -3,7 +3,7 @@ import type { Dict } from './index';
 
 export const tr: Dict = {
   // App
-  'app.name': 'PawLine',
+  'app.name': 'Stray’s Call',
   'app.tagline': 'Her sahipsiz hayvan bir dönüş yolunu hak eder.',
 
   // Navigation
@@ -111,7 +111,7 @@ export const tr: Dict = {
 
   // Case chat
   'caseChat.title': 'Vaka sohbeti',
-  'caseChat.subtitle': 'Yardımı koordine edin ve tedaviye katkıda bulunun. Veterinerler banka bilgilerini burada paylaşabilir — ödemeler PawLine dışında, doğrudan siz ve klinik arasında gerçekleşir.',
+  'caseChat.subtitle': 'Yardımı koordine edin ve tedaviye katkıda bulunun. Veterinerler banka bilgilerini burada paylaşabilir — ödemeler Stray’s Call dışında, doğrudan siz ve klinik arasında gerçekleşir.',
   'caseChat.placeholder': 'Bir mesaj yazın…',
   'caseChat.signIn': 'Sohbete katılmak için giriş yapın.',
   'caseChat.empty': 'Henüz mesaj yok. Merhaba deyin ve kurtarmayı koordine edin.',
@@ -153,7 +153,7 @@ export const tr: Dict = {
   'auth.roleCommunity': 'Topluluk',
   'auth.roleVet': 'Veteriner kliniği',
   'auth.roleLabel': 'Şu şekilde kaydoluyorum:',
-  'auth.termsPrefix': 'Hesap oluşturarak PawLine’ın ',
+  'auth.termsPrefix': 'Hesap oluşturarak ',
   'auth.termsMiddle': ' ve ',
   'auth.termsSuffix': ' koşullarını kabul etmiş olursunuz.',
   'auth.haveAccount': 'Zaten hesabınız var mı? Giriş yapın',
@@ -194,7 +194,7 @@ export const tr: Dict = {
   'profile.toNext': '{tier} için {xp} XP kaldı',
   'profile.maxTier': 'En üst seviyeye ulaşıldı',
   'profile.casesHelped': 'Yardım edilen hayvanlar',
-  'profile.memberSince': '{date} tarihinden beri PawLine’da',
+  'profile.memberSince': '{date} tarihinden beri Stray’s Call’da',
   'profile.myCases': 'Vakalarım',
   'profile.settings': 'Bildirimler',
   'profile.pref.all': 'Tümü',
@@ -205,8 +205,8 @@ export const tr: Dict = {
   'profile.setHome': 'Mevcut konumumu bölgem olarak kaydet',
   'profile.homeSet': 'Bölge kaydedildi',
   'profile.vetDashboard': 'Klinik paneli',
-  'profile.platformStats': 'Şu ana kadar PawLine',
-  'profile.install': 'Tam deneyim için PawLine’ı ana ekranınıza ekleyin.',
+  'profile.platformStats': 'Şu ana kadar Stray’s Call',
+  'profile.install': 'Tam deneyim için Stray’s Call’ı ana ekranınıza ekleyin.',
 
   // Vet dashboard
   'vetDash.title': 'Klinik paneli',
@@ -281,10 +281,10 @@ export const tr: Dict = {
   'push.disable': 'Anlık bildirimleri kapat',
   'push.enabled': 'Bu cihazda anlık bildirimler açık.',
   'push.denied': 'Bu site için bildirimler engellenmiş — tarayıcı ayarlarından açın.',
-  'push.unsupported': 'Anlık bildirim burada kullanılamıyor. iPhone’da önce PawLine’ı ana ekrana ekleyin.',
+  'push.unsupported': 'Anlık bildirim burada kullanılamıyor. iPhone’da önce Stray’s Call’ı ana ekrana ekleyin.',
   'privacy.link': 'Gizlilik politikası',
-  'vetSetup.pending': 'Kliniğiniz PawLine ekibi tarafından doğrulanmayı bekliyor. Onaylandığında kurtarıcılara görünecek.',
-  'vetSetup.rejected': 'Kliniğiniz onaylanmadı. Bunun bir hata olduğunu düşünüyorsanız PawLine ekibiyle iletişime geçin.',
+  'vetSetup.pending': 'Kliniğiniz Stray’s Call ekibi tarafından doğrulanmayı bekliyor. Onaylandığında kurtarıcılara görünecek.',
+  'vetSetup.rejected': 'Kliniğiniz onaylanmadı. Bunun bir hata olduğunu düşünüyorsanız Stray’s Call ekibiyle iletişime geçin.',
   'vetVisibility.needsDetails': 'Kurtarıcılar sizi henüz bulamıyor — Klinik ayarlarında adresinizi ve telefon numaranızı tamamlayın.',
   'vetVisibility.needsDocuments': 'Kurtarıcılar sizi henüz bulamıyor. Kliniğiniz inceleniyor — doğrulama belgeleri eklemek onayı hızlandırabilir.',
   'sponsors.title': 'Destekleyenler',
@@ -429,7 +429,7 @@ export const tr: Dict = {
   'case.closedCommunity': 'Kapatıldı: topluluk bu hayvanın artık burada olmadığını veya yardım edildiğini bildirdi.',
   'case.closedExpired': 'Arşivlendi: bu vaka 24 saat kurtarıcı olmadan açık kaldı. Hayvan hâlâ bölgede olabilir.',
   'safety.title': 'Yardım etmeden önce — lütfen okuyun',
-  'safety.body': 'PawLine insanları birbirine bağlar; bir kurtarma, veterinerlik veya acil müdahale hizmeti değildir. Yaralı veya korkmuş bir hayvan ısırabilir veya tırmalayabilir, bazıları hastalık taşır. Yavaş ve sakin yaklaşın, çocukları ve evcil hayvanları uzak tutun, mümkünse havlu veya eldiven kullanın, kendinizi trafiğe veya tehlikeye atmayın. Emin değilseniz veya hayvan saldırgansa, deneyimli birini bekleyin. Bu riskleri kendiniz kabul edersiniz.',
+  'safety.body': 'Stray’s Call insanları birbirine bağlar; bir kurtarma, veterinerlik veya acil müdahale hizmeti değildir. Yaralı veya korkmuş bir hayvan ısırabilir veya tırmalayabilir, bazıları hastalık taşır. Yavaş ve sakin yaklaşın, çocukları ve evcil hayvanları uzak tutun, mümkünse havlu veya eldiven kullanın, kendinizi trafiğe veya tehlikeye atmayın. Emin değilseniz veya hayvan saldırgansa, deneyimli birini bekleyin. Bu riskleri kendiniz kabul edersiniz.',
   'safety.agree': 'Bu riskleri anlıyorum ve kabul ediyorum',
   'safety.readFull': 'Tam güvenlik kılavuzunu okuyun',
   'settings.title': 'Ayarlar',
@@ -452,7 +452,7 @@ export const tr: Dict = {
   'legal.terms': 'Kullanım Şartları',
   'legal.safety': 'Güvenlik Kılavuzu',
   'legal.conduct': 'Topluluk Kuralları',
-  'legal.about': 'PawLine Hakkında',
+  'legal.about': 'Stray’s Call Hakkında',
   'legal.contact': 'Bize Ulaşın',
   'legal.faq': 'SSS',
   'error.title': 'Bir şeyler ters gitti',
@@ -468,7 +468,7 @@ export const tr: Dict = {
   'settings.notifManageSub': 'Hangi yeni vakaların sizi uyaracağını ve bölgenizi seçin',
   'settings.exportSub': 'Hesabınıza bağlı her şeyi bir dosya olarak indirin.',
   'safety.ackIntro': 'İlk kurtarmanızdan önce güvenlik hakkında kısa bir söz. Bu bir kez görünür.',
-  'safety.ackFine': 'Devam ederek bu riskleri anladığınızı ve kendi kararınızla hareket ettiğinizi onaylarsınız. PawLine bir koordinasyon aracıdır, kurtarma veya acil servis değildir.',
+  'safety.ackFine': 'Devam ederek bu riskleri anladığınızı ve kendi kararınızla hareket ettiğinizi onaylarsınız. Stray’s Call bir koordinasyon aracıdır, kurtarma veya acil servis değildir.',
   'safety.ackConfirm': 'Anladım — devam et',
   'report.captchaFailed': 'İnsan olduğunuz doğrulanamadı. Lütfen tekrar deneyin veya bildirmek için ücretsiz bir hesap oluşturun.',
   'report.submitFailed': 'Bildiriminiz gönderilemedi. Lütfen birazdan tekrar deneyin.',
