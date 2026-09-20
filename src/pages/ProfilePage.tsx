@@ -17,7 +17,7 @@ import { InkScene } from '../components/Ink';
 import type { CaseWithDetails, NewCasePref } from '../lib/types';
 
 export default function ProfilePage() {
-  const { user, profile, signOut, refreshProfile } = useAuth();
+  const { user, profile, profileError, retryProfile, signOut, refreshProfile } = useAuth();
   const [myCases, setMyCases] = useState<CaseWithDetails[]>([]);
   const [pushOn, setPushOn] = useState(false);
   const navigate = useNavigate();
@@ -69,6 +69,28 @@ export default function ProfilePage() {
   }
 
   if (!profile) {
+    if (profileError) {
+      return (
+        <div className="page">
+          <h1 className="page-title">{t('nav.profile')}</h1>
+          <div className="empty-state">
+            <InkScene kind="calm" />
+            {t('profile.loadFailed')}
+            {/* TEMP (debugging the "every fresh login" profile hang): raw
+                cause on-screen so a tester can report it without opening
+                devtools. Remove once the root cause is fixed. */}
+            <p className="page-subtitle" style={{ marginTop: 4, opacity: 0.6, fontSize: 11 }}>
+              couldn't load profile: {profileError}
+            </p>
+            <div style={{ marginTop: 16 }}>
+              <button className="btn btn--primary" onClick={retryProfile}>
+                {t('common.retry')}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="page">
         <h1 className="page-title">{t('nav.profile')}</h1>

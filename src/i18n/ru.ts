@@ -183,6 +183,7 @@ export const ru: Dict = {
 
   // Profile
   'profile.level': 'Уровень',
+  'profile.loadFailed': 'Не удалось загрузить профиль.',
   'profile.xp': '{xp} XP',
   'profile.toNext': '{xp} XP до «{tier}»',
   'profile.maxTier': 'Достигнут высший уровень',

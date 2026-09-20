@@ -183,6 +183,7 @@ export const az: Dict = {
 
   // Profile
   'profile.level': 'Səviyyə',
+  'profile.loadFailed': 'Profiliniz yüklənmədi.',
   'profile.xp': '{xp} XP',
   'profile.toNext': '{tier} üçün {xp} XP qalıb',
   'profile.maxTier': 'Ən yüksək səviyyəyə çatdınız',

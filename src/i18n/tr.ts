@@ -183,6 +183,7 @@ export const tr: Dict = {
 
   // Profile
   'profile.level': 'Seviye',
+  'profile.loadFailed': 'Profiliniz yüklenemedi.',
   'profile.xp': '{xp} XP',
   'profile.toNext': '{tier} için {xp} XP kaldı',
   'profile.maxTier': 'En üst seviyeye ulaşıldı',

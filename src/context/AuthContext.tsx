@@ -36,12 +36,22 @@ import {
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { becomeVet, fetchMyProfile } from '../lib/api';
+import { captureError } from '../lib/monitoring';
 import type { Profile } from '../lib/types';
 import { getLocale, setLocale, SUPPORTED_LOCALES, type LocaleCode } from '../i18n';
 
 interface AuthState {
   user: User | null;
   profile: Profile | null;
+  /**
+   * Set only once every retry in the profile-load effect below has been
+   * exhausted — a signed-in user whose `profiles` row genuinely can't be
+   * fetched, not a normal in-flight state. Pages should show this instead
+   * of spinning forever once it's non-null.
+   */
+  profileError: string | null;
+  /** Re-run the profile-load effect from attempt 0, clearing profileError first. */
+  retryProfile: () => void;
   /** True only while the persisted session is being restored on startup. */
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -81,6 +91,10 @@ const OAUTH_VET_PENDING_KEY = 'pawline-oauth-vet-pending';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  // Bumping this re-runs the profile-load effect below from attempt 0 —
+  // retryProfile()'s whole mechanism.
+  const [profileRetryNonce, setProfileRetryNonce] = useState(0);
   const [loading, setLoading] = useState(true);
   const retryTimer = useRef<number | null>(null);
 
@@ -115,10 +129,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (retryTimer.current) window.clearTimeout(retryTimer.current);
     if (!userId) {
       setProfile(null);
+      setProfileError(null);
       return;
     }
 
     let cancelled = false;
+    setProfileError(null); // clear any previous failure — this is a fresh attempt
 
     const load = async (attempt: number) => {
       try {
@@ -164,9 +180,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             1000 * 2 ** attempt
           );
         } else {
-          // Loud, not silent: this state previously masqueraded as
-          // "signed out" in parts of the UI.
+          // Loud, not silent: this state previously masqueraded as an
+          // infinite spinner, invisible everywhere but a devtools console
+          // nobody was watching — now it reaches Sentry AND the page (via
+          // profileError) so pages can show something other than "loading"
+          // forever.
           console.error('PawLine: failed to load profile after retries', e);
+          captureError(e);
+          setProfileError(e instanceof Error ? e.message : String(e));
         }
       }
     };
@@ -176,7 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       if (retryTimer.current) window.clearTimeout(retryTimer.current);
     };
-  }, [userId]);
+  }, [userId, profileRetryNonce]);
 
   // ── 3. Auth actions ───────────────────────────────────────────────────────
   const signIn = useCallback(async (email: string, password: string) => {
@@ -253,9 +274,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [userId]);
 
+  const retryProfile = useCallback(() => {
+    setProfileError(null);
+    setProfileRetryNonce((n) => n + 1);
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile, signInWithGoogle }}
+      value={{
+        user,
+        profile,
+        profileError,
+        retryProfile,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        refreshProfile,
+        signInWithGoogle,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -37,3 +37,13 @@ export function captureBoundaryError(error: unknown): void {
   if (!import.meta.env.VITE_SENTRY_DSN) return;
   Sentry.captureException(error);
 }
+
+/**
+ * Explicit capture for any other handled failure we still want visibility
+ * into — e.g. a retried background fetch that gives up and would otherwise
+ * only ever reach a console.error nobody's watching. No-op when unconfigured.
+ */
+export function captureError(error: unknown): void {
+  if (!import.meta.env.VITE_SENTRY_DSN) return;
+  Sentry.captureException(error);
+}

@@ -181,6 +181,7 @@ export const en = {
 
   // Profile
   'profile.level': 'Level',
+  'profile.loadFailed': 'Couldn’t load your profile.',
   'profile.xp': '{xp} XP',
   'profile.toNext': '{xp} XP to {tier}',
   'profile.maxTier': 'Top tier reached',
