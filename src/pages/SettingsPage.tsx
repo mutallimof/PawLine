@@ -23,7 +23,11 @@ import { InkScene } from '../components/Ink';
 import type { Profile } from '../lib/types';
 
 export default function SettingsPage() {
-  const { user, profile } = useAuth();
+  const { user, isGuest, profile, profileError, retryProfile } = useAuth();
+  // Bug #1 pattern (see AuthContext's header): gate on the ACCOUNT, never on
+  // `profile`, which lags the session briefly after sign-in. Gating on
+  // !profile alone showed "Sign in" to someone who was already signed in.
+  const isRegistered = !!user && !isGuest;
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -32,7 +36,7 @@ export default function SettingsPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!isRegistered) return; // a guest has no account and so blocks nobody
     void (async () => {
       try {
         const ids = await fetchBlockedIds(user.id);
@@ -42,9 +46,9 @@ export default function SettingsPage() {
         /* non-fatal */
       }
     })();
-  }, [user]);
+  }, [user, isRegistered]);
 
-  if (!user || !profile) {
+  if (!isRegistered) {
     return (
       <div className="page">
         <button className="back-btn" onClick={() => navigate(-1)}>
@@ -58,6 +62,31 @@ export default function SettingsPage() {
             {t('auth.signIn')}
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  // Signed in, profile not here yet: a spinner while it loads, and a real
+  // error with a retry if it never arrives — never an endless spinner, which
+  // is the failure this screen would otherwise have inherited from Profile.
+  if (!profile) {
+    return (
+      <div className="page">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <IconBack size={18} /> {t('common.back')}
+        </button>
+        <h1 className="page-title">{t('settings.title')}</h1>
+        {profileError ? (
+          <div className="empty-state">
+            <InkScene kind="lost" />
+            {t('profile.loadFailed')}
+            <button className="btn btn--primary" style={{ marginTop: 14 }} onClick={retryProfile}>
+              {t('common.retry')}
+            </button>
+          </div>
+        ) : (
+          <div className="spinner" />
+        )}
       </div>
     );
   }

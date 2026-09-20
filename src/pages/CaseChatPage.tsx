@@ -33,7 +33,14 @@ function senderColor(id: string): string {
 
 export default function CaseChatPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  // Reading this chat is deliberately public (case_messages is granted SELECT
+  // to anon, and its policy only hides hidden rows), so a guest keeps full
+  // read access — same as a signed-out visitor. Only POSTING needs an account:
+  // the insert policy (003) excludes anonymous sessions, and sender_id is a
+  // NOT NULL FK into profiles, which a guest has no row in. So gate the
+  // composer and the per-message actions, never the thread itself.
+  const isRegistered = !!user && !isGuest;
   const { caseData } = useCase(id);
   const { messages, loading } = useCaseChat(id);
   const [draft, setDraft] = useState('');
@@ -50,12 +57,12 @@ export default function CaseChatPage() {
   // Migration 017: mark read whenever new messages land while it's open —
   // mirrors DmThreadPage's markConversationRead effect.
   useEffect(() => {
-    if (id && user) void markCaseChatRead(id).catch(() => {});
-  }, [id, user, messages.length]);
+    if (id && isRegistered) void markCaseChatRead(id).catch(() => {});
+  }, [id, user, isRegistered, messages.length]);
 
   const send = async () => {
     const body = draft.trim();
-    if (!body || !user || !id) return;
+    if (!body || !isRegistered || !id) return;
     setSending(true);
     try {
       await sendCaseMessage(id, user.id, body);
@@ -106,7 +113,7 @@ export default function CaseChatPage() {
                     {m.sender.display_name}
                     {m.sender.role === 'vet' ? ' 🏥' : ''}
                   </Link>
-                  {user && m.sender_id && m.sender_id !== user.id && (
+                  {isRegistered && m.sender_id && m.sender_id !== user.id && (
                     <button
                       style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-soft)' }}
                       title={t('settings.block')}
@@ -129,7 +136,7 @@ export default function CaseChatPage() {
               <span className="bubble__time">{clockTime(m.created_at)}</span>
               {/* Report (B2): per-message, so every message keeps this —
                   unlike the name/block above, unrelated to run-grouping. */}
-              {!mine && user && (
+              {!mine && isRegistered && (
                 <ReportButton
                   reporterId={user.id}
                   targetType="case_message"
@@ -144,7 +151,7 @@ export default function CaseChatPage() {
         })}
       </div>
 
-      {user ? (
+      {isRegistered ? (
         <div className="chat-composer">
           <div style={{ alignSelf: 'center' }}>
             <Avatar name={user.email ?? 'me'} small />
