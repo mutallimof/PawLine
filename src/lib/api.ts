@@ -27,6 +27,7 @@ import type {
 } from './types';
 import { uploadCasePhoto } from './photos';
 import { computeDHash } from './phash';
+import { captureError } from './monitoring';
 import { getTurnstileToken, turnstileEnabled } from './turnstile';
 
 // ---------------------------------------------------------------------------
@@ -555,11 +556,51 @@ export async function fetchProfile(id: string): Promise<Profile | null> {
   return data as Profile | null;
 }
 
-/** The signed-in user's own FULL profile (RPC bypasses the column limits). */
+/**
+ * The signed-in user's own FULL profile (RPC bypasses the column limits).
+ *
+ * Self-heals a MISSING profiles row (migration 026). Zero rows here is not a
+ * "not written yet" race: handle_new_user() commits inside the auth.users
+ * insert transaction, so a real signup always lands both together. What
+ * actually produces zero rows for a live account is the row being deleted
+ * out from under it — profiles.id's FK cascades from auth.users but not back,
+ * so wiping public.profiles (a planned pre-launch test-data step) leaves
+ * working credentials with no profile, permanently. ensure_my_profile()
+ * recreates it at the community baseline; see that migration for why the
+ * healed role is never taken from signup metadata.
+ */
 export async function fetchMyProfile(): Promise<Profile | null> {
   const { data, error } = await supabase.rpc('get_my_profile');
   if (error) throw new Error(error.message);
-  return ((data as Profile[] | null)?.[0] ?? null);
+  const profile = (data as Profile[] | null)?.[0] ?? null;
+  if (profile) return profile;
+
+  // Guests correctly have no profile row (handle_new_user skips anonymous
+  // sessions, 003) — nothing to heal, and calling the RPC on every guest
+  // page load would be pure noise.
+  const { data: session } = await supabase.auth.getSession();
+  if (!session.session || session.session.user.is_anonymous) return null;
+
+  const { error: healErr } = await supabase.rpc('ensure_my_profile');
+  if (healErr) {
+    // Most likely migration 026 isn't applied yet. Degrade to exactly the
+    // previous behaviour rather than replacing a clear "no profile row"
+    // signal with a confusing RPC error — but say so out loud, since an
+    // unapplied migration is worth knowing about (they're applied by hand).
+    captureError(healErr);
+    return null;
+  }
+
+  const { data: healed, error: healedErr } = await supabase.rpc('get_my_profile');
+  if (healedErr) throw new Error(healedErr.message);
+  const healedProfile = (healed as Profile[] | null)?.[0] ?? null;
+
+  // Only on an actual repair: the row now exists, so every later load takes
+  // the fast path above and this never fires twice for the same account.
+  if (healedProfile) {
+    captureError(new Error('PawLine: profiles row was missing; ensure_my_profile() recreated it'));
+  }
+  return healedProfile;
 }
 
 export async function updateProfile(
