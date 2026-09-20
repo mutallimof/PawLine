@@ -56,7 +56,7 @@ export default function CaseDetailPage() {
   // account and no profiles row, so every action below would be rejected by
   // the database. They get the sign-in prompt instead of dead buttons.
   const isRegistered = !!user && !isGuest;
-  const { caseData, events, loading } = useCase(id);
+  const { caseData, events, loading, reload } = useCase(id);
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -128,11 +128,22 @@ export default function CaseDetailPage() {
   const reportPhotos = caseData.photos.filter((p) => p.kind === 'report');
   const deliveryPhotos = caseData.photos.filter((p) => p.kind === 'delivery');
 
-  /** Run an action with busy state + error toast. */
+  /**
+   * Run an action with busy state + error toast, then refresh THIS case.
+   *
+   * The reload is not belt-and-braces for a working subscription — it is what
+   * makes the acting user's own screen correct without depending on realtime
+   * at all. Every transition here is a SECURITY DEFINER RPC that returns
+   * nothing useful, so before this the actor had no local state change of any
+   * kind and sat on a stale paw-trail waiting for an echo of their own write.
+   * Observers still get the live update over the `cases`/`case_events`
+   * channel in useCase().
+   */
   const run = (fn: () => Promise<unknown>) => async () => {
     setBusy(true);
     try {
       await fn();
+      await reload();
     } catch (e) {
       const msg = e instanceof Error ? e.message : '';
       // Audit P4: a double-tap or a race with another actor lands here with a
@@ -197,6 +208,10 @@ export default function CaseDetailPage() {
     setBusy(true);
     try {
       await addDeliveryPhoto(caseData.id, files[0]);
+      // case_photos isn't in the realtime publication, so nothing would echo
+      // this back — without the reload the photo the rescuer just uploaded
+      // wouldn't appear until they navigated away and back.
+      await reload();
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
     } finally {
