@@ -17,7 +17,7 @@ import { InkScene } from '../components/Ink';
 import type { CaseWithDetails, NewCasePref } from '../lib/types';
 
 export default function ProfilePage() {
-  const { user, profile, profileError, retryProfile, signOut, refreshProfile } = useAuth();
+  const { user, isGuest, profile, profileError, retryProfile, signOut, refreshProfile } = useAuth();
   const [myCases, setMyCases] = useState<CaseWithDetails[]>([]);
   const [pushOn, setPushOn] = useState(false);
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || isGuest) return; // a guest never reaches the UI this feeds
     // Cases I reported, rescued or received.
     supabase
       .from('cases')
@@ -37,13 +37,17 @@ export default function ProfilePage() {
       .order('created_at', { ascending: false })
       .limit(20)
       .then(({ data }) => setMyCases((data ?? []) as unknown as CaseWithDetails[]));
-  }, [user]);
+  }, [user, isGuest]);
 
-  // Auth gate — on `user` ONLY. `profile` can lag behind the session for a
-  // moment (or briefly fail and retry); treating that as "signed out" was
-  // part of bug #1. A signed-in user with a pending profile sees a spinner,
-  // never the sign-in prompt.
-  if (!user) {
+  // Auth gate — a real account, not merely a session. `profile` can lag
+  // behind the session for a moment (or briefly fail and retry); treating
+  // that as "signed out" was part of bug #1, so this still never gates on
+  // `profile`. But a GUEST (anonymous session, minted just by browsing the
+  // feed) also has a `user` while having no account at all, and belongs here
+  // rather than in the profile-loading path below — otherwise they fall
+  // through to a spinner, then a profile-load error, for a profile they were
+  // never supposed to have.
+  if (!user || isGuest) {
     return (
       <div className="page">
         <h1 className="page-title">{t('nav.profile')}</h1>

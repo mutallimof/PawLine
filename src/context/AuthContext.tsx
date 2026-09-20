@@ -22,6 +22,12 @@
  *      longer strand the app in a "user set, profile null forever" state.
  *   3. `loading` refers only to session restoration. Pages must gate auth
  *      checks on `user`, never on `profile` (which may lag briefly).
+ *   4. `user` being set does NOT mean "signed in". Browsing the feed mints a
+ *      silent ANONYMOUS session (ensureSession, api.ts), which sets `user`
+ *      like any other. Pages that mean "has a real account" must check
+ *      `isGuest` too — a bare `!user` gate lets guests fall through into
+ *      signed-in-only UI, which is how the Profile tab ended up showing a
+ *      profile-load error to people who had never signed in at all.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import {
@@ -42,12 +48,20 @@ import { getLocale, setLocale, SUPPORTED_LOCALES, type LocaleCode } from '../i18
 
 interface AuthState {
   user: User | null;
+  /**
+   * True when the session is an ANONYMOUS one (minted silently by browsing —
+   * see rule 4 in the header). Such a session has a `user` and a valid token,
+   * but no account, no `profiles` row, and no business seeing signed-in-only
+   * UI. "Is there a real account behind this?" is `user && !isGuest`.
+   */
+  isGuest: boolean;
   profile: Profile | null;
   /**
    * Set only once every retry in the profile-load effect below has been
    * exhausted — a signed-in user whose `profiles` row genuinely can't be
    * fetched, not a normal in-flight state. Pages should show this instead
-   * of spinning forever once it's non-null.
+   * of spinning forever once it's non-null. Never set for a guest, whose
+   * lack of a profile row is correct rather than a failure.
    */
   profileError: string | null;
   /** Re-run the profile-load effect from attempt 0, clearing profileError first. */
@@ -125,9 +139,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── 2. Profile loading — separate effect, outside the auth lock ──────────
   const userId = user?.id ?? null;
+  const isGuest = user?.is_anonymous === true;
   useEffect(() => {
     if (retryTimer.current) window.clearTimeout(retryTimer.current);
-    if (!userId) {
+    // A guest has no profiles row by design (handle_new_user skips anonymous
+    // sessions, 003), so there is nothing to load and nothing wrong. Starting
+    // a load anyway would spend four retries reaching the only possible
+    // answer, then report it as a failure — to Sentry on every guest visit,
+    // and to any page reading profileError.
+    if (!userId || isGuest) {
       setProfile(null);
       setProfileError(null);
       return;
@@ -197,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       if (retryTimer.current) window.clearTimeout(retryTimer.current);
     };
-  }, [userId, profileRetryNonce]);
+  }, [userId, isGuest, profileRetryNonce]);
 
   // ── 3. Auth actions ───────────────────────────────────────────────────────
   const signIn = useCallback(async (email: string, password: string) => {
@@ -283,6 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        isGuest,
         profile,
         profileError,
         retryProfile,
