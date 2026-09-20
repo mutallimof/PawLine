@@ -8,7 +8,7 @@
  *  - VetDashboardPage: incoming requests + active cases for a clinic
  */
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   blockUser,
@@ -33,9 +33,31 @@ import { t } from '../i18n';
 import type { AnimalType, Profile, Vet, VetDocument } from '../lib/types';
 
 // ---------------------------------------------------------------------------
+/**
+ * The single guest / signed-out call to action used across this file: the
+ * reason, plus an actual tappable route to sign-in. The two vet screens below
+ * previously showed the reason with no way to act on it, which left a guest
+ * stranded; every prompt in the app now offers the same way out.
+ */
+function SignInCta() {
+  return (
+    <>
+      {t('dm.signIn')}
+      <div style={{ marginTop: 14 }}>
+        <Link to="/auth" className="btn btn--primary">{t('auth.signIn')}</Link>
+      </div>
+    </>
+  );
+}
+
 export function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  // This page stays PUBLIC for guests — only the actions need an account.
+  // Messaging goes through get_or_create_dm(), which requires a shared active
+  // case and a non-anonymous caller (012), and blocking keys on profile ids,
+  // so both fail at the database for an anonymous session.
+  const isRegistered = !!user && !isGuest;
   const [profile, setProfile] = useState<Profile | null>(null);
   const [blocked, setBlocked] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -48,15 +70,15 @@ export function UserProfilePage() {
 
   // B4: reflect current block state so the button reads Block vs Unblock.
   useEffect(() => {
-    if (user && id && user.id !== id) {
+    if (isRegistered && id && user.id !== id) {
       isUserBlocked(user.id, id).then(setBlocked).catch(() => {});
     }
-  }, [user, id]);
+  }, [user, isRegistered, id]);
 
   if (!profile) return <div className="page"><div className="spinner" /></div>;
 
   const message = async () => {
-    if (!user) return navigate('/auth');
+    if (!isRegistered) return navigate('/auth');
     try {
       navigate(`/messages/${await getOrCreateDm(profile.id)}`);
     } catch (e) {
@@ -65,7 +87,7 @@ export function UserProfilePage() {
   };
 
   const toggleBlock = async () => {
-    if (!user) return navigate('/auth');
+    if (!isRegistered) return navigate('/auth');
     setBusy(true);
     try {
       if (blocked) {
@@ -103,7 +125,12 @@ export function UserProfilePage() {
             {t('profile.casesHelped')}: {profile.cases_helped}
           </span>
         </div>
-        {user && user.id !== profile.id && (
+        {!isRegistered && (
+          <div style={{ marginTop: 14 }}>
+            <SignInCta />
+          </div>
+        )}
+        {isRegistered && user.id !== profile.id && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
             <button className="btn btn--primary" onClick={() => void message()}>
               💬 {t('dm.messageUser')}
@@ -125,7 +152,10 @@ export function UserProfilePage() {
 // ---------------------------------------------------------------------------
 export function VetPublicPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  // Public for guests; only messaging the clinic needs an account (same
+  // get_or_create_dm() restriction as UserProfilePage above).
+  const isRegistered = !!user && !isGuest;
   const [vet, setVet] = useState<Vet | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const navigate = useNavigate();
@@ -140,7 +170,7 @@ export function VetPublicPage() {
   if (!vet) return <div className="page"><div className="spinner" /></div>;
 
   const message = async () => {
-    if (!user) return navigate('/auth');
+    if (!isRegistered) return navigate('/auth');
     try {
       navigate(`/messages/${await getOrCreateDm(vet.id)}`);
     } catch (e) {
@@ -192,7 +222,12 @@ export function VetPublicPage() {
         ) : vet.is_open === false ? (
           <div className="banner banner--warn">{t('vets.atCapacity')}</div>
         ) : null}
-        {user && user.id !== vet.id && (
+        {!isRegistered && (
+          <div style={{ marginTop: 14 }}>
+            <SignInCta />
+          </div>
+        )}
+        {isRegistered && user.id !== vet.id && (
           <button className="btn btn--primary" onClick={() => void message()}>
             💬 {t('dm.messageUser')}
           </button>
@@ -279,7 +314,7 @@ export function VetSetupPage() {
   // still-loading profile for a genuinely signed-in user still gets a spinner,
   // not an error (same class of bug as the ProfilePage sign-in gate).
   if (!user || isGuest) {
-    return <div className="page"><div className="empty-state">{t('dm.signIn')}</div></div>;
+    return <div className="page"><div className="empty-state"><SignInCta /></div></div>;
   }
   if (!profile) {
     return <div className="page"><div className="spinner" /></div>;
@@ -603,7 +638,7 @@ export function VetDashboardPage() {
   // Same prompt VetSetupPage uses — a guest or signed-out visitor got a
   // permanent spinner here before.
   if (!isRegistered) {
-    return <div className="page"><div className="empty-state">{t('dm.signIn')}</div></div>;
+    return <div className="page"><div className="empty-state"><SignInCta /></div></div>;
   }
 
   const mine = cases.filter((c) => c.vet_id === user.id);
