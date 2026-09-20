@@ -1,7 +1,7 @@
 /** Shared UI building blocks. */
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import type { CaseStatus, CaseWithDetails, Profile, UrgencyLevel } from '../lib/types';
+import type { CaseStatus, CaseWithDetails, UrgencyLevel } from '../lib/types';
 import {
   getLocale,
   LOCALE_NAMES,
@@ -503,33 +503,5 @@ export function LanguageSwitcher() {
         </button>
       ))}
     </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Small profile row (used in DM search, case detail)
-// ---------------------------------------------------------------------------
-
-export function ProfileRow({
-  profile,
-  sub,
-  onClick,
-}: {
-  profile: Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'xp'> & { role?: string };
-  sub?: string;
-  onClick?: () => void;
-}) {
-  return (
-    <button className="list-row" onClick={onClick}>
-      <Avatar name={profile.display_name} url={profile.avatar_url} />
-      <div className="list-row__main">
-        <div className="list-row__title">
-          {profile.display_name}
-          {profile.role === 'vet' ? ' 🏥' : ''}
-        </div>
-        {sub && <div className="list-row__sub">{sub}</div>}
-      </div>
-      <TierBadge xp={profile.xp ?? 0} />
-    </button>
   );
 }
