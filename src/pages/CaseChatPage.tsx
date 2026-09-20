@@ -89,8 +89,12 @@ export default function CaseChatPage() {
     }
   };
 
+  // Which message's ⋯ menu is open, if any.
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
+
   const setPin = async (messageId: number | null) => {
     if (!id) return;
+    setOpenMenu(null);
     try {
       if (messageId === null) await unpinCaseMessage(id);
       else await pinCaseMessage(id, messageId);
@@ -177,6 +181,16 @@ export default function CaseChatPage() {
           // consecutive messages from the same person collapse together,
           // WhatsApp-style.
           const isFirstOfRun = i === 0 || messages[i - 1].sender_id !== m.sender_id;
+          // Menu contents by viewer. Reporting is for other people's messages;
+          // pinning is for the case's own vet, and only on their OWN message —
+          // a clinic pins its condition/bank-details post, nothing else. Both
+          // of those are enforced server-side too (028 / content_reports RLS).
+          const canReport = !mine && isRegistered;
+          const ownVetMessage = isCaseVet && m.sender_id === user.id;
+          const canPin = ownVetMessage && m.id !== caseData?.pinned_message_id;
+          const canUnpin = ownVetMessage && m.id === caseData?.pinned_message_id;
+          // No affordance at all when there would be nothing in the menu.
+          const hasMenu = canReport || canPin || canUnpin;
           return (
             <div key={m.id} className={`bubble${mine ? ' bubble--mine' : ''}`}>
               {/* Sender name + block: identity info, so only once per run —
@@ -207,30 +221,55 @@ export default function CaseChatPage() {
                 </div>
               )}
               {m.body}
-              {/* One footer row for the timestamp and the per-message actions.
+              {/* One footer row for the timestamp and the ⋯ menu.
                   .bubble__time is `display: block` and shared with
-                  DmThreadPage, so it keeps that — but anything rendered after
-                  it therefore landed on its own line, which is how the pin
-                  ended up an unfindable 11px mark under the clock. The row
-                  overrides the time's display locally instead. */}
+                  DmThreadPage, so it keeps that — the row overrides the time's
+                  display locally instead, otherwise anything after it starts a
+                  new line. */}
               <div className="bubble__footer">
                 <span className="bubble__time">{clockTime(m.created_at)}</span>
-                {isCaseVet && m.id !== caseData?.pinned_message_id && (
-                  <button className="bubble__action" onClick={() => void setPin(m.id)}>
-                    📌 {t('caseChat.pin')}
-                  </button>
-                )}
-                {/* Report (B2): per-message, so every message keeps this —
-                    unlike the name/block above, unrelated to run-grouping. */}
-                {!mine && isRegistered && (
-                  <ReportButton
-                    reporterId={user.id}
-                    targetType="case_message"
-                    targetCase={m.case_id}
-                    targetMessage={m.id}
-                    targetProfile={m.sender_id}
-                    small
-                  />
+                {hasMenu && (
+                  <div className="bubble__menu">
+                    <button
+                      className="bubble__menu-btn"
+                      aria-label={t('caseChat.actions')}
+                      aria-haspopup="menu"
+                      aria-expanded={openMenu === m.id}
+                      onClick={() => setOpenMenu(openMenu === m.id ? null : m.id)}
+                    >
+                      ⋯
+                    </button>
+                    {openMenu === m.id && (
+                      <>
+                        {/* Tap-anywhere-else to close, without a document
+                            listener to attach and tear down. */}
+                        <div className="bubble__menu-backdrop" onClick={() => setOpenMenu(null)} />
+                        <div className="bubble__menu-list" role="menu">
+                          {canPin && (
+                            <button role="menuitem" onClick={() => void setPin(m.id)}>
+                              📌 {t('caseChat.pin')}
+                            </button>
+                          )}
+                          {canUnpin && (
+                            <button role="menuitem" onClick={() => void setPin(null)}>
+                              📌 {t('caseChat.unpin')}
+                            </button>
+                          )}
+                          {/* Report (B2), unchanged — just relocated into the
+                              menu so it stops sitting under every bubble. */}
+                          {canReport && (
+                            <ReportButton
+                              reporterId={user.id}
+                              targetType="case_message"
+                              targetCase={m.case_id}
+                              targetMessage={m.id}
+                              targetProfile={m.sender_id}
+                            />
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

@@ -33,11 +33,18 @@ export type LocaleCode = 'az' | 'tr' | 'en' | 'ru';
 export const SUPPORTED_LOCALES: Record<LocaleCode, Dict> = { az, tr, en, ru };
 
 /** Native-language display names for the switcher. */
+/**
+ * Codes, not names: the switcher is a four-up .segmented track, and
+ * "Azərbaycanca" / "Русский" were being ellipsised to "Azərb…" at a quarter of
+ * its width. Two-letter codes are unambiguous and fit at any width. The
+ * control carries an aria-label of "Language", so the codes are never the only
+ * context a screen reader gets.
+ */
 export const LOCALE_NAMES: Record<LocaleCode, string> = {
-  az: 'Azərbaycanca',
-  tr: 'Türkçe',
-  en: 'English',
-  ru: 'Русский',
+  az: 'AZ',
+  tr: 'TR',
+  en: 'EN',
+  ru: 'RU',
 };
 
 const STORAGE_KEY = 'pawline-locale';

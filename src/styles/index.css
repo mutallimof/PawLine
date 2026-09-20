@@ -794,21 +794,57 @@ select {
   margin-right: auto;
 }
 
-/* The pin control: a labelled pill with a real tap target, not a faint glyph. */
-.bubble__action {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+/* Per-message ⋯ menu. The button is rendered only when the menu would have
+   something in it, so most bubbles carry no affordance at all. */
+.bubble__menu {
+  position: relative;
   flex-shrink: 0;
+}
+.bubble__menu-btn {
+  min-width: 34px;
   min-height: 34px;
-  padding: 4px 12px;
-  border: 1px solid var(--coral);
   border-radius: var(--radius-pill);
-  background: var(--card);
-  color: var(--coral-deep);
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 800;
-  white-space: nowrap;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+.bubble--mine .bubble__menu-btn {
+  color: rgba(255, 255, 255, 0.9);
+}
+/* Full-screen catcher so a tap anywhere else closes the menu — cheaper and
+   less error-prone than attaching and removing a document listener. */
+.bubble__menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+.bubble__menu-list {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 41;
+  width: max-content;
+  min-width: 190px;
+  max-width: min(320px, 72vw);
+  padding: 6px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lift);
+  text-align: left;
+}
+.bubble__menu-list > button,
+.bubble__menu-list > .btn {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: left;
 }
 
 /* One-time nudge so the assigned clinic discovers pinning exists at all. */
