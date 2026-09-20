@@ -27,12 +27,16 @@ type ListEntry =
   | { kind: 'dm'; activityAt: string; entry: InboxEntry };
 
 export default function MessagesPage() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  // A guest (anonymous session from browsing) has a `user` but no account and
+  // no conversations, so every query below would return empty — show them the
+  // sign-in prompt rather than an empty inbox.
+  const isRegistered = !!user && !isGuest;
   const [entries, setEntries] = useState<ListEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user || isGuest) return;
     const [cases, dms] = await Promise.all([
       fetchCaseChatInbox(user.id).catch(() => [] as CaseChatInboxEntry[]),
       fetchInbox(user.id).catch(() => [] as InboxEntry[]),
@@ -44,11 +48,11 @@ export default function MessagesPage() {
     merged.sort((a, b) => b.activityAt.localeCompare(a.activityAt));
     setEntries(merged);
     setLoading(false);
-  }, [user]);
+  }, [user, isGuest]);
 
   // Live-refresh on any new message in either chat system.
   useEffect(() => {
-    if (!user) {
+    if (!user || isGuest) {
       setLoading(false);
       return;
     }
@@ -59,9 +63,9 @@ export default function MessagesPage() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'case_messages' }, () => void load())
       .subscribe();
     return () => void supabase.removeChannel(channel);
-  }, [user, load]);
+  }, [user, isGuest, load]);
 
-  if (!user) {
+  if (!isRegistered) {
     return (
       <div className="page">
         <h1 className="page-title">{t('dm.title')}</h1>

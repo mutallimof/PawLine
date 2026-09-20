@@ -206,7 +206,7 @@ export function VetPublicPage() {
 const ANIMAL_TYPES: AnimalType[] = ['dog', 'cat', 'other'];
 
 export function VetSetupPage() {
-  const { user, profile } = useAuth();
+  const { user, isGuest, profile } = useAuth();
   const [vetStatus, setVetStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   // Whether a `vets` row for this user actually exists yet — vet_documents.vet_id
   // is a FK into vets, so document upload must never fire before this is true
@@ -273,9 +273,12 @@ export function VetSetupPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Gate on `user` for auth; a still-loading profile gets a spinner, not an
-  // error (same class of bug as the ProfilePage sign-in gate).
-  if (!user) {
+  // Gate on a real ACCOUNT, not merely a session: a guest (anonymous session
+  // minted by browsing) has a `user` but never a profiles row, so letting them
+  // past here dropped them into the `!profile` spinner below forever. A
+  // still-loading profile for a genuinely signed-in user still gets a spinner,
+  // not an error (same class of bug as the ProfilePage sign-in gate).
+  if (!user || isGuest) {
     return <div className="page"><div className="empty-state">{t('dm.signIn')}</div></div>;
   }
   if (!profile) {
@@ -578,14 +581,18 @@ export function VetVisibilityNotice() {
 
 // ---------------------------------------------------------------------------
 export function VetDashboardPage() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  // A guest has a `user` but no account, so fetchVet() below would find no
+  // clinic, set hasClinic=false, and bounce them to /vet-setup — which is
+  // itself account-only. Treat them as not signed in instead.
+  const isRegistered = !!user && !isGuest;
   const { cases } = useCases(); // live — new requests appear instantly
   const [hasClinic, setHasClinic] = useState<boolean | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) fetchVet(user.id).then((v) => setHasClinic(!!v));
-  }, [user]);
+    if (isRegistered) fetchVet(user.id).then((v) => setHasClinic(!!v));
+  }, [user, isRegistered]);
 
   useEffect(() => {
     // A vet account without a clinic row can't receive animals — route
@@ -593,7 +600,11 @@ export function VetDashboardPage() {
     if (hasClinic === false) navigate('/vet-setup');
   }, [hasClinic, navigate]);
 
-  if (!user) return <div className="page"><div className="spinner" /></div>;
+  // Same prompt VetSetupPage uses — a guest or signed-out visitor got a
+  // permanent spinner here before.
+  if (!isRegistered) {
+    return <div className="page"><div className="empty-state">{t('dm.signIn')}</div></div>;
+  }
 
   const mine = cases.filter((c) => c.vet_id === user.id);
   const incoming = mine.filter((c) => c.status === 'vet_selected');

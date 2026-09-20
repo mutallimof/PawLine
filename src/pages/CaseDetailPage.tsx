@@ -51,7 +51,11 @@ import { getCurrentPosition } from '../lib/geo';
 
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  // A guest (anonymous session from browsing the feed) has a `user` but no
+  // account and no profiles row, so every action below would be rejected by
+  // the database. They get the sign-in prompt instead of dead buttons.
+  const isRegistered = !!user && !isGuest;
   const { caseData, events, loading } = useCase(id);
   const toast = useToast();
   const navigate = useNavigate();
@@ -150,7 +154,7 @@ export default function CaseDetailPage() {
   });
 
   const toggleWatch = run(async () => {
-    if (!user) return navigate('/auth');
+    if (!isRegistered) return navigate('/auth');
     if (watching) {
       await unwatchCase(caseData.id);
       setWatching(false);
@@ -451,13 +455,14 @@ export default function CaseDetailPage() {
           ACTIONS — role- and status-aware
          ------------------------------------------------------------------ */}
       <div style={{ display: 'grid', gap: 10, margin: '14px 0' }}>
-        {/* Anyone signed-out, case open → prompt to sign in */}
-        {caseData.status === 'open' && !user && (
+        {/* Anyone without an account (signed out OR guest), case open →
+            prompt to sign in */}
+        {caseData.status === 'open' && !isRegistered && (
           <Link to="/auth" className="btn btn--primary">{t('case.signInToHelp')}</Link>
         )}
 
         {/* Registered user, case open → accept */}
-        {caseData.status === 'open' && user && (
+        {caseData.status === 'open' && isRegistered && (
           <>
             <button
               className="btn btn--primary"
@@ -666,12 +671,12 @@ export default function CaseDetailPage() {
         <Link to={`/case/${caseData.id}/chat`} className="btn btn--primary">
           💬 {t('case.openChat')}
         </Link>
-        {user && !isRescuer && !isVet && (
+        {isRegistered && !isRescuer && !isVet && (
           <button className={`btn ${watching ? 'btn--ghost' : 'btn--secondary'}`} disabled={busy} onClick={toggleWatch}>
             {watching ? `✓ ${t('case.watching')}` : `🔔 ${t('case.watch')}`}
           </button>
         )}
-        {user && (
+        {isRegistered && (
           <div className="case-detail__report-link">
             <ReportButton reporterId={user.id} targetType="case" targetCase={caseData.id} />
           </div>

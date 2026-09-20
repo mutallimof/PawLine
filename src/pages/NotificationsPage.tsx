@@ -22,8 +22,13 @@ const TYPE_EMOJI: Record<NotificationType, string> = {
 };
 
 export default function NotificationsPage() {
-  const { user } = useAuth();
-  const { notifications, unread, loading, reload } = useNotifications(user?.id);
+  const { user, isGuest } = useAuth();
+  // A guest has a `user` but no account and therefore no notifications; pass
+  // no id so the hook doesn't query, and show the sign-in prompt below.
+  const isRegistered = !!user && !isGuest;
+  const { notifications, unread, loading, reload } = useNotifications(
+    isRegistered ? user.id : undefined
+  );
   const navigate = useNavigate();
 
   const open = async (n: AppNotification) => {
@@ -32,7 +37,7 @@ export default function NotificationsPage() {
     else if (n.conversation_id) navigate(`/messages/${n.conversation_id}`);
   };
 
-  if (!user) {
+  if (!isRegistered) {
     return (
       <div className="page">
         <h1 className="page-title">{t('alerts.title')}</h1>
