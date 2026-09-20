@@ -16,7 +16,14 @@ import { INJURY_TYPES, SPOT_TYPES, URGENCY_LEVELS } from '../lib/types';
 import { animalEmoji, IconCamera } from '../components/Icons';
 
 export default function ReportPage() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  // A real account, not merely a session. Someone who browsed the feed before
+  // opening this page already holds an ANONYMOUS session (ensureSession, in
+  // api.ts, mints one to sign photo URLs), so `user` is set for them too —
+  // but they are still a guest, and their report must go in as one. Treating
+  // them as registered is what sent reporter_id = <anon uid>, which the
+  // cases INSERT policy (003) rejects outright with 42501.
+  const isRegistered = !!user && !isGuest;
   const navigate = useNavigate();
   const toast = useToast();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -146,8 +153,13 @@ export default function ReportPage() {
       lat: location.lat,
       lng: location.lng,
       addressHint: addressHint.trim(),
-      guestName: user ? null : guestName.trim() || null,
-      reporterId: user?.id ?? null,
+      // reporter_id MUST be null for any guest, however their session was
+      // minted: the INSERT policy only admits an anonymous session when
+      // reporter_id is null (and only a registered one when it equals
+      // auth.uid()). creator_uid still records the device server-side, so
+      // the per-device rate limits (003/021) are unaffected.
+      guestName: isRegistered ? null : guestName.trim() || null,
+      reporterId: isRegistered ? user.id : null,
       injuryType,
       spotType,
       urgency,
@@ -223,7 +235,7 @@ export default function ReportPage() {
       <h1 className="page-title">{t('report.title')}</h1>
       <p className="page-subtitle">{t('report.subtitle')}</p>
 
-      {!user && <div className="banner banner--info">{t('report.guestNote')}</div>}
+      {!isRegistered && <div className="banner banner--info">{t('report.guestNote')}</div>}
 
       {/* Photos */}
       <span className="field__label">{t('report.photos')}</span>
@@ -356,7 +368,7 @@ export default function ReportPage() {
         />
       </label>
 
-      {!user && (
+      {!isRegistered && (
         <label className="field">
           <span className="field__label">{t('report.guestName')}</span>
           <input value={guestName} onChange={(e) => setGuestName(e.target.value)} maxLength={60} />
