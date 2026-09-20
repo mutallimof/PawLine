@@ -28,6 +28,7 @@ import type {
 import { uploadCasePhoto } from './photos';
 import { computeDHash } from './phash';
 import { getTurnstileToken, turnstileEnabled } from './turnstile';
+import { reverseGeocode } from './gmaps';
 
 // ---------------------------------------------------------------------------
 // Cases
@@ -179,6 +180,11 @@ export function purgeCachedCasePhotos(caseId: string): void {
   }
 }
 
+/** PostgREST's "that column isn't in the schema" shapes, by code and name. */
+function isUnknownColumnError(e: { code?: string; message?: string }, column: string): boolean {
+  return (e.code === 'PGRST204' || e.code === '42703') && (e.message ?? '').includes(column);
+}
+
 export interface NewCaseInput {
   animal: RescueCase['animal'];
   description: string;
@@ -247,23 +253,42 @@ export async function createCase(input: NewCaseInput): Promise<string> {
     }
   }
 
-  const { data, error } = await supabase
+  // ONE reverse geocode per report, here at creation — never per view, which
+  // would bill a lookup every time anyone opened a case. Cannot throw: it
+  // returns null on every failure path (see reverseGeocode), so a missing key,
+  // a disabled Geocoding API or zero results all just mean no street address.
+  const streetAddress = await reverseGeocode(input.lat, input.lng);
+
+  const row = {
+    animal: input.animal,
+    description: input.description,
+    lat: input.lat,
+    lng: input.lng,
+    address_hint: input.addressHint,
+    injury_type: input.injuryType,
+    spot_type: input.spotType,
+    urgency: input.urgency,
+    guest_name: input.guestName,
+    reporter_id: input.reporterId,
+  };
+
+  let { data, error } = await supabase
     .from('cases')
-    .insert({
-      animal: input.animal,
-      description: input.description,
-      lat: input.lat,
-      lng: input.lng,
-      address_hint: input.addressHint,
-      injury_type: input.injuryType,
-      spot_type: input.spotType,
-      urgency: input.urgency,
-      guest_name: input.guestName,
-      reporter_id: input.reporterId,
-    })
+    .insert({ ...row, street_address: streetAddress })
     .select('id')
     .single();
+
+  // Migration 029 not applied yet? PostgREST rejects the whole insert over the
+  // unknown column. Retry without it rather than let a pending migration break
+  // report creation, which is the one flow this app exists for. Safe to delete
+  // once 029 is live everywhere.
+  if (error && isUnknownColumnError(error, 'street_address')) {
+    ({ data, error } = await supabase.from('cases').insert(row).select('id').single());
+  }
   if (error) throw error;
+  // The retry path widens `data` to nullable; single() only resolves without
+  // an error when it returned a row, so this is belt-and-braces for the types.
+  if (!data) throw new Error('Report was not created.');
 
   const caseId = data.id as string;
 

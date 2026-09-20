@@ -44,6 +44,43 @@ export function loadGoogleMaps(): Promise<typeof google> {
 }
 
 /**
+ * Street address for a pin, or null. Best-effort by contract: EVERY failure
+ * path returns null rather than throwing, because the one caller is report
+ * creation and a report must never fail over an address lookup.
+ *
+ * Uses the Maps JS Geocoder rather than the Geocoding REST endpoint: the web
+ * service sends no CORS headers, so a browser fetch to it is blocked. The
+ * Geocoder class goes through the already-loaded Maps JS API — but it still
+ * bills against, and requires, the Geocoding API being enabled on the Cloud
+ * project (a separate toggle from Maps JavaScript and Places).
+ *
+ * Returns the street-level part only ("Nizami küç. 12"), not the full
+ * formatted address, which in Baku trails city, postcode and country and
+ * would not fit the pill it is shown in. Falls back to the full formatted
+ * address when no street components come back.
+ */
+export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  try {
+    const g = await loadGoogleMaps();
+    const { results } = await new g.maps.Geocoder().geocode({ location: { lat, lng } });
+    const best = results?.[0];
+    if (!best) return null;
+
+    const part = (type: string) =>
+      best.address_components?.find((c) => c.types.includes(type))?.long_name ?? '';
+    const route = part('route');
+    const number = part('street_number');
+    const street = [route, number].filter(Boolean).join(' ').trim();
+
+    return street || best.formatted_address || null;
+  } catch {
+    // Missing key, script blocked, Geocoding API not enabled, over quota,
+    // ZERO_RESULTS — all the same to the caller: no address, carry on.
+    return null;
+  }
+}
+
+/**
  * Calm, warm map style matching PawLine's palette — desaturated, low-noise
  * (no POI pins or transit icons competing with case markers).
  */

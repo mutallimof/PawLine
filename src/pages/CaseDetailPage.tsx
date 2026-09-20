@@ -233,8 +233,13 @@ export default function CaseDetailPage() {
          ================================================================== */}
       <div className="case-detail__map-card">
         <CaseLocationMap caseData={caseData} />
+        {/* The reporter's own landmark wins when they typed one — "the alley
+            behind the bakery" beats a street number for actually finding an
+            animal. The reverse-geocoded street (029) is the fallback for the
+            common case where they typed nothing, and null when geocoding
+            failed or has not been applied yet. */}
         <div className="case-detail__map-pill">
-          📍 {caseData.address_hint || t('case.locationUnknown')}
+          📍 {caseData.address_hint || caseData.street_address || t('case.locationUnknown')}
         </div>
         <a
           className="case-detail__map-directions"

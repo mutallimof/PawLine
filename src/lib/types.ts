@@ -125,6 +125,12 @@ export interface RescueCase {
   lat: number;
   lng: number;
   address_hint: string;
+  /**
+   * Reverse-geocoded street address from the pin (migration 029), set once at
+   * creation. Optional, not merely nullable: it reads as undefined until that
+   * migration is applied. Distinct from address_hint, the reporter's own words.
+   */
+  street_address?: string | null;
   status: CaseStatus;
   rescuer_id: string | null;
   vet_id: string | null;
