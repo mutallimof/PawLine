@@ -834,8 +834,19 @@ select {
   box-shadow: var(--shadow-lift);
   text-align: left;
 }
-.bubble__menu-list > button,
-.bubble__menu-list > .btn {
+/* Anchor to whichever side keeps the panel on-screen: bubbles from other
+   people sit against the left edge, so their menu opens rightward; your own
+   sit against the right, so theirs opens leftward. Anchoring everything to
+   the bubble's right edge pushed the menu off the left of the screen. */
+.bubble__menu-list {
+  left: 0;
+  right: auto;
+}
+.bubble--mine .bubble__menu-list {
+  left: auto;
+  right: 0;
+}
+.bubble__menu-list > button {
   display: block;
   width: 100%;
   min-height: 40px;

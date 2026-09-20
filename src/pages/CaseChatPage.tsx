@@ -10,10 +10,11 @@ import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
 import { blockUser, markCaseChatRead, pinCaseMessage, sendCaseMessage, unpinCaseMessage } from '../lib/api';
 import { Avatar, StatusBadge, useToast } from '../components/ui';
-import { ReportButton } from '../components/Report';
+import { ReportSheet } from '../components/Report';
 import { IconBack, IconSend } from '../components/Icons';
 import { t } from '../i18n';
 import { clockTime } from '../lib/time';
+import type { CaseMessage } from '../lib/types';
 
 /**
  * Group E: a consistent colour per sender across the thread, distinct from
@@ -91,6 +92,10 @@ export default function CaseChatPage() {
 
   // Which message's ⋯ menu is open, if any.
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+  // The message being reported, if any. The form is a sheet at page level
+  // rather than inline in the dropdown — anchored to a bubble it spilled off
+  // the side of the screen and clipped its own question and options.
+  const [reportFor, setReportFor] = useState<CaseMessage | null>(null);
 
   const setPin = async (messageId: number | null) => {
     if (!id) return;
@@ -255,16 +260,18 @@ export default function CaseChatPage() {
                               📌 {t('caseChat.unpin')}
                             </button>
                           )}
-                          {/* Report (B2), unchanged — just relocated into the
-                              menu so it stops sitting under every bubble. */}
+                          {/* Report (B2): closes the menu and opens the form
+                              as a sheet, so it gets the whole screen width. */}
                           {canReport && (
-                            <ReportButton
-                              reporterId={user.id}
-                              targetType="case_message"
-                              targetCase={m.case_id}
-                              targetMessage={m.id}
-                              targetProfile={m.sender_id}
-                            />
+                            <button
+                              role="menuitem"
+                              onClick={() => {
+                                setOpenMenu(null);
+                                setReportFor(m);
+                              }}
+                            >
+                              ⚑ {t('mod.report')}
+                            </button>
                           )}
                         </div>
                       </>
@@ -276,6 +283,17 @@ export default function CaseChatPage() {
           );
         })}
       </div>
+
+      {reportFor && user && (
+        <ReportSheet
+          reporterId={user.id}
+          targetType="case_message"
+          targetCase={reportFor.case_id}
+          targetMessage={reportFor.id}
+          targetProfile={reportFor.sender_id}
+          onClose={() => setReportFor(null)}
+        />
+      )}
 
       {isRegistered ? (
         <div className="chat-composer">
