@@ -104,6 +104,7 @@ export default function ProfilePage() {
   }
 
   const { tier, next, progress, xpToNext } = tierForXp(profile.xp);
+  const isVet = profile.role === 'vet';
 
   const setPref = async (pref: NewCasePref) => {
     try {
@@ -141,26 +142,41 @@ export default function ProfilePage() {
             date: new Date(profile.created_at).toLocaleDateString(),
           })}
         </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
-          <TierBadge xp={profile.xp} />
-          <span className="tier-badge" style={{ background: 'var(--ink-soft)' }}>
-            {t('profile.xp', { xp: profile.xp })}
-          </span>
-        </div>
-        <div className="progress-track">
-          <div className="progress-track__fill" style={{ width: `${progress * 100}%` }} />
-        </div>
+        {/* XP and tier are for RESCUERS. A vet's standing is their star
+            rating from the rescuers they received animals from (migration
+            014, C2) — vets earn no XP at all (023), so showing a tier here
+            would be a progression bar that can never move. Animals helped
+            still counts for everyone. */}
+        {!isVet && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+              <TierBadge xp={profile.xp} />
+              <span className="tier-badge" style={{ background: 'var(--ink-soft)' }}>
+                {t('profile.xp', { xp: profile.xp })}
+              </span>
+            </div>
+            <div className="progress-track">
+              <div className="progress-track__fill" style={{ width: `${progress * 100}%` }} />
+            </div>
+          </>
+        )}
         <p className="page-subtitle" style={{ marginTop: 8, marginBottom: 0 }}>
-          {next
-            ? t('profile.toNext', { xp: xpToNext, tier: tierName(next) })
-            : t('profile.maxTier')}
-          {' · '}
+          {!isVet && (
+            <>
+              {next
+                ? t('profile.toNext', { xp: xpToNext, tier: tierName(next) })
+                : t('profile.maxTier')}
+              {' · '}
+            </>
+          )}
           {t('profile.casesHelped')}: {profile.cases_helped}
         </p>
         {/* screen-reader label for the progress bar's tier context */}
-        <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>
-          {t('profile.level')}: {tierName(tier)}
-        </span>
+        {!isVet && (
+          <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>
+            {t('profile.level')}: {tierName(tier)}
+          </span>
+        )}
       </div>
 
       <PlatformStats />

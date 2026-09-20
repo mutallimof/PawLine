@@ -120,7 +120,9 @@ export function UserProfilePage() {
           {profile.role === 'vet' ? ' 🏥' : ''}
         </h1>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '10px 0 14px' }}>
-          <TierBadge xp={profile.xp} />
+          {/* Vets earn no XP (023) — their standing is their star rating, shown
+              on the clinic's own page. Animals helped applies to everyone. */}
+          {profile.role !== 'vet' && <TierBadge xp={profile.xp} />}
           <span className="tier-badge" style={{ background: 'var(--ink-soft)' }}>
             {t('profile.casesHelped')}: {profile.cases_helped}
           </span>
@@ -157,14 +159,14 @@ export function VetPublicPage() {
   // get_or_create_dm() restriction as UserProfilePage above).
   const isRegistered = !!user && !isGuest;
   const [vet, setVet] = useState<Vet | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const navigate = useNavigate();
   const toast = useToast();
 
   useEffect(() => {
     if (!id) return;
     fetchVet(id).then(setVet).catch(() => {});
-    fetchProfile(id).then(setProfile).catch(() => {});
+    // No fetchProfile here any more: the profiles row was read only to render
+    // a tier badge, and vets have no XP to tier (023). One less query per view.
   }, [id]);
 
   if (!vet) return <div className="page"><div className="spinner" /></div>;
@@ -208,11 +210,8 @@ export function VetPublicPage() {
             {vet.accepted_animals.map((a) => t(`animal.${a}` as const)).join(' · ')}
           </p>
         )}
-        {profile && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '12px 0' }}>
-            <TierBadge xp={profile.xp} />
-          </div>
-        )}
+        {/* No tier badge here: this page is always a clinic, and vets earn no
+            XP (023). The star rating above is a clinic's standing. */}
         {vet.open_now === false ? (
           <div className="banner banner--warn">
             {vet.opens_at
