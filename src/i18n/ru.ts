@@ -369,6 +369,7 @@ export const ru: Dict = {
   'admin.statMedianResolve': 'Среднее время до решения (мин)',
   'admin.statRescuers': 'Активные спасатели (30 дней)',
   'admin.statGuest7': 'Сообщения от гостей (7 дней)',
+  'admin.statTotal': 'Всего случаев',
   'admin.partnerTitle': 'Значок партнёра',
   'admin.partnerOrg': 'Название организации',
   'admin.partnerSet': 'Присвоить значок',

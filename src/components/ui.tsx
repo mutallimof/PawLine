@@ -491,12 +491,18 @@ export function LanguageSwitcher() {
     }
   };
 
+  // chip-row, not .segmented: even two-letter codes ellipsised there ("E…",
+  // "R…") — a quarter of the track minus its padding is narrower than "EN"
+  // or "RU" at that weight. Chips size to their label, so this can't clip at
+  // any width or in any locale.
   return (
-    <div className="segmented" role="group" aria-label={t('profile.language')}>
+    <div className="chip-row lang-switcher" role="group" aria-label={t('profile.language')}>
       {(Object.keys(SUPPORTED_LOCALES) as LocaleCode[]).map((code) => (
         <button
           key={code}
-          className={`segmented__option${current === code ? ' active' : ''}`}
+          type="button"
+          aria-pressed={current === code}
+          className={`chip${current === code ? ' active' : ''}`}
           onClick={() => choose(code)}
         >
           {LOCALE_NAMES[code]}

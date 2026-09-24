@@ -369,6 +369,7 @@ export const az: Dict = {
   'admin.statMedianResolve': 'Həllə qədər median vaxt (dəq)',
   'admin.statRescuers': 'Aktiv xilasedicilər (30 gün)',
   'admin.statGuest7': 'Qonaq bildirişləri (7 gün)',
+  'admin.statTotal': 'Bütün hallar',
   'admin.partnerTitle': 'Tərəfdaş nişanı',
   'admin.partnerOrg': 'Təşkilatın adı',
   'admin.partnerSet': 'Nişanı təyin et',

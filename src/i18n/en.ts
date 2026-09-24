@@ -367,6 +367,7 @@ export const en = {
   'admin.statMedianResolve': 'Median time to resolved (min)',
   'admin.statRescuers': 'Active rescuers (30 days)',
   'admin.statGuest7': 'Guest reports (7 days)',
+  'admin.statTotal': 'Cases, all time',
   'admin.partnerTitle': 'Partner badge',
   'admin.partnerOrg': 'Organization name',
   'admin.partnerSet': 'Set badge',

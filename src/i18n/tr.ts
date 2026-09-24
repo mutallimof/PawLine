@@ -369,6 +369,7 @@ export const tr: Dict = {
   'admin.statMedianResolve': 'Çözüme kadar medyan süre (dk)',
   'admin.statRescuers': 'Aktif kurtarıcılar (30 gün)',
   'admin.statGuest7': 'Misafir bildirimleri (7 gün)',
+  'admin.statTotal': 'Toplam vaka',
   'admin.partnerTitle': 'Ortak rozeti',
   'admin.partnerOrg': 'Kuruluş adı',
   'admin.partnerSet': 'Rozeti ata',

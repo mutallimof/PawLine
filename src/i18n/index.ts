@@ -34,9 +34,10 @@ export const SUPPORTED_LOCALES: Record<LocaleCode, Dict> = { az, tr, en, ru };
 
 /** Native-language display names for the switcher. */
 /**
- * Codes, not names: the switcher is a four-up .segmented track, and
- * "Azərbaycanca" / "Русский" were being ellipsised to "Azərb…" at a quarter of
- * its width. Two-letter codes are unambiguous and fit at any width. The
+ * Codes, not names: "Azərbaycanca" / "Русский" were being ellipsised to
+ * "Azərb…" at a quarter of the old .segmented track's width. Two-letter codes
+ * are unambiguous and compact. (The switcher is now a chip row — even the
+ * codes clipped in the segmented track — so nothing here can ellipsise.) The
  * control carries an aria-label of "Language", so the codes are never the only
  * context a screen reader gets.
  */

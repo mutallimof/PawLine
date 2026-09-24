@@ -155,7 +155,7 @@ export default function AdminPage() {
           {!stats && <div className="spinner" />}
           {stats && (
             <div className="impact-grid">
-              <div className="impact-stat" style={{ gridColumn: '1 / -1' }}>
+              <div className="impact-stat impact-stat--hero">
                 <div className="impact-stat__value impact-stat__value--big">
                   {stats.median_accept_min !== null ? `${stats.median_accept_min} min` : '—'}
                 </div>
@@ -185,7 +185,7 @@ export default function AdminPage() {
               </div>
               <div className="impact-stat">
                 <div className="impact-stat__value">{stats.cases_total}</div>
-                <div className="impact-stat__label">{t('home.filter.all')}</div>
+                <div className="impact-stat__label">{t('admin.statTotal')}</div>
               </div>
             </div>
           )}
