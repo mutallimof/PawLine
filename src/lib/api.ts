@@ -9,6 +9,7 @@
  */
 import { supabase } from './supabase';
 import type {
+  AnimalType,
   AppNotification,
   CaseChatInboxEntry,
   ContentReport,
@@ -20,6 +21,7 @@ import type {
   DirectMessage,
   InboxEntry,
   Profile,
+  ProfileRole,
   RescueCase,
   Vet,
   VetDocument,
@@ -1105,6 +1107,140 @@ export async function fetchPublicImpact(): Promise<PublicImpact> {
 
 export const adminSetPartner = (profileId: string, org: string | null) =>
   rpc('admin_set_partner', { p_profile: profileId, p_org: org });
+
+// ---------------------------------------------------------------------------
+// Admin → Users tab (migration 030)
+// ---------------------------------------------------------------------------
+
+export type AdminUserSort = 'created_at' | 'xp' | 'cases_helped';
+
+/**
+ * One row of admin_list_users(). email / banned / is_admin are hidden from
+ * every non-admin read path by column grants (005) — this RPC is the only
+ * way to get them, and it checks is_admin() before reading anything.
+ */
+export interface AdminUser {
+  id: string;
+  display_name: string;
+  avatar_url: string | null;
+  role: ProfileRole;
+  xp: number;
+  cases_helped: number;
+  created_at: string;
+  banned: boolean;
+  is_admin: boolean;
+  partner_org: string | null;
+  email: string | null;
+  cases_reported: number;
+  cases_hidden: number;
+}
+
+/** Paginated + sorted server-side; the server clamps limit to 100. */
+export async function fetchAdminUsers(opts: {
+  role: ProfileRole | null;
+  search: string;
+  sort: AdminUserSort;
+  limit: number;
+  offset: number;
+}): Promise<AdminUser[]> {
+  const { data, error } = await supabase.rpc('admin_list_users', {
+    p_role: opts.role,
+    p_search: opts.search.trim() || null,
+    p_sort: opts.sort,
+    p_limit: opts.limit,
+    p_offset: opts.offset,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as AdminUser[];
+}
+
+/**
+ * A clinic row for the admin detail panel, in ANY status. Public columns only
+ * — vets' column grants (014) keep manager_* out of a plain select; the
+ * admin row policy (003) is what lets rejected/pending rows through.
+ */
+export async function fetchVetForAdmin(id: string): Promise<Vet | null> {
+  const { data, error } = await supabase
+    .from('vets')
+    .select('id, clinic_name, address, contact_phone, contact_email, accepted_animals, status, created_at')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as Vet | null) ?? null;
+}
+
+export interface HiddenCaseRow {
+  id: string;
+  animal: AnimalType;
+  description: string;
+  created_at: string;
+}
+
+export interface HiddenMessageRow {
+  id: number;
+  case_id: string;
+  body: string;
+  created_at: string;
+}
+
+/**
+ * Everything of one account's that is currently hidden, so it can be
+ * unhidden. Admin-only by RLS (003: `not hidden or is_admin()`) — for anyone
+ * else these filters simply match nothing.
+ */
+export async function fetchHiddenContentBy(
+  profileId: string,
+): Promise<{ cases: HiddenCaseRow[]; messages: HiddenMessageRow[] }> {
+  const [c, m] = await Promise.all([
+    supabase
+      .from('cases')
+      .select('id, animal, description, created_at')
+      .eq('creator_uid', profileId)
+      .eq('hidden', true)
+      .order('created_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('case_messages')
+      .select('id, case_id, body, created_at')
+      .eq('sender_id', profileId)
+      .eq('hidden', true)
+      .order('created_at', { ascending: false })
+      .limit(50),
+  ]);
+  if (c.error) throw new Error(c.error.message);
+  if (m.error) throw new Error(m.error.message);
+  return {
+    cases: (c.data ?? []) as HiddenCaseRow[],
+    messages: (m.data ?? []) as HiddenMessageRow[],
+  };
+}
+
+/**
+ * created_at of every row since `sinceIso`, for the admin growth charts.
+ * Both columns are already readable (profiles.created_at is in the public
+ * column grant; admins see hidden cases too). Paged in 1000s because
+ * PostgREST caps a single response — a silent cap would flatten the chart.
+ */
+export async function fetchCreatedAtSince(
+  table: 'profiles' | 'cases',
+  sinceIso: string,
+): Promise<string[]> {
+  const PAGE = 1000;
+  const out: string[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from(table)
+      .select('id, created_at')
+      .gte('created_at', sinceIso)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as { created_at: string }[];
+    for (const r of rows) out.push(r.created_at);
+    if (rows.length < PAGE) return out;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Pre-launch pass (migration 007): blocks, export, community flag, safety ack

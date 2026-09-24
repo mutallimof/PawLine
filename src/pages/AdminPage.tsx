@@ -4,6 +4,7 @@
  *   - Vet approvals: pending clinics appear here; approve/reject.
  *   - Reports: everything users flagged; hide content, ban users, dismiss.
  *   - Sponsors: manage the "Supported by" strip.
+ *   - Users: every account (migration 030) — ban/unban, unhide, clinic review.
  *
  * Access: profiles.is_admin — settable ONLY via the SQL editor
  * (docs/OPERATIONS.md explains how and why).
@@ -19,8 +20,6 @@ import {
   fetchReportedAccounts,
   fetchHiddenRatioAccounts,
   fetchHighVolumeReporters,
-  fetchVetDocuments,
-  getVetDocumentUrl,
   searchProfiles,
   type AdminStats,
   type ReportedAccount,
@@ -39,58 +38,14 @@ import {
 import { useToast } from '../components/ui';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
-import type { ContentReport, Profile, Sponsor, Vet, VetDocument } from '../lib/types';
+import type { ContentReport, Profile, Sponsor, Vet } from '../lib/types';
+import VetDocumentsList from './admin/VetDocumentsList';
+import UsersTab from './admin/UsersTab';
+import GrowthCharts from './admin/GrowthCharts';
 
-/**
- * C1: a pending vet's uploaded verification documents — private bucket, so
- * each is only ever viewed via a short-lived signed URL, fetched on click.
- * Reports its document count up to the parent via onCount, so the approve
- * button can warn when a clinic has none.
- */
-function VetDocumentsList({ vetId, onCount }: { vetId: string; onCount: (n: number) => void }) {
-  const [docs, setDocs] = useState<VetDocument[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const toast = useToast();
+type Tab = 'stats' | 'users' | 'vets' | 'reports' | 'flagged' | 'sponsors';
 
-  useEffect(() => {
-    fetchVetDocuments(vetId)
-      .then((d) => {
-        setDocs(d);
-        onCount(d.length);
-      })
-      .catch(() => {})
-      .finally(() => setLoaded(true));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vetId]);
-
-  if (!loaded) return null;
-  if (docs.length === 0) {
-    return <p className="list-row__sub" style={{ fontStyle: 'italic' }}>{t('admin.vetNoDocuments')}</p>;
-  }
-
-  return (
-    <div style={{ margin: '6px 0' }}>
-      <div className="field__label" style={{ marginBottom: 4 }}>{t('admin.vetDocuments')}</div>
-      {docs.map((d) => (
-        <button
-          key={d.id}
-          type="button"
-          className="link-btn"
-          style={{ display: 'block', fontSize: 13, marginBottom: 2 }}
-          onClick={() => {
-            void getVetDocumentUrl(d.path)
-              .then((url) => window.open(url, '_blank', 'noopener'))
-              .catch(() => toast(t('common.error')));
-          }}
-        >
-          📄 {d.filename || d.path}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-type Tab = 'stats' | 'vets' | 'reports' | 'flagged' | 'sponsors';
+const TABS: Tab[] = ['stats', 'users', 'vets', 'reports', 'flagged', 'sponsors'];
 
 export default function AdminPage() {
   const { profile } = useAuth();
@@ -173,11 +128,17 @@ export default function AdminPage() {
     <div className="page">
       <h1 className="page-title">{t('admin.title')}</h1>
 
-      <div className="segmented" style={{ margin: '12px 0 16px' }}>
-        {(['stats', 'vets', 'reports', 'flagged', 'sponsors'] as Tab[]).map((tb) => (
+      {/* chip-row, not .segmented: six tabs with counts ("Reports (12)") are
+          far past what the equal-width, no-wrap segmented track can hold
+          without ellipsising. Chips size to their label and wrap. */}
+      <div className="chip-row" role="tablist" style={{ margin: '12px 0 16px' }}>
+        {TABS.map((tb) => (
           <button
             key={tb}
-            className={`segmented__option${tab === tb ? ' active' : ''}`}
+            type="button"
+            role="tab"
+            aria-selected={tab === tb}
+            className={`chip${tab === tb ? ' active' : ''}`}
             onClick={() => setTab(tb)}
           >
             {t(`admin.${tb}` as const)}
@@ -228,7 +189,13 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+          <GrowthCharts />
         </>
+      )}
+
+      {/* ---- Users (migration 030) ---- */}
+      {tab === 'users' && (
+        <UsersTab currentUserId={profile.id} pendingVets={pendingVets} onChanged={reload} />
       )}
 
       {/* ---- Vet approvals ---- */}
@@ -323,7 +290,10 @@ export default function AdminPage() {
                 </Link>
               )}
               <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-                {r.target_type === 'case' && r.target_case && (
+                {/* Already hidden (by another report or a flagged account)?
+                    Offer Unhide instead. Unhiding leaves the report open —
+                    Dismiss is still the separate "this report was wrong". */}
+                {r.target_type === 'case' && r.target_case && !r.reported_case?.hidden && (
                   <button
                     className="btn btn--danger btn--small"
                     disabled={busy}
@@ -335,7 +305,16 @@ export default function AdminPage() {
                     {t('admin.hideContent')}
                   </button>
                 )}
-                {r.target_type === 'case_message' && r.target_message && (
+                {r.target_type === 'case' && r.target_case && r.reported_case?.hidden && (
+                  <button
+                    className="btn btn--secondary btn--small"
+                    disabled={busy}
+                    onClick={run(() => adminHideCase(r.target_case!, false))}
+                  >
+                    {t('admin.unhide')}
+                  </button>
+                )}
+                {r.target_type === 'case_message' && r.target_message && !r.reported_message?.hidden && (
                   <button
                     className="btn btn--danger btn--small"
                     disabled={busy}
@@ -345,6 +324,15 @@ export default function AdminPage() {
                     })}
                   >
                     {t('admin.hideContent')}
+                  </button>
+                )}
+                {r.target_type === 'case_message' && r.target_message && r.reported_message?.hidden && (
+                  <button
+                    className="btn btn--secondary btn--small"
+                    disabled={busy}
+                    onClick={run(() => adminHideCaseMessage(r.target_message!, false))}
+                  >
+                    {t('admin.unhide')}
                   </button>
                 )}
                 {r.target_profile && (
@@ -376,11 +364,13 @@ export default function AdminPage() {
       {tab === 'flagged' && (
         <>
           <p className="page-subtitle" style={{ marginTop: -4 }}>{t('admin.flaggedSub')}</p>
-          <div className="segmented" style={{ marginBottom: 14 }}>
+          <div className="chip-row" style={{ marginBottom: 14 }}>
             {[1, 7, 30].map((d) => (
               <button
                 key={d}
-                className={`segmented__option${flagWindow === d ? ' active' : ''}`}
+                type="button"
+                aria-pressed={flagWindow === d}
+                className={`chip${flagWindow === d ? ' active' : ''}`}
                 onClick={() => setFlagWindow(d)}
               >
                 {t('admin.flaggedWindow', { n: d })}
@@ -494,11 +484,13 @@ export default function AdminPage() {
               <input value={spUrl} onChange={(e) => setSpUrl(e.target.value)} />
             </label>
             <span className="field__label">{t('admin.sponsorKind')}</span>
-            <div className="segmented" style={{ marginBottom: 12 }}>
+            <div className="chip-row" style={{ marginBottom: 12 }}>
               {(['sponsor', 'partner'] as const).map((k) => (
                 <button
                   key={k}
-                  className={`segmented__option${spKind === k ? ' active' : ''}`}
+                  type="button"
+                  aria-pressed={spKind === k}
+                  className={`chip${spKind === k ? ' active' : ''}`}
                   onClick={() => setSpKind(k)}
                 >
                   {k === 'sponsor' ? t('sponsors.title') : t('partners.title')}

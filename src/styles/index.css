@@ -520,6 +520,13 @@ select {
 }
 
 /* ---- 6. Segmented control & chips ------------------------------------------ */
+/* GUARDRAIL: .segmented is for 2-3 SHORT, fixed labels only. Each option is
+   `flex: 1` (flex-basis 0) and, further down, `white-space: nowrap; overflow:
+   hidden; text-overflow: ellipsis` — so options never wrap, they shrink to
+   1/n of the track and ellipsise ("Res…", "Azərb…", "Reports (…"). Anything
+   with more options, translated labels of uneven length, or a live count in
+   the label belongs in .chip-row/.chip, which sizes to content and wraps
+   (Home filters, ReportPage pickers, every AdminPage control). */
 .segmented {
   display: flex;
   background: #f1e4dc;
@@ -2997,4 +3004,156 @@ body::before {
 }
 .paw-trail__connector {
   top: 15px;
+}
+
+
+/* ============================================================================
+   21. ADMIN — Users tab (migration 030) and growth charts
+   ============================================================================ */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--sand);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.admin-badge--banned { background: #fadedb; border-color: #f0b7b0; color: #a3261b; }
+.admin-badge--admin { background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep); }
+.admin-badge--approved { background: #e3f1e9; border-color: #b5d9c4; color: #2c7550; }
+.admin-badge--pending { background: #fbf1de; border-color: #ecd49f; color: #8a6414; }
+.admin-badge--rejected { background: #fadedb; border-color: #f0b7b0; color: #a3261b; }
+.admin-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+.admin-sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.admin-user-row { align-items: flex-start; }
+.admin-user-row__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.admin-user-row__name .list-row__title { min-width: 0; }
+.admin-user-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.admin-user-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+}
+.admin-facts > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* values line up even when a label wraps */
+  background: var(--sand);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+.admin-facts__wide { grid-column: 1 / -1; }
+.admin-facts dt { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
+.admin-facts dd { margin: 2px 0 0; font-size: 17px; font-weight: 800; color: var(--ink); }
+@media (max-width: 380px) {
+  .admin-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.admin-hidden-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.admin-hidden-row:first-of-type { border-top: none; }
+
+/* Growth charts: one series each, --coral on --card (validated >= 3:1).
+   Bars are 4px-rounded at the data end only, anchored to one baseline, with a
+   2px gap. Each column is a full-height button so the hit target is the whole
+   slot, not just the (possibly zero-height) bar. */
+.admin-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+.admin-chart { padding: 14px 14px 10px; }
+.admin-chart__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.admin-chart__title { font-size: 14px; font-weight: 800; color: var(--ink); }
+.admin-chart__readout { font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.admin-chart__readout strong { color: var(--ink); font-size: 14px; }
+.admin-chart__plot {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 120px;
+  padding-top: 14px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(to bottom, var(--line) 0 1px, transparent 1px) 0 14px / 100% 1px no-repeat;
+}
+.admin-chart__max {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 10.5px;
+  line-height: 1;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.admin-chart__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 4px 4px 0 0;
+}
+.admin-chart__col:focus-visible { outline: 2px solid var(--coral-deep); outline-offset: 1px; }
+.admin-chart__bar {
+  display: block;
+  width: 100%;
+  background: var(--coral);
+  border-radius: 4px 4px 0 0;
+  transition: background var(--t-fast);
+}
+.admin-chart__col.active .admin-chart__bar { background: var(--coral-deep); }
+.admin-chart__col.active { background: var(--coral-soft); }
+.admin-chart__axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
 }
