@@ -8,6 +8,8 @@
  *
  * Renders differently depending on who's looking:
  *  - Anyone:            photos, paw-trail progress, timeline, case chat, watch.
+ *                       Once resolved/closed: only delivery photos + chat remain
+ *                       of those (task 4).
  *  - Registered user:   "I'll rescue this animal" while the case is open.
  *  - The active rescuer: choose vet → depart → (drop at any point).
  *  - The selected vet:  confirm/decline the incoming animal, post updates,
@@ -125,7 +127,13 @@ export default function CaseDetailPage() {
 
   const isRescuer = !!user && caseData.rescuer_id === user.id;
   const isVet = !!user && caseData.vet_id === user.id;
-  const reportPhotos = caseData.photos.filter((p) => p.kind === 'report');
+  // Task 4: once a case is over — resolved (safe at the vet) or closed
+  // (expired / flagged "not here") — the in-progress sections stop being
+  // useful and are hidden: the paw trail, the timeline, the original report
+  // photos and Watch. The vet's delivery photos STAY: on a resolved case
+  // they are the proof of arrival.
+  const finished = caseData.status === 'resolved' || caseData.status === 'closed';
+  const reportPhotos = finished ? [] : caseData.photos.filter((p) => p.kind === 'report');
   const deliveryPhotos = caseData.photos.filter((p) => p.kind === 'delivery');
 
   /**
@@ -286,10 +294,14 @@ export default function CaseDetailPage() {
           3. STATUS TIMELINE — the pipeline, its history, who's involved,
           and everything that can move it forward, grouped as one idea.
          ================================================================== */}
-      <div className="section-label">{t('case.rescueProgress')}</div>
-      <div className="card" style={{ padding: 'var(--space-2xs) var(--space-xs) var(--space-sm)', marginBottom: 'var(--space-xl)' }}>
-        <PawTrail status={caseData.status} />
-      </div>
+      {!finished && (
+        <>
+          <div className="section-label">{t('case.rescueProgress')}</div>
+          <div className="card" style={{ padding: 'var(--space-2xs) var(--space-xs) var(--space-sm)', marginBottom: 'var(--space-xl)' }}>
+            <PawTrail status={caseData.status} />
+          </div>
+        </>
+      )}
 
       {/* Possible duplicate — advisory only; the report always stands. */}
       {dupFlags.map((f) => {
@@ -610,9 +622,9 @@ export default function CaseDetailPage() {
         />
       </div>
 
-      {/* Event log */}
-      <div className="section-label">{t('case.timeline')}</div>
-      {events.length === 0 ? (
+      {/* Event log — hidden once the case is finished (task 4) */}
+      {!finished && <div className="section-label">{t('case.timeline')}</div>}
+      {finished ? null : events.length === 0 ? (
         <p className="page-subtitle">—</p>
       ) : (
         <ol className="case-detail__timeline">
@@ -634,7 +646,7 @@ export default function CaseDetailPage() {
          ================================================================== */}
       {(reportPhotos.length > 0 || deliveryPhotos.length > 0) && (
         <>
-          <div className="section-label">{t('report.photos')}</div>
+          {reportPhotos.length > 0 && <div className="section-label">{t('report.photos')}</div>}
           {reportPhotos[0] && (
             <div className="photo-hero" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 12 }}>
               {reportPhotos[0].url && !brokenPhotoIds.has(reportPhotos[0].id) ? (
@@ -642,7 +654,7 @@ export default function CaseDetailPage() {
                   url={reportPhotos[0].url}
                   alt={caseData.description}
                   onError={() => markPhotoBroken(reportPhotos[0].id)}
-                  defaultRevealed
+                  urgency={caseData.urgency}
                 />
               ) : (
                 <div className="photo-unavailable">
@@ -656,7 +668,7 @@ export default function CaseDetailPage() {
             <div className="photo-grid" style={{ marginBottom: 12 }}>
               {reportPhotos.slice(1).map((p) =>
                 p.url && !brokenPhotoIds.has(p.id) ? (
-                  <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} defaultRevealed />
+                  <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} urgency={caseData.urgency} />
                 ) : (
                   <div key={p.id} className="photo-unavailable">
                     <span aria-hidden="true">🐾</span>
@@ -671,7 +683,7 @@ export default function CaseDetailPage() {
               <div className="photo-grid" style={{ marginBottom: 14 }}>
                 {deliveryPhotos.map((p) =>
                   p.url && !brokenPhotoIds.has(p.id) ? (
-                    <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} defaultRevealed />
+                    <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} urgency={caseData.urgency} />
                   ) : (
                     <div key={p.id} className="photo-unavailable">
                       <span aria-hidden="true">🐾</span>
@@ -691,7 +703,7 @@ export default function CaseDetailPage() {
         <Link to={`/case/${caseData.id}/chat`} className="btn btn--primary">
           💬 {t('case.openChat')}
         </Link>
-        {isRegistered && !isRescuer && !isVet && (
+        {isRegistered && !isRescuer && !isVet && !finished && (
           <button className={`btn ${watching ? 'btn--ghost' : 'btn--secondary'}`} disabled={busy} onClick={toggleWatch}>
             {watching ? `✓ ${t('case.watching')}` : `🔔 ${t('case.watch')}`}
           </button>

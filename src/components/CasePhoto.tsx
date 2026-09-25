@@ -1,38 +1,36 @@
 /**
- * Case photo with blur-by-default (item 4e).
+ * Case photo, blurred when the case is CRITICAL (task 11).
  *
- * Injured-animal photos are frequently graphic. Every case image renders
- * blurred behind a "may contain graphic content — tap to view" affordance,
- * on by default; one tap reveals it, and it can be re-hidden. This protects
- * users who don't want to be surprised by gore, and is the posture app-store
- * review expects. The blur is a real CSS filter on the actual <img>, so
- * nothing about the image leaks before the user opts in visually.
+ * The reporter's own urgency call decides it: a case marked `critical` is the
+ * one most likely to show a badly hurt animal, so its photos start blurred
+ * behind a "may contain graphic content — tap to view" affordance, on every
+ * screen that uses this component (feed cards, case detail). `high`, `medium`
+ * and `low` start revealed. Either way one tap reveals or re-hides it.
  *
- * Future scaling note (documented in OPERATIONS.md, not built now): an
- * automated content-severity check could pre-classify images so only
- * likely-graphic ones blur — optional, not blocking launch.
+ * The blur is a real CSS filter on the actual <img>, so nothing about the
+ * image leaks before the user opts in visually. Map pins don't use this
+ * component (see maps.tsx) and are never blurred.
  */
 import { useState } from 'react';
 import { t } from '../i18n';
+import type { UrgencyLevel } from '../lib/types';
 
 export function CasePhoto({
   url,
   alt,
   className,
   onError,
-  defaultRevealed,
+  urgency,
 }: {
   url: string;
   alt: string;
   className?: string;
   onError?: () => void;
-  /** Case detail: opening a specific case is already an opt-in look, so it
-   * starts revealed there. The feed (default false) stays blurred — someone
-   * scrolling past shouldn't be surprised. Either way it can still be
-   * hidden/revealed by hand. */
-  defaultRevealed?: boolean;
+  /** The case's urgency. Required, so no screen can forget it: `critical`
+   *  starts blurred, anything else starts revealed. */
+  urgency: UrgencyLevel;
 }) {
-  const [revealed, setRevealed] = useState(!!defaultRevealed);
+  const [revealed, setRevealed] = useState(urgency !== 'critical');
 
   return (
     <div className={`case-photo${className ? ` ${className}` : ''}`}>

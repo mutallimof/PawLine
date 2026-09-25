@@ -143,7 +143,7 @@ function pinEmojiFallback(c: CaseWithDetails): HTMLElement {
 // Not wrapped in <CasePhoto>: this is a 46px circular Leaflet marker built
 // as a raw DOM node, not a React tree, and CasePhoto's reveal affordance
 // (icon + title + CTA pill) has no room to render legibly at that size.
-// The full-size photo is still blurred-by-default once opened from here.
+// The full-size photo opened from here still blurs if the case is critical.
 function photoPinEl(c: CaseWithDetails, onClick: () => void): HTMLElement {
   const photo = c.photos?.find((p) => p.kind === 'report') ?? c.photos?.[0];
   const el = document.createElement('button');

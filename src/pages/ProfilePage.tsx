@@ -1,5 +1,5 @@
 /**
- * Own profile: identity, tier/XP progress, my cases, notification
+ * Own profile: identity, animals helped, my cases, notification
  * preferences, and (for vets) the clinic dashboard entry point.
  */
 import { useEffect, useState } from 'react';
@@ -8,9 +8,8 @@ import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../lib/api';
 import { disablePush, enablePush, getPushSubscription, pushSupported } from '../lib/push';
 import { supabase } from '../lib/supabase';
-import { Avatar, CaseCard, LanguageSwitcher, PlatformStats, TierBadge, useToast } from '../components/ui';
+import { Avatar, CaseCard, LanguageSwitcher, PlatformStats, useToast } from '../components/ui';
 import { VetVisibilityNotice } from './vetAndUserPages';
-import { tierForXp, tierName } from '../lib/xp';
 import { getCurrentPosition } from '../lib/geo';
 import { t } from '../i18n';
 import { InkScene } from '../components/Ink';
@@ -103,7 +102,6 @@ export default function ProfilePage() {
     );
   }
 
-  const { tier, next, progress, xpToNext } = tierForXp(profile.xp);
   const isVet = profile.role === 'vet';
 
   const setPref = async (pref: NewCasePref) => {
@@ -142,41 +140,14 @@ export default function ProfilePage() {
             date: new Date(profile.created_at).toLocaleDateString(),
           })}
         </p>
-        {/* XP and tier are for RESCUERS. A vet's standing is their star
-            rating from the rescuers they received animals from (migration
-            014, C2) — vets earn no XP at all (023), so showing a tier here
-            would be a progression bar that can never move. Animals helped
-            still counts for everyone. */}
-        {!isVet && (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
-              <TierBadge xp={profile.xp} />
-              <span className="tier-badge" style={{ background: 'var(--ink-soft)' }}>
-                {t('profile.xp', { xp: profile.xp })}
-              </span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-track__fill" style={{ width: `${progress * 100}%` }} />
-            </div>
-          </>
-        )}
         <p className="page-subtitle" style={{ marginTop: 8, marginBottom: 0 }}>
-          {!isVet && (
-            <>
-              {next
-                ? t('profile.toNext', { xp: xpToNext, tier: tierName(next) })
-                : t('profile.maxTier')}
-              {' · '}
-            </>
-          )}
           {t('profile.casesHelped')}: {profile.cases_helped}
         </p>
-        {/* screen-reader label for the progress bar's tier context */}
-        {!isVet && (
-          <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>
-            {t('profile.level')}: {tierName(tier)}
-          </span>
-        )}
+        {/* XP is still awarded server-side (award_xp, 023) but no longer shown:
+            the display is being rebuilt as a ledger / ranking / prizes
+            system. TierBadge and lib/xp.ts are kept for that. Vets never had
+            XP (023), so the placeholder is for rescuers only. */}
+        {!isVet && <div className="soon-pill">🏆 {t('profile.rewardsSoon')}</div>}
       </div>
 
       <PlatformStats />

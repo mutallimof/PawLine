@@ -2013,6 +2013,13 @@ body {
   backdrop-filter: blur(2px);
 }
 .case-photo__reveal-icon { font-size: 26px; }
+/* 88px grid thumbnails: the full "May contain graphic content" title can't fit
+   and pushed the CTA out of the tile. Icon + "Tap to view" only; the button's
+   aria-label still carries the meaning. Visible since critical cases start
+   blurred on case detail too (task 11). */
+.photo-grid .case-photo__reveal-title { display: none; }
+.photo-grid .case-photo__reveal-icon { font-size: 20px; }
+.photo-grid .case-photo__reveal-cta { font-size: 11px; padding: 2px 8px; margin-top: 2px; }
 .case-photo__reveal-title { font-weight: 800; font-size: 13.5px; }
 .case-photo__reveal-cta {
   font-size: 12px; font-weight: 700; opacity: 0.9;
@@ -3212,5 +3219,53 @@ body::before {
   justify-content: space-between;
   margin-top: 6px;
   font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* ---- Vet public page: opening hours (VetHours) ------------------------------ */
+.vet-hours {
+  margin: 12px auto 10px;
+  padding: 10px 14px;
+  max-width: 320px;
+  background: var(--sand);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.vet-hours__label {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+.vet-hours__value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 10px;
+  margin-top: 4px;
+}
+.vet-hours__range {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.vet-hours__note { font-size: 13.5px; color: var(--ink-soft); }
+.vet-hours__open { font-size: 13px; font-weight: 800; color: var(--status-resolved); }
+.vet-hours__tz { margin-top: 4px; font-size: 12px; color: var(--ink-soft); }
+.vet-hours .tag { font-size: 13px; padding: 3px 10px; }
+
+/* ---- Own profile: placeholder where the XP / tier block was ---------------- */
+.soon-pill {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--line);
+  background: var(--sand);
+  font-size: 12.5px;
+  font-weight: 700;
   color: var(--ink-soft);
 }

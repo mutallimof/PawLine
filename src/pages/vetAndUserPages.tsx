@@ -25,7 +25,7 @@ import {
   upsertVet,
 } from '../lib/api';
 import { useCases } from '../hooks/useRealtime';
-import { Avatar, CaseCard, TierBadge, useToast } from '../components/ui';
+import { Avatar, CaseCard, useToast } from '../components/ui';
 import { PinDropMap } from '../components/maps';
 import { IconBack } from '../components/Icons';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
@@ -120,9 +120,8 @@ export function UserProfilePage() {
           {profile.role === 'vet' ? ' 🏥' : ''}
         </h1>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '10px 0 14px' }}>
-          {/* Vets earn no XP (023) — their standing is their star rating, shown
-              on the clinic's own page. Animals helped applies to everyone. */}
-          {profile.role !== 'vet' && <TierBadge xp={profile.xp} />}
+          {/* No tier badge: XP is off every user-facing surface until the
+              ledger / ranking display replaces it. Animals helped stays. */}
           <span className="tier-badge" style={{ background: 'var(--ink-soft)' }}>
             {t('profile.casesHelped')}: {profile.cases_helped}
           </span>
@@ -152,6 +151,57 @@ export function UserProfilePage() {
 }
 
 // ---------------------------------------------------------------------------
+/**
+ * The clinic's stated daily hours, as a rescuer reads them. Mirrors how the
+ * server's vet_within_hours() (010) interprets the same four columns, so the
+ * label never disagrees with open_now:
+ *   - is_24_7, or opens_at == closes_at (00:00–00:00)  → round the clock
+ *   - closes_at < opens_at                             → overnight window
+ *   - either time missing                              → hours not set (the
+ *     server treats that as open, so this says so rather than implying closed)
+ * Times are wall-clock in the CLINIC's timezone; the zone is named only when
+ * it differs from the viewer's, where the times would otherwise mislead.
+ */
+function VetHours({ vet }: { vet: Vet }) {
+  const hhmm = (s: string) => s.slice(0, 5);
+  const allDay = vet.is_24_7 || (!!vet.opens_at && vet.opens_at === vet.closes_at);
+  const set = !!vet.opens_at && !!vet.closes_at;
+  const overnight = set && !allDay && vet.closes_at! < vet.opens_at!;
+
+  let viewerTz = '';
+  try {
+    viewerTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    /* no Intl zone support — just don't label */
+  }
+  const showTz = set && !allDay && !!vet.timezone && vet.timezone !== viewerTz;
+  const tzCity = (vet.timezone || '').split('/').pop()?.replace(/_/g, ' ') ?? '';
+
+  return (
+    <div className="vet-hours">
+      <div className="vet-hours__label">{t('vets.hoursTitle')}</div>
+      <div className="vet-hours__value">
+        {allDay ? (
+          <span className="tag tag--always">{t('vets.hours247')}</span>
+        ) : set ? (
+          <>
+            <span className="vet-hours__range">
+              {hhmm(vet.opens_at!)}–{hhmm(vet.closes_at!)}
+            </span>
+            {overnight && <span className="vet-hours__note"> · {t('vets.hoursOvernight')}</span>}
+          </>
+        ) : (
+          <span className="vet-hours__note">{t('vets.hoursNotSet')}</span>
+        )}
+        {vet.open_now && vet.is_open !== false && (
+          <span className="vet-hours__open">● {t('vets.openNow')}</span>
+        )}
+      </div>
+      {showTz && <div className="vet-hours__tz">{t('vets.hoursTz', { tz: tzCity })}</div>}
+    </div>
+  );
+}
+
 export function VetPublicPage() {
   const { id } = useParams<{ id: string }>();
   const { user, isGuest } = useAuth();
@@ -212,6 +262,7 @@ export function VetPublicPage() {
         )}
         {/* No tier badge here: this page is always a clinic, and vets earn no
             XP (023). The star rating above is a clinic's standing. */}
+        <VetHours vet={vet} />
         {vet.open_now === false ? (
           <div className="banner banner--warn">
             {vet.opens_at

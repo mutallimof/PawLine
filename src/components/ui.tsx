@@ -221,6 +221,7 @@ export function CaseCard({
             url={photo!.url!}
             alt={`${caseData.animal} — ${statusLabel(caseData.status)}`}
             onError={() => setPhotoBroken(true)}
+            urgency={caseData.urgency}
           />
         ) : (
           <span>{animalEmoji(caseData.animal)}</span>
