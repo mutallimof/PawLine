@@ -5,6 +5,7 @@
  *   - Reports: everything users flagged; hide content, ban users, dismiss.
  *   - Sponsors: manage the "Supported by" strip.
  *   - Users: every account (migration 030) — ban/unban, unhide, clinic review.
+ *   - DMs: read-only oversight of every direct-message thread (032); ban either side.
  *
  * Access: profiles.is_admin — settable ONLY via the SQL editor
  * (docs/OPERATIONS.md explains how and why).
@@ -41,11 +42,12 @@ import { timeAgo } from '../lib/time';
 import type { ContentReport, Profile, Sponsor, Vet } from '../lib/types';
 import VetDocumentsList from './admin/VetDocumentsList';
 import UsersTab from './admin/UsersTab';
+import DmsTab from './admin/DmsTab';
 import GrowthCharts from './admin/GrowthCharts';
 
-type Tab = 'stats' | 'users' | 'vets' | 'reports' | 'flagged' | 'sponsors';
+type Tab = 'stats' | 'users' | 'dms' | 'vets' | 'reports' | 'flagged' | 'sponsors';
 
-const TABS: Tab[] = ['stats', 'users', 'vets', 'reports', 'flagged', 'sponsors'];
+const TABS: Tab[] = ['stats', 'users', 'dms', 'vets', 'reports', 'flagged', 'sponsors'];
 
 export default function AdminPage() {
   const { profile } = useAuth();
@@ -197,6 +199,9 @@ export default function AdminPage() {
       {tab === 'users' && (
         <UsersTab currentUserId={profile.id} pendingVets={pendingVets} onChanged={reload} />
       )}
+
+      {/* ---- DMs oversight (migration 032) ---- */}
+      {tab === 'dms' && <DmsTab currentUserId={profile.id} />}
 
       {/* ---- Vet approvals ---- */}
       {tab === 'vets' && (

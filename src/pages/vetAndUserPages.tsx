@@ -52,11 +52,12 @@ function SignInCta() {
 
 export function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const { user, isGuest } = useAuth();
+  const { user, isGuest, profile: me } = useAuth();
   // This page stays PUBLIC for guests — only the actions need an account.
-  // Messaging goes through get_or_create_dm(), which requires a shared active
-  // case and a non-anonymous caller (012), and blocking keys on profile ids,
-  // so both fail at the database for an anonymous session.
+  // DMs are user → approved clinic only (migration 032): there is no Message
+  // button for a regular user's profile at all, and on a clinic's profile it
+  // is offered only to regular users. get_or_create_dm() enforces the same
+  // rule server-side; this just doesn't offer what would be refused.
   const isRegistered = !!user && !isGuest;
   const [profile, setProfile] = useState<Profile | null>(null);
   const [blocked, setBlocked] = useState(false);
@@ -132,10 +133,12 @@ export function UserProfilePage() {
           </div>
         )}
         {isRegistered && user.id !== profile.id && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
-            <button className="btn btn--primary" onClick={() => void message()}>
-              💬 {t('dm.messageUser')}
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {profile.role === 'vet' && me?.role === 'user' && (
+              <button className="btn btn--primary" onClick={() => void message()}>
+                💬 {t('dm.messageClinic')}
+              </button>
+            )}
             <button
               className="btn btn--ghost"
               disabled={busy}
@@ -204,7 +207,7 @@ function VetHours({ vet }: { vet: Vet }) {
 
 export function VetPublicPage() {
   const { id } = useParams<{ id: string }>();
-  const { user, isGuest } = useAuth();
+  const { user, isGuest, profile: me } = useAuth();
   // Public for guests; only messaging the clinic needs an account (same
   // get_or_create_dm() restriction as UserProfilePage above).
   const isRegistered = !!user && !isGuest;
@@ -277,9 +280,12 @@ export function VetPublicPage() {
             <SignInCta />
           </div>
         )}
-        {isRegistered && user.id !== vet.id && (
+        {/* Any regular user can start a DM with a clinic; clinics can reply
+            but never start one (get_or_create_dm refuses it, 032), so another
+            vet isn't offered the button. */}
+        {isRegistered && user.id !== vet.id && me?.role !== 'vet' && (
           <button className="btn btn--primary" onClick={() => void message()}>
-            💬 {t('dm.messageUser')}
+            💬 {t('dm.messageClinic')}
           </button>
         )}
       </div>

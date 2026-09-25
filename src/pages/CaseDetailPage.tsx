@@ -389,6 +389,13 @@ export default function CaseDetailPage() {
       {caseData.status === 'resolved' && !justResolved && (
         <div className="banner banner--success">{t('case.resolvedBanner')}</div>
       )}
+      {/* Why a closed case closed — these strings existed in every locale but
+          never rendered. closed_reason is set by the server (007). */}
+      {caseData.status === 'closed' && caseData.closed_reason && (
+        <div className="banner banner--info">
+          {caseData.closed_reason === 'community' ? t('case.closedCommunity') : t('case.closedExpired')}
+        </div>
+      )}
 
       {/* C2: rate the vet — rescuer only, once per case */}
       {caseData.status === 'resolved' && user && caseData.rescuer_id === user.id && caseData.vet && (

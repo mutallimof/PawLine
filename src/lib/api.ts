@@ -652,6 +652,12 @@ export async function markAllNotificationsRead(profileId: string): Promise<void>
 // Chat system 1 — direct messages
 // ---------------------------------------------------------------------------
 
+/**
+ * Opens (or finds) a DM. Since migration 032 the server only allows a NEW
+ * conversation from a regular user to an approved clinic — a clinic can
+ * reply but never start one, and two regular users can't DM at all. The
+ * server's refusal message is what the caller shows.
+ */
 export async function getOrCreateDm(otherId: string): Promise<string> {
   const { data, error } = await supabase.rpc('get_or_create_dm', { p_other: otherId });
   if (error) throw error;
@@ -871,6 +877,23 @@ export async function fetchCaseMessages(caseId: string): Promise<CaseMessage[]> 
   if (error) throw error;
   return (data ?? []) as unknown as CaseMessage[];
 }
+
+/**
+ * Can messages still be sent in this DM thread? False for an old user↔user
+ * thread, or one whose clinic is no longer approved (migration 032). The
+ * send policy enforces the same rule; this only decides whether to show the
+ * composer. Treated as "yes" if the check itself fails (e.g. before 032 is
+ * applied) — the server still has the final say on every send.
+ */
+export async function isUserVetConversation(conversationId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_user_vet_conversation', { p_conv: conversationId });
+  if (error) return true;
+  return data === true;
+}
+
+/** Case's vet only (migration 032); refused server-side for anyone else. */
+export const closeCaseChat = (caseId: string) => rpc('close_case_chat', { p_case: caseId });
+export const reopenCaseChat = (caseId: string) => rpc('reopen_case_chat', { p_case: caseId });
 
 export async function sendCaseMessage(caseId: string, senderId: string, body: string) {
   const { error } = await supabase
@@ -1107,6 +1130,33 @@ export async function fetchPublicImpact(): Promise<PublicImpact> {
 
 export const adminSetPartner = (profileId: string, org: string | null) =>
   rpc('admin_set_partner', { p_profile: profileId, p_org: org });
+
+// ---------------------------------------------------------------------------
+// Admin → DMs oversight (migration 032) — read-only; admins never post.
+// ---------------------------------------------------------------------------
+
+/** One DM thread: the regular user is `a`, the clinic (if any) is `b`. */
+export interface AdminDmThread {
+  conversation_id: string;
+  created_at: string;
+  a_id: string | null;
+  a_name: string | null;
+  a_role: ProfileRole | null;
+  a_banned: boolean | null;
+  b_id: string | null;
+  b_name: string | null;
+  b_role: ProfileRole | null;
+  b_banned: boolean | null;
+  message_count: number;
+  last_message_at: string | null;
+  last_message: string | null;
+}
+
+export async function fetchAdminDmThreads(limit = 50, offset = 0): Promise<AdminDmThread[]> {
+  const { data, error } = await supabase.rpc('admin_list_dm_threads', { p_limit: limit, p_offset: offset });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as AdminDmThread[];
+}
 
 // ---------------------------------------------------------------------------
 // Admin → Users tab (migration 030)

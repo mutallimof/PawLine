@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCases } from '../hooks/useRealtime';
 import { fetchVets } from '../lib/api';
-import type { AnimalType, CaseStatus, Vet } from '../lib/types';
+import { isCaseLive, type AnimalType, type CaseStatus, type Vet } from '../lib/types';
 import { CasesMap, LocationSearch } from '../components/maps';
 import { CaseCard, useToast } from '../components/ui';
 import { SponsorStrip } from '../components/extras';
@@ -55,8 +55,10 @@ export default function HomePage() {
 
   const filtered = useMemo(() => {
     let list = cases;
-    if (filter === 'resolved') list = cases.filter((c) => c.status === 'resolved');
-    else if (filter === 'active') list = cases.filter((c) => c.status !== 'resolved');
+    // "Done" = resolved OR closed; "Active" = live only (closed used to count
+    // as active here).
+    if (filter === 'resolved') list = cases.filter((c) => !isCaseLive(c.status));
+    else if (filter === 'active') list = cases.filter((c) => isCaseLive(c.status));
 
     // Group G: radius / animal type / (finer) status, on top of the tab above.
     if (radiusKm && userLocation) {

@@ -12,6 +12,18 @@ export type CaseStatus =
   | 'resolved'
   | 'closed';
 
+/**
+ * Task 1: the ONE definition of "is this case still live?". Live = still
+ * moving through the pipeline; done = resolved (safe at the vet) or closed
+ * (expired / flagged "not here"). Every surface that shows live-vs-done —
+ * the status badge's pulse, feed card tint, map pin, home filter — reads
+ * this, so they can't disagree about `closed` again.
+ */
+export const LIVE_STATUSES: readonly CaseStatus[] = ['open', 'accepted', 'vet_selected', 'vet_confirmed', 'en_route'];
+export function isCaseLive(status: CaseStatus): boolean {
+  return LIVE_STATUSES.includes(status);
+}
+
 export type AnimalType = 'dog' | 'cat' | 'other';
 export type ProfileRole = 'user' | 'vet';
 export type NewCasePref = 'nearby' | 'all' | 'off';
@@ -152,6 +164,12 @@ export interface RescueCase {
    * that migration is applied, and the UI treats undefined and null alike.
    */
   pinned_message_id?: number | null;
+  /**
+   * When the case's vet closed the case chat (migration 032); null = open.
+   * Optional for the same reason as pinned_message_id: undefined until the
+   * migration is applied, which the UI treats as open.
+   */
+  chat_closed_at?: string | null;
 }
 
 export type InjuryType = 'limping' | 'bleeding' | 'hit_by_car' | 'weak' | 'skin' | 'trapped' | 'unknown';

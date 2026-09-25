@@ -20,7 +20,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { CaseWithDetails, Vet } from '../lib/types';
+import { isCaseLive, type CaseWithDetails, type Vet } from '../lib/types';
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -126,10 +126,11 @@ function getMarkerClass(g: typeof google): HtmlMarkerCtor {
 // Pin element builders (styles: index.css "Map pins" section)
 // ---------------------------------------------------------------------------
 function statusClass(c: CaseWithDetails): string {
-  if (c.status === 'resolved') return 'resolved';
+  // Done (resolved OR closed) shares the faded "done" pin; the ✓ badge below
+  // stays resolved-only, since a closed case wasn't necessarily helped.
+  if (!isCaseLive(c.status)) return 'resolved';
   if (c.status === 'en_route') return 'enroute';
   if (c.status === 'open') return 'open';
-  if (c.status === 'closed') return 'resolved';
   return 'progress';
 }
 

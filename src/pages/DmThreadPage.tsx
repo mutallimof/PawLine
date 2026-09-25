@@ -12,6 +12,12 @@
  * schema change (new target_type + FK to `messages`) to do properly;
  * flagging per FIX_SPEC's "stop and flag it" rule rather than building
  * around it.
+ *
+ * Since migration 032, DMs are user → approved clinic only, and admins can
+ * read every thread (Admin → DMs) and ban either side from there. A thread
+ * that no longer fits the model (an old user↔user thread, or a clinic that
+ * lost approval) stays readable here but can't be posted in — the send
+ * policy refuses it, and the composer is swapped for a notice.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,6 +27,7 @@ import {
   blockUser,
   fetchDmPartner,
   isUserBlocked,
+  isUserVetConversation,
   markConversationRead,
   sendMessage,
   unblockUser,
@@ -39,12 +46,18 @@ export default function DmThreadPage() {
   const [blocked, setBlocked] = useState(false);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  // null while checking; the server's send policy is the real gate.
+  const [canSend, setCanSend] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const toast = useToast();
 
   useEffect(() => {
     if (id && user) fetchDmPartner(id, user.id).then(setPartner).catch(() => {});
+  }, [id, user]);
+
+  useEffect(() => {
+    if (id && user) void isUserVetConversation(id).then(setCanSend);
   }, [id, user]);
 
   // B4: reflect current block state so the header action reads Block vs Unblock.
@@ -129,18 +142,25 @@ export default function DmThreadPage() {
         ))}
       </div>
 
-      <div className="chat-composer">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && void send()}
-          placeholder={t('dm.placeholder')}
-          maxLength={4000}
-        />
-        <button onClick={() => void send()} disabled={sending || !draft.trim()} aria-label={t('common.send')}>
-          <IconSend size={18} />
-        </button>
-      </div>
+      {canSend === false ? (
+        <div className="chat-composer chat-composer--closed" role="status">
+          <span>🔒 {t('dm.threadClosed')}</span>
+        </div>
+      ) : (
+        <div className="chat-composer">
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void send()}
+            placeholder={t('dm.placeholder')}
+            maxLength={4000}
+            disabled={canSend === null}
+          />
+          <button onClick={() => void send()} disabled={sending || !draft.trim() || canSend === null} aria-label={t('common.send')}>
+            <IconSend size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 /** Shared UI building blocks. */
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import type { CaseStatus, CaseWithDetails, UrgencyLevel } from '../lib/types';
+import { isCaseLive, type CaseStatus, type CaseWithDetails, type UrgencyLevel } from '../lib/types';
 import {
   getLocale,
   LOCALE_NAMES,
@@ -44,7 +44,8 @@ export function StatusBadge({
   status: CaseStatus;
   overlay?: boolean;
 }) {
-  const live = status !== 'resolved';
+  // Pulses only while the case is live — never on resolved OR closed.
+  const live = isCaseLive(status);
   return (
     <span
       className={`status-badge${overlay ? ' status-badge--overlay' : ''}`}
@@ -209,7 +210,9 @@ export function CaseCard({
     <Link
       to={`/case/${caseData.id}`}
       className={`card case-card case-card--compact case-card--${
-        caseData.status === 'resolved' ? 'resolved'
+        // Done (resolved OR closed) gets the done tint — closed used to fall
+        // through to the amber in-progress tint.
+        !isCaseLive(caseData.status) ? 'resolved'
         : caseData.status === 'en_route' ? 'enroute'
         : caseData.status === 'open' ? 'open'
         : 'progress'

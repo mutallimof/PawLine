@@ -8,11 +8,19 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
-import { blockUser, markCaseChatRead, pinCaseMessage, sendCaseMessage, unpinCaseMessage } from '../lib/api';
+import {
+  blockUser,
+  closeCaseChat,
+  markCaseChatRead,
+  pinCaseMessage,
+  reopenCaseChat,
+  sendCaseMessage,
+  unpinCaseMessage,
+} from '../lib/api';
 import { Avatar, StatusBadge, useToast } from '../components/ui';
 import { ReportSheet } from '../components/Report';
 import { IconBack, IconSend } from '../components/Icons';
-import { t } from '../i18n';
+import { getLocale, t } from '../i18n';
 import { clockTime } from '../lib/time';
 import type { CaseMessage } from '../lib/types';
 
@@ -97,6 +105,29 @@ export default function CaseChatPage() {
   // the side of the screen and clipped its own question and options.
   const [reportFor, setReportFor] = useState<CaseMessage | null>(null);
 
+  // Task 8: the case's vet can close the chat (read-only for everyone, the
+  // vet included) and reopen it, at any case status. close_case_chat /
+  // reopen_case_chat refuse anyone but cases.vet_id, and the posting policy
+  // refuses every insert while chat_closed_at is set (migration 032) — the
+  // composer swap below is presentation. `cases` is in the realtime
+  // publication, so everyone with the chat open sees the change live.
+  const chatClosedAt = caseData?.chat_closed_at ?? null;
+  const [togglingChat, setTogglingChat] = useState(false);
+  const toggleChatClosed = async () => {
+    if (!id) return;
+    if (!chatClosedAt && !window.confirm(t('caseChat.closeConfirm'))) return;
+    setTogglingChat(true);
+    try {
+      if (chatClosedAt) await reopenCaseChat(id);
+      else await closeCaseChat(id);
+      await reloadCase(); // don't wait on the realtime echo of our own write
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setTogglingChat(false);
+    }
+  };
+
   const setPin = async (messageId: number | null) => {
     if (!id) return;
     setOpenMenu(null);
@@ -147,6 +178,18 @@ export default function CaseChatPage() {
           )}
         </div>
         {caseData && <StatusBadge status={caseData.status} />}
+        {isCaseVet && !chatClosedAt && (
+          <button
+            type="button"
+            className="chat-header__action"
+            disabled={togglingChat}
+            onClick={() => void toggleChatClosed()}
+            title={t('caseChat.close')}
+            aria-label={t('caseChat.close')}
+          >
+            🔒 {t('caseChat.closeShort')}
+          </button>
+        )}
       </header>
 
       {pinned && (
@@ -295,7 +338,26 @@ export default function CaseChatPage() {
         />
       )}
 
-      {isRegistered ? (
+      {chatClosedAt ? (
+        <div className="chat-composer chat-composer--closed" role="status">
+          <span>
+            🔒{' '}
+            {t(isCaseVet ? 'caseChat.closedByYou' : 'caseChat.closedByClinic', {
+              date: new Date(chatClosedAt).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short', year: 'numeric' }),
+            })}
+          </span>
+          {isCaseVet && (
+            <button
+              type="button"
+              className="chat-reopen"
+              disabled={togglingChat}
+              onClick={() => void toggleChatClosed()}
+            >
+              {t('caseChat.reopen')}
+            </button>
+          )}
+        </div>
+      ) : isRegistered ? (
         <div className="chat-composer">
           <div style={{ alignSelf: 'center' }}>
             <Avatar name={user.email ?? 'me'} small />
