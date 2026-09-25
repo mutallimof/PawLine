@@ -89,6 +89,8 @@ export const ru: Dict = {
   'case.arrivedAtVet': 'Привезите животное в «{clinic}».',
   'case.confirmDelivery': 'Подтвердить приём животного',
   'case.confirmDeliveryNote': 'При желании добавьте фото животного в клинике.',
+  'case.addRecoveryPhoto': 'Добавить фото выздоровления',
+  'case.addRecoveryPhotoHint': 'Покажите всем, кто следит за случаем, как себя чувствует животное.',
   'case.vetDecline': 'Не можем принять',
   'case.vetAccept': 'Мы готовы',
   'case.vetUpdate': 'Опубликовать новость',

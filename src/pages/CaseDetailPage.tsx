@@ -135,6 +135,12 @@ export default function CaseDetailPage() {
   const finished = caseData.status === 'resolved' || caseData.status === 'closed';
   const reportPhotos = finished ? [] : caseData.photos.filter((p) => p.kind === 'report');
   const deliveryPhotos = caseData.photos.filter((p) => p.kind === 'delivery');
+  // The assigned vet can keep adding photos after the case is over — the
+  // "healed and safe" update followers want. Same path as the delivery photo
+  // (addDeliveryPhoto → case_photos kind 'delivery'); the server's existing
+  // rule (005) already limits delivery photos to the case's vet_id, with no
+  // status restriction, and refuses them on a hidden case.
+  const canAddRecoveryPhoto = isVet && finished;
 
   /**
    * Run an action with busy state + error toast, then refresh THIS case.
@@ -211,11 +217,10 @@ export default function CaseDetailPage() {
     }
   };
 
-  const onDeliveryPhoto = async (files: FileList | null) => {
-    if (!files?.[0]) return;
+  const onDeliveryPhoto = async (file: File) => {
     setBusy(true);
     try {
-      await addDeliveryPhoto(caseData.id, files[0]);
+      await addDeliveryPhoto(caseData.id, file);
       // case_photos isn't in the realtime publication, so nothing would echo
       // this back — without the reload the photo the rescuer just uploaded
       // wouldn't appear until they navigated away and back.
@@ -618,7 +623,13 @@ export default function CaseDetailPage() {
           accept="image/*"
           capture="environment"
           hidden
-          onChange={(e) => void onDeliveryPhoto(e.target.files)}
+          onChange={(e) => {
+            // Take the File first, then clear the input so a second recovery
+            // photo (or the same file again) still fires onChange.
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) void onDeliveryPhoto(file);
+          }}
         />
       </div>
 
@@ -644,7 +655,7 @@ export default function CaseDetailPage() {
       {/* ==================================================================
           4. PHOTO
          ================================================================== */}
-      {(reportPhotos.length > 0 || deliveryPhotos.length > 0) && (
+      {(reportPhotos.length > 0 || deliveryPhotos.length > 0 || canAddRecoveryPhoto) && (
         <>
           {reportPhotos.length > 0 && <div className="section-label">{t('report.photos')}</div>}
           {reportPhotos[0] && (
@@ -677,20 +688,34 @@ export default function CaseDetailPage() {
               )}
             </div>
           )}
-          {deliveryPhotos.length > 0 && (
+          {(deliveryPhotos.length > 0 || canAddRecoveryPhoto) && (
             <>
               <div className="section-label">{t('status.resolved')}</div>
-              <div className="photo-grid" style={{ marginBottom: 14 }}>
-                {deliveryPhotos.map((p) =>
-                  p.url && !brokenPhotoIds.has(p.id) ? (
-                    <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} urgency={caseData.urgency} />
-                  ) : (
-                    <div key={p.id} className="photo-unavailable">
-                      <span aria-hidden="true">🐾</span>
-                    </div>
-                  )
-                )}
-              </div>
+              {deliveryPhotos.length > 0 && (
+                <div className="photo-grid" style={{ marginBottom: 14 }}>
+                  {deliveryPhotos.map((p) =>
+                    p.url && !brokenPhotoIds.has(p.id) ? (
+                      <CasePhoto key={p.id} url={p.url} alt="" onError={() => markPhotoBroken(p.id)} urgency={caseData.urgency} />
+                    ) : (
+                      <div key={p.id} className="photo-unavailable">
+                        <span aria-hidden="true">🐾</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+              {canAddRecoveryPhoto && (
+                <div style={{ marginBottom: 14 }}>
+                  <button
+                    className="btn btn--secondary"
+                    disabled={busy}
+                    onClick={() => deliveryPhotoInput.current?.click()}
+                  >
+                    <IconCamera size={18} /> {t('case.addRecoveryPhoto')}
+                  </button>
+                  <p className="page-subtitle" style={{ marginTop: 6 }}>{t('case.addRecoveryPhotoHint')}</p>
+                </div>
+              )}
             </>
           )}
         </>

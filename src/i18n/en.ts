@@ -87,6 +87,8 @@ export const en = {
   'case.arrivedAtVet': 'Bring the animal to {clinic}.',
   'case.confirmDelivery': 'Confirm animal received',
   'case.confirmDeliveryNote': 'Optionally add a photo of the animal at the clinic.',
+  'case.addRecoveryPhoto': 'Add recovery photo',
+  'case.addRecoveryPhotoHint': 'Show everyone following this case how the animal is doing.',
   'case.vetDecline': 'Can’t receive',
   'case.vetAccept': 'We’re ready',
   'case.vetUpdate': 'Post an update',

@@ -89,6 +89,8 @@ export const tr: Dict = {
   'case.arrivedAtVet': 'Hayvanı {clinic} kliniğine götürün.',
   'case.confirmDelivery': 'Hayvanın teslim alındığını onayla',
   'case.confirmDeliveryNote': 'İsterseniz hayvanın klinikteki fotoğrafını ekleyin.',
+  'case.addRecoveryPhoto': 'İyileşme fotoğrafı ekle',
+  'case.addRecoveryPhotoHint': 'Bu vakayı takip edenlere hayvanın nasıl olduğunu gösterin.',
   'case.vetDecline': 'Kabul edemiyoruz',
   'case.vetAccept': 'Hazırız',
   'case.vetUpdate': 'Güncelleme paylaş',
