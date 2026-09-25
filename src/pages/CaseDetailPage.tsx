@@ -53,7 +53,7 @@ import { getCurrentPosition } from '../lib/geo';
 
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user, isGuest } = useAuth();
+  const { user, profile, isGuest } = useAuth();
   // A guest (anonymous session from browsing the feed) has a `user` but no
   // account and no profiles row, so every action below would be rejected by
   // the database. They get the sign-in prompt instead of dead buttons.
@@ -140,7 +140,11 @@ export default function CaseDetailPage() {
   // (addDeliveryPhoto → case_photos kind 'delivery'); the server's existing
   // rule (005) already limits delivery photos to the case's vet_id, with no
   // status restriction, and refuses them on a hidden case.
-  const canAddRecoveryPhoto = isVet && finished;
+  // Banned accounts can't add case photos (migration 031 refuses the upload
+  // server-side, the same is_banned() check case chat uses); this only hides
+  // the buttons so a banned vet isn't offered an action that will fail.
+  const isBanned = !!profile?.banned;
+  const canAddRecoveryPhoto = isVet && finished && !isBanned;
 
   /**
    * Run an action with busy state + error toast, then refresh THIS case.
@@ -585,9 +589,11 @@ export default function CaseDetailPage() {
             <button className="btn btn--success" disabled={busy} onClick={run(() => confirmDelivery(caseData.id))}>
               ✓ {t('case.confirmDelivery')}
             </button>
-            <button className="btn btn--ghost" onClick={() => deliveryPhotoInput.current?.click()}>
-              <IconCamera size={18} /> {t('case.confirmDeliveryNote')}
-            </button>
+            {!isBanned && (
+              <button className="btn btn--ghost" onClick={() => deliveryPhotoInput.current?.click()}>
+                <IconCamera size={18} /> {t('case.confirmDeliveryNote')}
+              </button>
+            )}
           </>
         )}
 
