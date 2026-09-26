@@ -1974,27 +1974,223 @@ body {
 .banner--success.celebrate { animation: page-enter 400ms both; }
 .paw-trail--complete .paw-trail__icon { animation: pulse-ring 1.8s ease-out 2; }
 
-/* ---- Onboarding (first run) ---- */
+/* ---- Onboarding (first run) ----------------------------------------------
+   Built from the design's three splash frames. Those frames are flat bitmaps
+   (no layers), so geometry was measured off the pixels at 390px and colours
+   sampled from them; anything the variables already define uses the token.
+   --u is one design pixel, scaled down below 390px so 320px keeps the same
+   proportions and line breaks; floors keep type and targets usable. */
 .onboarding {
+  --u: min(1px, calc(100vw / 390));
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: var(--sand);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 28px;
-  text-align: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--onb-hill);
+  color: var(--onb-ink);
   animation: page-enter var(--t-med) both;
 }
-.onboarding__icon { font-size: 76px; margin-bottom: 18px; animation: float-paw 3.6s ease-in-out infinite; }
-.onboarding__title { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin: 0 0 10px; }
-.onboarding__body { color: var(--ink-soft); font-size: 15.5px; max-width: 420px; margin: 0 0 26px; }
-.onboarding__dots { display: flex; gap: 8px; margin-bottom: 26px; }
-.onboarding__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); transition: background var(--t-fast), transform var(--t-fast); }
-.onboarding__dot.active { background: var(--coral); transform: scale(1.25); }
-.onboarding__actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 340px; }
+.onboarding--green {
+  --onb-top: #066f5a;           /* sampled — no Figma variable */
+  --onb-hill: #026551;          /* sampled */
+  --onb-ink: #fff;
+  --onb-body: rgba(255, 255, 255, 0.94); /* sampled #f1f4f0 over the green */
+  --onb-cta-bg: #fff;
+  --onb-cta-ink: var(--ink);
+  --onb-title: 41;              /* design px */
+  --onb-title-lh: 1.02;
+}
+.onboarding--light {
+  --onb-top: #fff;
+  --onb-hill: #fff;
+  --onb-ink: #015148;           /* sampled deep green — no Figma variable */
+  --onb-body: #003f3c;          /* sampled */
+  --onb-cta-bg: var(--coral);
+  --onb-cta-ink: var(--color-text-on-brand);
+  --onb-title: 48;
+  --onb-title-lh: 1.08;
+}
+.onboarding--lavender {
+  --onb-top: #8979df;           /* sampled — a shade under the --lavender token */
+  --onb-hill: #8272db;          /* sampled */
+  --onb-ink: #fff;
+  --onb-body: #fff;
+  --onb-cta-bg: #fff;
+  --onb-cta-ink: var(--ink);
+  --onb-title: 45;
+  --onb-title-lh: 1.03;
+}
+
+.onboarding__frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--onb-hill);
+}
+
+.onboarding__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(calc(48 * var(--u)), calc(env(safe-area-inset-top, 0px) + 16px))
+    calc(35 * var(--u)) calc(12 * var(--u));
+  background: var(--onb-top);
+}
+.onboarding__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(9 * var(--u));
+  font-size: max(20px, calc(24 * var(--u)));
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+.onboarding__mark {
+  width: max(24px, calc(28 * var(--u)));
+  height: max(24px, calc(28 * var(--u)));
+  fill: currentColor;
+  flex-shrink: 0;
+}
+/* Not in the design — see LanguageSelect in Onboarding.tsx. */
+.onboarding__lang {
+  appearance: none;
+  min-height: 36px;
+  margin: -4px 0; /* 36px target, but the row keeps the logo's 28px height */
+  padding: 0 28px 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.16)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat right 11px center;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.onboarding--light .onboarding__lang {
+  border-color: var(--line);
+  background-color: var(--color-bg-surface-alt);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23015148' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.onboarding__lang option { color: var(--ink); background: var(--card); }
+
+/* The photo band. Its natural height is the crop's aspect ratio; on short
+   screens it shrinks (photo stays whole, bottom-anchored) before the copy
+   ever has to scroll. The image files carry 560px of edge-repeated
+   background on each side, so `cover` shows exactly the design's crop at
+   full size and fills the sides seamlessly when the band shrinks. */
+.onboarding__art {
+  position: relative;
+  flex: 0 1 auto;
+  width: 100%;
+  aspect-ratio: 853 / 961;
+  min-height: 160px;
+  background: linear-gradient(var(--onb-top), var(--onb-hill));
+}
+.onboarding__art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.onboarding__panel {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0 calc(35 * var(--u)) calc(max(12px, env(safe-area-inset-bottom, 0px)) + 4 * var(--u));
+}
+.onboarding__title {
+  /* The design's headline runs ~5px past the button's right edge; without
+     the same room "with one report." wraps to a third line. */
+  margin: 0 calc(-12 * var(--u)) 0 0;
+  font-family: var(--font-display);
+  font-size: max(28px, calc(var(--onb-title) * var(--u)));
+  font-weight: 700;
+  line-height: var(--onb-title-lh);
+  letter-spacing: 0;
+}
+.onboarding__body {
+  margin: calc(14 * var(--u)) 0 0;
+  max-width: calc(300 * var(--u));
+  color: var(--onb-body);
+  font-size: max(15px, calc(17 * var(--u)));
+  font-weight: 500;
+  line-height: 1.4;
+}
+.onboarding__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(12 * var(--u));
+  margin-top: auto;
+  padding-top: calc(30 * var(--u));
+}
+/* Figma: full-width, 55px, 14px corners, flat fill, no shadow. */
+.onboarding__cta {
+  min-height: max(48px, calc(55 * var(--u)));
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--onb-cta-bg);
+  color: var(--onb-cta-ink);
+  font: inherit;
+  font-size: max(16px, calc(17.5 * var(--u)));
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform var(--t-fast);
+}
+.onboarding__cta:active { transform: scale(0.98); }
+.onboarding__cta:focus-visible,
+.onboarding__skip:focus-visible,
+.onboarding__lang:focus-visible {
+  outline: 3px solid var(--onb-ink);
+  outline-offset: 3px;
+}
+/* Not in the design; styled like its "Continue as guest" text link. On the
+   last step an empty slot keeps its space so the button doesn't jump. */
+.onboarding__skip {
+  align-self: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--onb-body);
+  font: inherit;
+  font-size: max(14px, calc(13.5 * var(--u)));
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.onboarding__skip-slot { min-height: 36px; }
+
+/* Wide screens: present the 390px frame as the design does — a phone-sized
+   card — rather than stretching the photo across a desktop. */
+@media (min-width: 600px) {
+  .onboarding {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--color-bg-surface-alt);
+  }
+  .onboarding__frame {
+    flex: none;
+    width: 390px;
+    height: min(844px, calc(100dvh - 48px));
+    margin: 0;
+    border-radius: 36px;
+    overflow: hidden auto;
+    box-shadow: var(--shadow-lift);
+  }
+}
 
 /* ============================================================================
    15. PRE-LAUNCH — photo blur, chip rows, legal/settings, error/404
@@ -2237,7 +2433,6 @@ body {
 /* Display type: Fraunces wants a heavier optical presence — its character
    lives in the higher weights and a touch of negative tracking at size. */
 .page-title,
-.onboarding__title,
 .modal-sheet__title,
 .side-nav__name {
   font-family: var(--font-display);
@@ -2419,9 +2614,6 @@ body {
 }
 
 
-/* ---- Onboarding in Direction A ---- */
-.onboarding__icon .ink-scene { color: var(--coral-deep); opacity: 0.92; }
-.onboarding__title { font-size: 27px; letter-spacing: -0.015em; }
 
 /* ============================================================================
    17. DESIGN SOUL LAYER — Direction A: "The Hand That Helps"
@@ -2434,7 +2626,6 @@ body {
 
 /* ---- Fraunces, given its hand-cut character (opsz/SOFT/WONK axes) --------- */
 .page-title,
-.onboarding__title,
 .modal-sheet__title,
 .fullscreen-msg h1,
 .doc-page h1,

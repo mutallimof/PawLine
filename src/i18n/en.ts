@@ -443,15 +443,15 @@ export const en = {
   'onboard.skip': 'Skip',
 
   // Onboarding + feed states (excellence pass UI completion)
-  'onb.1title': 'See an animal in trouble?',
-  'onb.1body': 'Take a photo, drop a pin where it is, add a few words. That’s the whole report — no account needed.',
-  'onb.2title': 'A nearby rescuer steps up',
-  'onb.2body': 'People close by get alerted and one of them commits to help. You can follow every step live.',
-  'onb.3title': 'Safe at a verified vet',
-  'onb.3body': 'The rescuer brings the animal to a verified clinic. Anyone can chip in for treatment — directly with the vet, never through the app.',
-  'onb.next': 'Next',
+  'onb.1title': 'Rescue starts with one report.',
+  'onb.1body': 'Help us find and rescue street animals faster.',
+  'onb.2title': 'Spot them. Report fast.',
+  'onb.2body': 'Share a photo and location so nearby rescuers can respond quickly.',
+  'onb.3title': 'Track every rescue step.',
+  'onb.3body': 'Follow updates from report to safe care in real time.',
+  'onb.next': 'Continue',
   'onb.skip': 'Skip',
-  'onb.start': 'Let’s go 🐾',
+  'onb.start': 'Get started',
   'home.stillWaiting': 'Still waiting for a rescuer',
   'home.loadError': 'We couldn’t reach the cases just now — check your connection and try again.',
 
