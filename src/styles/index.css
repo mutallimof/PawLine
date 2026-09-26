@@ -11,7 +11,11 @@
      Names kept from the old coral palette so every existing var() reference
      picks up the new values; "coral" now means "brand", not the hue. */
   --coral: #02b874;        /* primary — actions, brand (Figma "Royal Green") */
-  --coral-deep: #02b874;   /* emphasis / active label — Figma uses the same green, no darker step */
+  /* The brand green is 2.6:1 on white — fine as a fill, too light for text.
+     --brand-text is the same hue darkened to pass AA (4.5:1) on white
+     (6.0), #f4f4f4 (5.5) and the --coral-soft tint (4.95). */
+  --brand-text: #017245;
+  --coral-deep: var(--brand-text); /* green text / labels on light backgrounds */
   --coral-soft: rgba(3, 184, 117, 0.2); /* tinted backgrounds (Figma chip fill) */
   --sand: #ffffff;         /* app background (Figma screens are white) */
   --card: #ffffff;         /* card surface (Figma "Citrine White") */
@@ -36,10 +40,26 @@
   --urgency-high: #e0672c;       /* orange */
   --urgency-critical: #c22a1f;   /* alarming deep red */
 
+  /* Next urgency scale — defined, not yet used: screens switch from the
+     --urgency-* ramp above when feed / case detail are restyled. Neutral →
+     amber → orange → red, none of it green (green means safe). Per level:
+     solid fill, label colour on the solid, tint, and text-on-tint. Every
+     text pair is ≥ 4.5:1. High and critical differ in hue, lightness and
+     label colour so they can't be confused at a glance. */
+  --color-urgency-low: #71717a;          --color-urgency-low-on: #fff;
+  --color-urgency-low-subtle: #f1f1f2;   --color-urgency-low-strong: #52525b;
+  --color-urgency-medium: #f5a623;       --color-urgency-medium-on: var(--ink);
+  --color-urgency-medium-subtle: #fdf1dc; --color-urgency-medium-strong: #8a5a00;
+  --color-urgency-high: #f76b15;         --color-urgency-high-on: var(--ink);
+  --color-urgency-high-subtle: #feeadd;  --color-urgency-high-strong: #b23e00;
+  --color-urgency-critical: #c8201e;     --color-urgency-critical-on: #fff;
+  --color-urgency-critical-subtle: #fbe3e2; --color-urgency-critical-strong: #a3150f;
+
   /* Type — one family for everything, as in the design (Figma: Aeonik,
-     substituted with DM Sans — see main.tsx). */
-  --font-display: 'DM Sans Variable', system-ui, -apple-system, sans-serif;
-  --font-body: 'DM Sans Variable', system-ui, -apple-system, sans-serif;
+     substituted with DM Sans — see main.tsx). DM Sans has no Cyrillic, so
+     Russian falls through to Onest (below) rather than the system font. */
+  --font-display: 'DM Sans Variable', 'Onest Cyrillic', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans Variable', 'Onest Cyrillic', system-ui, -apple-system, sans-serif;
   --fraunces-soft: normal; /* Fraunces-only axes; DM Sans has none of them */
 
   /* Shape & elevation — rounded, soft, approachable.
@@ -61,6 +81,22 @@
   --nav-height: 64px;
   --page-max: 640px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Cyrillic companion to DM Sans. Only Onest's Cyrillic file is declared (the
+   package's own CSS would also pull in and precache its Latin files, which
+   DM Sans already covers), and unicode-range limits it to Cyrillic glyphs.
+   size-adjust matches Onest's x-height (527) to DM Sans's (504), so Russian
+   lowercase sits at the same height as Latin in mixed text. */
+@font-face {
+  font-family: 'Onest Cyrillic';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../../node_modules/@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+  size-adjust: 95.6%;
 }
 
 /* ---- 2. Base ------------------------------------------------------------- */
@@ -195,7 +231,7 @@ select {
 }
 
 .bottom-nav__item.active {
-  color: var(--coral);
+  color: var(--brand-text);
 }
 
 .bottom-nav__item svg {
@@ -1066,7 +1102,7 @@ select {
 
 .banner--success {
   background: rgba(63, 155, 108, 0.12);
-  color: var(--status-resolved);
+  color: var(--brand-text);
 }
 
 .banner--info {
@@ -1764,12 +1800,13 @@ body {
 /* ---- Status color families (tints for card surfaces, solids for rings) ---- */
 :root {
   /* 50 / 500 / 700 from the Figma badges (tint fill, solid, text-on-tint —
-     Figma uses the solid as the text colour). The 100 steps and the whole
-     prog family have no Figma equivalent and are unchanged. */
+     Figma uses the solid as the text colour, except done-700: the brand
+     green fails contrast as text, so it takes --brand-text). The 100 steps
+     and the whole prog family have no Figma equivalent and are unchanged. */
   --open-50: rgba(238, 107, 82, 0.18);  --open-100: #fbd9d4;  --open-500: #ea4335;  --open-700: #ea4335;
   --prog-50: #fdf3e2;  --prog-100: #fae6c3;  --prog-500: #e09b26;  --prog-700: #9c6a12;
   --route-50: rgba(39, 72, 232, 0.18);  --route-100: #d5e6f1; --route-500: #4285f4; --route-700: #4285f4;
-  --done-50: rgba(3, 184, 117, 0.2);    --done-100: #d2ebdd;  --done-500: #02b874;  --done-700: #02b874;
+  --done-50: rgba(3, 184, 117, 0.2);    --done-100: #d2ebdd;  --done-500: #02b874;  --done-700: var(--brand-text);
 }
 
 /* ---- §pins: the case IS the pin --------------------------------------------
@@ -2565,7 +2602,7 @@ body {
   font-variation-settings: 'opsz' 40, 'SOFT' 30, 'WONK' 1;
   font-size: clamp(56px, 18vw, 82px);
   line-height: 0.9;
-  color: var(--coral);
+  color: var(--brand-text);
   letter-spacing: -0.03em;
 }
 .impact-stat__value {
@@ -2585,7 +2622,7 @@ body {
   font-size: clamp(44px, 14vw, 64px);
   line-height: 0.9;
   letter-spacing: -0.03em;
-  color: var(--coral);
+  color: var(--brand-text);
 }
 
 /* ---- Platform stats (ProfilePage) — the three /impact headline numbers,
@@ -2604,7 +2641,7 @@ body {
   font-variation-settings: var(--fraunces-soft);
   font-size: clamp(20px, 6vw, 28px);
   line-height: 1.1;
-  color: var(--coral);
+  color: var(--brand-text);
 }
 .platform-stats__label {
   font-size: 11px;
@@ -2735,7 +2772,7 @@ body::before {
   font-variation-settings: 'opsz' 40, 'SOFT' 30, 'WONK' 1;
   font-size: clamp(56px, 18vw, 84px);
   line-height: 0.9;
-  color: var(--coral);
+  color: var(--brand-text);
   letter-spacing: -0.03em;
 }
 .impact-stat-num {
@@ -3443,7 +3480,7 @@ body::before {
   font-variant-numeric: tabular-nums;
 }
 .vet-hours__note { font-size: 13.5px; color: var(--ink-soft); }
-.vet-hours__open { font-size: 13px; font-weight: 800; color: var(--status-resolved); }
+.vet-hours__open { font-size: 13px; font-weight: 800; color: var(--brand-text); }
 .vet-hours__tz { margin-top: 4px; font-size: 12px; color: var(--ink-soft); }
 .vet-hours .tag { font-size: 13px; padding: 3px 10px; }
 
