@@ -954,7 +954,7 @@ select {
 
 .bubble--mine {
   align-self: flex-end;
-  background: var(--coral);
+  background: var(--brand-fill);
   color: #fff;
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 6px;

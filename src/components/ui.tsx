@@ -29,7 +29,7 @@ export const STATUS_COLOR: Record<CaseStatus, string> = {
   vet_selected: 'var(--status-progress)',
   vet_confirmed: 'var(--status-progress)',
   en_route: 'var(--status-enroute)',
-  resolved: 'var(--status-resolved)',
+  resolved: 'var(--brand-fill)', // badge fill under white text — the bright green fails contrast
   closed: 'var(--ink-soft)',
 };
 
