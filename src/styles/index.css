@@ -7,21 +7,25 @@
 
 /* ---- 1. Design tokens ---------------------------------------------------- */
 :root {
-  /* Palette — warm coral/terracotta core with earthy support colors. */
-  --coral: #e85d4a;        /* primary — actions, brand */
-  --coral-deep: #c2402f;   /* pressed / emphasis */
-  --coral-soft: #fceae6;   /* tinted backgrounds */
-  --sand: #faf3ee;         /* app background */
-  --card: #fffdfb;         /* card surface */
-  --ink: #33241f;          /* primary text — warm near-black */
-  --ink-soft: #7d6a62;     /* secondary text */
-  --line: #eeddd4;         /* hairlines and borders */
+  /* Palette — values from the designer's Figma variables (green + lavender).
+     Names kept from the old coral palette so every existing var() reference
+     picks up the new values; "coral" now means "brand", not the hue. */
+  --coral: #02b874;        /* primary — actions, brand (Figma "Royal Green") */
+  --coral-deep: #02b874;   /* emphasis / active label — Figma uses the same green, no darker step */
+  --coral-soft: rgba(3, 184, 117, 0.2); /* tinted backgrounds (Figma chip fill) */
+  --sand: #ffffff;         /* app background (Figma screens are white) */
+  --card: #ffffff;         /* card surface (Figma "Citrine White") */
+  --ink: #241f1a;          /* primary text (Figma "Zeus") */
+  --ink-soft: rgba(36, 31, 26, 0.55); /* secondary text (Figma "Zeus 55%") */
+  --line: #eaeaea;         /* hairlines and borders (Figma "Border Gray") */
+  --lavender: #9c85e6;     /* accent (Figma "Dull Lavender") */
+  --lavender-soft: rgba(156, 133, 230, 0.16); /* accent tint (Figma "Dull Lavender 16%") */
 
   /* Status colors — the case pipeline at a glance. */
-  --status-open: #d93a2b;        /* needs help — urgent red-orange */
-  --status-progress: #e09b26;    /* accepted / vet stages — amber */
-  --status-enroute: #3f7fae;     /* moving — calm blue */
-  --status-resolved: #3f9b6c;    /* safe — green */
+  --status-open: #ea4335;        /* needs help — Figma "Cinnabar" (Injured badge) */
+  --status-progress: #e09b26;    /* accepted / vet stages — amber; no Figma equivalent, unchanged */
+  --status-enroute: #4285f4;     /* moving — Figma "Cornflower Blue" (Ongoing badge) */
+  --status-resolved: #02b874;    /* safe — Figma "Royal Green" (Finished badge) */
 
   /* Urgency colors (migration 022) — a separate ramp from status above, on
      purpose: urgency and pipeline stage appear side by side on the same
@@ -41,16 +45,14 @@
 
   /* Shape & elevation — rounded, soft, approachable.
      Shadows are warm INK (90,50,35), never grey — Direction A rule #2. */
-  --radius: 18px;
-  --radius-sm: 12px;
-  --radius-lg: 24px;
-  --shadow: 0 4px 18px rgba(90, 50, 35, 0.09);
-  --shadow-soft: 0 2px 8px rgba(90, 50, 35, 0.07);
-  --shadow-lift: 0 10px 30px rgba(90, 50, 35, 0.14);
-  --grad-coral: linear-gradient(135deg, #ef6a4f 0%, #e85d4a 55%, #d84a37 100%);
-  /* Layered warm depth for hero surfaces — not a flat fill. */
-  --depth-card: 0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 2px 6px rgba(90, 50, 35, 0.06), 0 10px 26px rgba(90, 50, 35, 0.10);
+  --radius: 16px;          /* cards, info panels (Figma corner radius/16) */
+  --radius-sm: 14px;       /* buttons, inputs, segmented track (Figma corner radius/14) */
+  --radius-lg: 20px;       /* large cards, photos (Figma corner radius/20) */
+  --shadow: 0 0 13px 0 rgba(0, 0, 0, 0.25);                /* Figma case card */
+  --shadow-soft: 0 14px 26px -20px rgba(36, 31, 26, 0.45); /* Figma raised panel / map */
+  --shadow-lift: 0 30px 60px -25px rgba(36, 31, 26, 0.45); /* Figma top-level sheet */
+  --grad-coral: linear-gradient(135deg, #02b874 0%, #02b874 100%); /* Figma primary is a flat fill */
+  --depth-card: 0 0 13px 0 rgba(0, 0, 0, 0.25);
 
   /* Motion — quick, springy, never bouncy-toy. */
   --t-fast: 150ms cubic-bezier(0.2, 0.8, 0.3, 1);
@@ -1762,10 +1764,13 @@ body {
 
 /* ---- Status color families (tints for card surfaces, solids for rings) ---- */
 :root {
-  --open-50: #fdeae7;  --open-100: #fbd9d4;  --open-500: #d93a2b;  --open-700: #a82415;
+  /* 50 / 500 / 700 from the Figma badges (tint fill, solid, text-on-tint —
+     Figma uses the solid as the text colour). The 100 steps and the whole
+     prog family have no Figma equivalent and are unchanged. */
+  --open-50: rgba(238, 107, 82, 0.18);  --open-100: #fbd9d4;  --open-500: #ea4335;  --open-700: #ea4335;
   --prog-50: #fdf3e2;  --prog-100: #fae6c3;  --prog-500: #e09b26;  --prog-700: #9c6a12;
-  --route-50: #e9f2f8; --route-100: #d5e6f1; --route-500: #3f7fae; --route-700: #2b5c81;
-  --done-50: #e8f5ee;  --done-100: #d2ebdd;  --done-500: #3f9b6c;  --done-700: #2b7350;
+  --route-50: rgba(39, 72, 232, 0.18);  --route-100: #d5e6f1; --route-500: #4285f4; --route-700: #4285f4;
+  --done-50: rgba(3, 184, 117, 0.2);    --done-100: #d2ebdd;  --done-500: #02b874;  --done-700: #02b874;
 }
 
 /* ---- §pins: the case IS the pin --------------------------------------------
@@ -2208,20 +2213,15 @@ body {
 :root {
   /* Warmer neutrals — no pure white anywhere (Headspace principle). The old
      --card was near-white; nudge everything a few degrees toward paper. */
-  --paper: #fef9f3;          /* warmest neutral, replaces bare white */
-  --ink-line: #3a2a23;       /* ink for hand-drawn marks — warm, not #000 */
+  --paper: #ffffff;          /* surface — Figma "Citrine White" */
+  --ink-line: #241f1a;       /* ink for hand-drawn marks — Figma "Zeus" */
 
-  /* Tinted, layered shadows — depth from warm color, not grey haze. */
-  --shadow-ink: 0 1px 1px rgba(120, 74, 52, 0.05),
-                0 3px 6px rgba(120, 74, 52, 0.08),
-                0 10px 22px rgba(120, 74, 52, 0.10);
-  --shadow-ink-lift: 0 2px 4px rgba(120, 74, 52, 0.08),
-                     0 8px 18px rgba(120, 74, 52, 0.12),
-                     0 20px 40px rgba(120, 74, 52, 0.16);
+  /* Figma elevation: one soft offset shadow per step, no layered warm haze. */
+  --shadow-ink: 0 14px 26px -20px rgba(36, 31, 26, 0.45);
+  --shadow-ink-lift: 0 30px 60px -25px rgba(36, 31, 26, 0.45);
 
-  /* Layered warm background wash — subtle, alive without being busy. */
-  --wash: radial-gradient(1200px 520px at 82% -8%, rgba(232, 93, 74, 0.08), transparent 60%),
-          radial-gradient(900px 480px at -12% 26%, rgba(224, 155, 38, 0.06), transparent 55%);
+  /* Figma backgrounds are flat — no radial wash. */
+  --wash: none;
 }
 
 /* Paper grain — a barely-there tactile texture on the app background. This is
@@ -2596,13 +2596,13 @@ body::before {
   --color-brand-subtle: var(--coral-soft);
   --color-bg-app: var(--sand);
   --color-bg-surface: var(--paper);
-  --color-bg-surface-alt: #f1e4dc; /* already the .segmented track's raw value */
+  --color-bg-surface-alt: #f4f4f4; /* Figma "Bridal Heath" — inputs, secondary buttons, segmented track */
   --color-border-default: var(--line);
-  --color-border-hairline: rgba(238, 221, 212, 0.7);
+  --color-border-hairline: rgba(36, 31, 26, 0.08); /* Figma "Zeus 8%" */
   --color-text-primary: var(--ink);
   --color-text-secondary: var(--ink-soft);
-  --color-text-on-brand: #fff;
-  --color-focus-ring: rgba(232, 93, 74, 0.4);
+  --color-text-on-brand: #fff7ea; /* Figma "Serenade" — text on green fills */
+  --color-focus-ring: rgba(2, 184, 116, 0.4); /* brand at the old ring's alpha — Figma has no focus spec */
 
   --space-2xs: 4px;
   --space-xs: 8px;
@@ -2623,12 +2623,12 @@ body::before {
   --font-size-sm: 12px;
   --font-size-base: 14px;
   --font-size-lg: 16px;
-  --font-size-xl: 20px;
-  --font-size-3xl: 28px;
+  --font-size-xl: 22px;   /* Figma Semantic/Heading 1 */
+  --font-size-3xl: 26px;  /* Figma sign-in hero */
 
   --shadow-md: var(--shadow-ink);
   --shadow-lg: var(--shadow-ink-lift);
-  --shadow-focus: 0 0 0 3px rgba(232, 93, 74, 0.4);
+  --shadow-focus: 0 0 0 3px rgba(2, 184, 116, 0.4);
 }
 
 .auth-page {
