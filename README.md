@@ -20,7 +20,7 @@ outside the platform).
 | Backend | **Supabase** (Postgres, Auth, Realtime, Storage) | The case pipeline is relational and consistency-critical; Postgres RLS + `SECURITY DEFINER` functions enforce the state machine **server-side**. Realtime channels push case/chat/notification changes live. Comfortably supports 1,000+ concurrent users on a Pro plan with no custom scaling work |
 | Maps | Google Maps JavaScript API | Best tile/positioning accuracy and place coverage in Azerbaijan & Turkey; requires an API key (setup below) |
 | Place search | Google Places (Text Search) | Accurate address/POI search in the launch markets, biased to the visible map area |
-| Fonts | Fraunces + Nunito Sans (self-hosted via Fontsource) | Bundled and precached — typography works offline |
+| Fonts | DM Sans (self-hosted via Fontsource, variable weight) | Bundled and precached — typography works offline |
 
 Firebase was the other candidate; Supabase won because the case state
 machine, XP awards, and notification fan-out are naturally expressed as

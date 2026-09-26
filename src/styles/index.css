@@ -36,12 +36,11 @@
   --urgency-high: #e0672c;       /* orange */
   --urgency-critical: #c22a1f;   /* alarming deep red */
 
-  /* Type — Fraunces is the *voice* (the hand), Noto Sans does the work.
-     Direction A: low optical-size + heavy weights give Fraunces its warm,
-     slightly-wonky, hand-cut character instead of a cold geometric serif. */
-  --font-display: 'Fraunces', 'Georgia', serif;
-  --font-body: 'Noto Sans', system-ui, -apple-system, sans-serif;
-  --fraunces-soft: 'opsz' 32, 'SOFT' 60, 'WONK' 1; /* softer, wonkier terminals */
+  /* Type — one family for everything, as in the design (Figma: Aeonik,
+     substituted with DM Sans — see main.tsx). */
+  --font-display: 'DM Sans Variable', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans Variable', system-ui, -apple-system, sans-serif;
+  --fraunces-soft: normal; /* Fraunces-only axes; DM Sans has none of them */
 
   /* Shape & elevation — rounded, soft, approachable.
      Shadows are warm INK (90,50,35), never grey — Direction A rule #2. */

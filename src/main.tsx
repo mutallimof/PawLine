@@ -3,37 +3,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 
-// Self-hosted fonts (bundled + precached — no runtime Google Fonts request,
+// Self-hosted font (bundled + precached — no runtime Google Fonts request,
 // so typography works offline and on slow connections).
-// Noto Sans/Serif chosen deliberately: full Azerbaijani Latin coverage
-// (ə Ə ğ ı İ ş ç ö ü) AND complete Turkish — the previous fonts were
-// missing the schwa (ə/Ə lives outside the common latin-ext subset most
-// fonts ship), which rendered Azerbaijani text visibly broken.
-// Subset-precise imports (latin + latin-ext cover az/tr/en fully) keep the
-// PWA precache small — the full multi-script packages tripled its size.
-// Display face: Fraunces — a characterful, soft "old-style" serif with a
-// wonky optical axis. Chosen for Direction A ("The Hand That Helps"): it
-// carries warmth and a human hand before a word is read. Both latin and
-// latin-ext subsets load because Azerbaijani (ə/ğ/İ/ş) and Turkish (ç/ö/ü/ı)
-// split across them — verified at the glyph level.
-import '@fontsource/fraunces/latin-400.css';
-import '@fontsource/fraunces/latin-500.css';
-import '@fontsource/fraunces/latin-600.css';
-import '@fontsource/fraunces/latin-700.css';
-import '@fontsource/fraunces/latin-900.css';
-import '@fontsource/fraunces/latin-ext-400.css';
-import '@fontsource/fraunces/latin-ext-500.css';
-import '@fontsource/fraunces/latin-ext-600.css';
-import '@fontsource/fraunces/latin-ext-700.css';
-import '@fontsource/fraunces/latin-ext-900.css';
-import '@fontsource/noto-sans/latin-400.css';
-import '@fontsource/noto-sans/latin-600.css';
-import '@fontsource/noto-sans/latin-700.css';
-import '@fontsource/noto-sans/latin-800.css';
-import '@fontsource/noto-sans/latin-ext-400.css';
-import '@fontsource/noto-sans/latin-ext-600.css';
-import '@fontsource/noto-sans/latin-ext-700.css';
-import '@fontsource/noto-sans/latin-ext-800.css';
+// DM Sans stands in for the design's Aeonik (commercial, not web-licensed)
+// and is the only family — headings and body alike, as in the design.
+// wght.css is the variable-weight build: one file per subset covers every
+// weight the app uses. Both subsets load because Azerbaijani/Turkish split
+// across them — ə Ə ğ İ ş live in latin-ext, ç ö ü ı in latin — verified
+// at the glyph level (the schwa is what broke the fonts before Noto).
+import '@fontsource-variable/dm-sans/wght.css';
 
 import './styles/index.css';
 import App from './App';

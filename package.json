@@ -11,10 +11,7 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
-    "@fontsource-variable/fraunces": "^5.2.9",
-    "@fontsource/fraunces": "^5.2.9",
-    "@fontsource/noto-sans": "^5.1.0",
-    "@fontsource/noto-serif": "^5.1.0",
+    "@fontsource-variable/dm-sans": "^5.3.0",
     "@sentry/react": "^8.42.0",
     "@supabase/supabase-js": "^2.47.0",
     "react": "^18.3.1",
