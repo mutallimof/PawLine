@@ -294,7 +294,7 @@ export const az: Dict = {
   'push.denied': 'Bu sayt üçün bildirişlər bloklanıb — brauzer parametrlərindən aktiv edin.',
   'push.unsupported': 'Push burada mövcud deyil. iPhone-da əvvəlcə Stray’s Call-ı əsas ekrana əlavə edin.',
   'privacy.link': 'Məxfilik siyasəti',
-  'vetSetup.pending': 'Klinikanız Stray’s Call komandası tərəfindən yoxlanılır. Təsdiqlənəndən sonra xilasedicilərə görünəcək.',
+  'vetSetup.pending': 'Klinikanız Stray’s Call komandasının təsdiqini gözləyir. Təsdiqlənəndən sonra xilasedicilərə görünəcək.',
   'vetSetup.rejected': 'Klinikanız təsdiqlənmədi. Səhv olduğunu düşünürsünüzsə, Stray’s Call komandası ilə əlaqə saxlayın.',
   'vetVisibility.needsDetails': 'Xilasedicilər sizi hələ tapa bilmir — Klinika parametrlərində ünvanı və telefonu tamamlayın.',
   'vetVisibility.needsDocuments': 'Xilasedicilər sizi hələ tapa bilmir. Klinikanız yoxlanılır — doğrulama sənədləri əlavə etmək təsdiqi sürətləndirə bilər.',
