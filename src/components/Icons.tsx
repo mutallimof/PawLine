@@ -62,7 +62,42 @@ export const IconUser = ({ size }: IconProps) => (
   </svg>
 );
 
-export const IconSend = ({ size }: IconProps) => (
+export const IconStethoscope = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M11 2v2M5 2v2" />
+    <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
+    <path d="M8 15a6 6 0 0 0 12 0v-3" />
+    <circle cx="20" cy="10" r="2" />
+  </svg>
+);
+
+/**
+ * Empty-state paw — a clean single-weight outline on a soft lavender disc.
+ * Deliberately crisp (no ink filter) and muted: it marks the empty list
+ * without competing with the copy under it.
+ */
+export const EmptyPaw = ({ size = 88 }: IconProps) => (
+  <span className="empty-paw" style={{ width: size, height: size }} aria-hidden="true">
+    <svg
+      width={size / 2}
+      height={size / 2}
+      viewBox="0 0 64 64"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M32 34c-6.6 0-12.4 5.3-12.4 10.8 0 4.3 3.3 6.6 7.3 6.6 2.1 0 3.3-1 5.1-1s3 1 5.1 1c4 0 7.3-2.3 7.3-6.6C44.4 39.3 38.6 34 32 34z" />
+      <ellipse cx="18.5" cy="27" rx="4.2" ry="5.6" transform="rotate(-20 18.5 27)" />
+      <ellipse cx="26.5" cy="17.5" rx="4.2" ry="5.8" transform="rotate(-8 26.5 17.5)" />
+      <ellipse cx="37.5" cy="17.5" rx="4.2" ry="5.8" transform="rotate(8 37.5 17.5)" />
+      <ellipse cx="45.5" cy="27" rx="4.2" ry="5.6" transform="rotate(20 45.5 27)" />
+    </svg>
+  </span>
+);
+
+export const IconSend =({ size }: IconProps) => (
   <svg {...base(size)}>
     <path d="m22 2-7 20-4-9-9-4 20-7z" />
   </svg>

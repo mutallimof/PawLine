@@ -13,7 +13,8 @@ import { CaseCard, useToast } from '../components/ui';
 import { SponsorStrip } from '../components/extras';
 import { distanceKm, geoErrorKind, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
-import { InkScene, PawTrailInk } from '../components/Ink';
+import { PawTrailInk } from '../components/Ink';
+import { EmptyPaw } from '../components/Icons';
 
 type View = 'map' | 'feed';
 type Filter = 'active' | 'all' | 'resolved';
@@ -251,7 +252,7 @@ export default function HomePage() {
           )}
           {!loading && !error && filtered.length === 0 && (
             <div className="empty-state">
-              <InkScene kind="calm" />
+              <EmptyPaw />
               {t('home.empty')}
             </div>
           )}

@@ -16,7 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { timeAgo } from '../lib/time';
 import { distanceKm, formatDistance, type LatLng } from '../lib/geo';
 import { tierForXp, tierName } from '../lib/xp';
-import { animalEmoji, IconBell, IconChat, IconMap, IconPlus, IconUser } from './Icons';
+import { animalEmoji, IconBell, IconChat, IconMap, IconPlus, IconStethoscope, IconUser } from './Icons';
 import { CasePhoto } from './CasePhoto';
 
 // ---------------------------------------------------------------------------
@@ -349,7 +349,7 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
         <IconMap /> {t('nav.home')}
       </NavLink>
       <NavLink to="/vets" className={({ isActive }) => item(isActive)}>
-        <span className="side-nav__emoji">🏥</span> {t('home.browseVets')}
+        <IconStethoscope /> {t('home.browseVets')}
       </NavLink>
       <NavLink to="/messages" className={({ isActive }) => item(isActive)}>
         <IconChat /> {t('nav.messages')}
@@ -380,7 +380,7 @@ export function BottomNav() {
         {t('nav.home')}
       </NavLink>
       <NavLink to="/vets" className={({ isActive }) => `bottom-nav__item${isActive ? ' active' : ''}`}>
-        <span className="bottom-nav__emoji" aria-hidden="true">🏥</span>
+        <IconStethoscope />
         {t('nav.vets')}
       </NavLink>
       <div className="bottom-nav__report">

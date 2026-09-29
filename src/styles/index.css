@@ -286,11 +286,6 @@ select {
   justify-content: center;
 }
 
-.bottom-nav__emoji {
-  font-size: 22px;
-  line-height: 1;
-}
-
 /* Group D: top-right bell — mobile only; desktop uses SideNav's own Alerts
    link instead (hidden below at the same ≥1024px breakpoint). */
 .top-bar {
@@ -1679,11 +1674,6 @@ body {
     width: 21px;
     height: 21px;
   }
-  .side-nav__emoji {
-    font-size: 19px;
-    width: 21px;
-    text-align: center;
-  }
   .side-nav__foot {
     margin-top: auto;
     font-size: 12.5px;
@@ -2529,6 +2519,14 @@ body {
 /* Empty states now host an ink scene; center and warm it. */
 .empty-state .ink-scene { display: block; margin: 0 auto 6px; }
 .empty-state__icon.ink-scene { animation: none; } /* scenes don't bob like emoji did */
+.empty-paw {
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: var(--lavender-soft);
+  color: var(--lavender);
+}
 
 /* Section headings pick up a hint of the display face for authored feel. */
 .section-label {
@@ -2723,20 +2721,6 @@ body::before {
 .btn--primary:active {
   transform: translateY(3px) scale(0.99);
   box-shadow: 0 2px 0 rgba(120, 40, 26, 0.35), 0 4px 10px rgba(232, 93, 74, 0.3);
-}
-
-/* ---- Brushed underline under page titles: a hand-drawn stroke ------------- */
-.page-title::after {
-  content: '';
-  display: block;
-  width: 64px;
-  height: 5px;
-  margin-top: 8px;
-  border-radius: 3px;
-  background: var(--coral);
-  /* a stroke that isn't a clean rectangle — tapered like a brush lift */
-  clip-path: polygon(0 40%, 12% 10%, 46% 70%, 70% 15%, 88% 60%, 100% 30%, 100% 100%, 0 100%);
-  opacity: 0.9;
 }
 
 /* ---- Ink-draw motion: strokes DRAW in, they never merely fade ------------ */
