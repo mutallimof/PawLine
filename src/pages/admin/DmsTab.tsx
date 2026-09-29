@@ -21,6 +21,7 @@ import { useToast } from '../../components/ui';
 import { t } from '../../i18n';
 import { clockTime, timeAgo } from '../../lib/time';
 import type { DirectMessage, ProfileRole } from '../../lib/types';
+import { VetTag } from '../../components/Icons';
 
 const PAGE = 50;
 
@@ -42,7 +43,7 @@ function SideLabel({ s }: { s: Side }) {
   return (
     <>
       {s.name}
-      {s.role === 'vet' ? ' 🏥' : ''}
+      {s.role === 'vet' && <VetTag />}
       {s.banned && <span className="admin-badge admin-badge--banned" style={{ marginLeft: 6 }}>{t('admin.badgeBanned')}</span>}
     </>
   );

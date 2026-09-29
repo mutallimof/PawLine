@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { getLocale, LOCALE_NAMES, setLocale, SUPPORTED_LOCALES, t, type LocaleCode } from '../i18n';
 import { updateProfile } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { PawHeartMark } from './Icons';
 import splash1 from '../assets/onboarding/splash-1.webp';
 import splash2 from '../assets/onboarding/splash-2.webp';
 import splash3 from '../assets/onboarding/splash-3.webp';
@@ -33,22 +34,6 @@ const STEPS = [
   { theme: 'light', art: splash2, title: 'onb.2title', body: 'onb.2body', cta: 'onb.next' },
   { theme: 'lavender', art: splash3, title: 'onb.3title', body: 'onb.3body', cta: 'onb.start' },
 ] as const;
-
-/** The design's brand mark: a paw whose main pad carries a heart. */
-function PawHeartMark() {
-  return (
-    <svg className="onboarding__mark" viewBox="0 0 28 28" aria-hidden="true">
-      <ellipse cx="5" cy="11.2" rx="2.9" ry="3.4" transform="rotate(-18 5 11.2)" />
-      <ellipse cx="10.4" cy="5.4" rx="3" ry="3.6" transform="rotate(-6 10.4 5.4)" />
-      <ellipse cx="17.6" cy="5.4" rx="3" ry="3.6" transform="rotate(6 17.6 5.4)" />
-      <ellipse cx="23" cy="11.2" rx="2.9" ry="3.4" transform="rotate(18 23 11.2)" />
-      <path
-        fillRule="evenodd"
-        d="M14 11.6c5.4 0 9.6 4.9 9.6 9.3 0 3.6-2.6 5.6-5.6 5.6-1.6 0-2.8-.6-4-.6s-2.4.6-4 .6c-3 0-5.6-2-5.6-5.6 0-4.4 4.2-9.3 9.6-9.3Zm0 7.1c-.8-1.5-3.6-1.4-3.6.8 0 1.8 2.2 3.3 3.6 4.3 1.4-1 3.6-2.5 3.6-4.3 0-2.2-2.8-2.3-3.6-.8Z"
-      />
-    </svg>
-  );
-}
 
 /**
  * The design has no language control on these frames, but language has to be
@@ -101,7 +86,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
       <div className="onboarding__frame">
         <header className="onboarding__top">
           <span className="onboarding__brand">
-            <PawHeartMark />
+            <PawHeartMark className="onboarding__mark" />
             {t('app.name')}
           </span>
           <LanguageSelect />

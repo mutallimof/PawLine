@@ -14,6 +14,7 @@ import { BottomNav, SideNav, ToastProvider, TopBar, useToast } from './component
 import { getLocale, subscribeLocale, t } from './i18n';
 import Onboarding, { shouldShowOnboarding } from './components/Onboarding';
 import { InkDefs } from './components/Ink';
+import { PawHeartMark } from './components/Icons';
 import { flushQueue } from './lib/offlineQueue';
 
 import HomePage from './pages/HomePage';
@@ -81,8 +82,8 @@ function Shell() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', fontSize: 44 }}>
-        🐾
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
+        <PawHeartMark className="app-loading__mark" />
       </div>
     );
   }

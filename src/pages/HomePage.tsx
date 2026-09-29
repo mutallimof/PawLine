@@ -14,7 +14,7 @@ import { SponsorStrip } from '../components/extras';
 import { distanceKm, geoErrorKind, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import { PawTrailInk } from '../components/Ink';
-import { EmptyPaw } from '../components/Icons';
+import { EmptyPaw, IconStethoscope } from '../components/Icons';
 
 type View = 'map' | 'feed';
 type Filter = 'active' | 'all' | 'resolved';
@@ -217,7 +217,9 @@ export default function HomePage() {
 
         {nearbyVetCount > 0 && (
           <Link to="/vets" className="home-vet-banner">
-            <span className="home-vet-banner__icon" aria-hidden="true">🏥</span>
+            <span className="home-vet-banner__icon" aria-hidden="true">
+              <IconStethoscope size={20} />
+            </span>
             <span className="home-vet-banner__text">
               <span className="home-vet-banner__title">{t('home.vetsNearby', { n: nearbyVetCount })}</span>
               <span className="home-vet-banner__sub">{t('home.vetsNearbyHint')}</span>

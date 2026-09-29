@@ -1,4 +1,5 @@
 /** Alerts — the notification inbox. Tapping deep-links to the case or DM. */
+import type { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../hooks/useRealtime';
@@ -6,12 +7,13 @@ import { markAllNotificationsRead, markNotificationRead } from '../lib/api';
 import type { AppNotification, NotificationType } from '../lib/types';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
+import { IconStethoscope } from '../components/Icons';
 
-const TYPE_EMOJI: Record<NotificationType, string> = {
+const TYPE_EMOJI: Record<NotificationType, ReactNode> = {
   case_new_nearby: '🆘',
   case_accepted: '🐾',
   case_dropped: '⚠️',
-  vet_requested: '🏥',
+  vet_requested: <IconStethoscope size={22} />,
   vet_confirmed: '✅',
   vet_declined: '↩️',
   case_en_route: '🚗',

@@ -43,7 +43,7 @@ import { CaseLocationMap, EnRouteMap } from '../components/maps';
 import { Avatar, PawTrail, StatusBadge, UrgencyBadge, useToast } from '../components/ui';
 import { ReportButton } from '../components/Report';
 import { CasePhoto } from '../components/CasePhoto';
-import { animalEmoji, IconBack, IconCamera } from '../components/Icons';
+import { animalEmoji, IconBack, IconCamera, IconStethoscope } from '../components/Icons';
 import { hasKey, t } from '../i18n';
 import { SafetyAck, hasAcceptedSafety } from '../components/legal';
 import { Paw } from '../components/Ink';
@@ -538,7 +538,8 @@ export default function CaseDetailPage() {
               <div className="banner banner--warn">{t('event.vet_declined')}</div>
             )}
             <Link to={`/case/${caseData.id}/vets`} className="btn btn--primary">
-              🏥 {events[events.length - 1]?.type === 'vet_declined'
+              <IconStethoscope size={18} />{' '}
+              {events[events.length - 1]?.type === 'vet_declined'
                 ? t('case.chooseAnotherVet')
                 : t('case.chooseVet')}
             </Link>

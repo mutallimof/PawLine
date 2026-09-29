@@ -12,7 +12,7 @@ import { Avatar, CaseCard, LanguageSwitcher, PlatformStats, useToast } from '../
 import { VetVisibilityNotice } from './vetAndUserPages';
 import { getCurrentPosition } from '../lib/geo';
 import { t } from '../i18n';
-import { InkScene } from '../components/Ink';
+import { EmptyPaw, IconStethoscope, VetTag } from '../components/Icons';
 import type { CaseWithDetails, NewCasePref } from '../lib/types';
 
 export default function ProfilePage() {
@@ -55,7 +55,7 @@ export default function ProfilePage() {
           <LanguageSwitcher />
         </div>
         <div className="empty-state">
-          <InkScene kind="calm" />
+          <EmptyPaw />
           {t('dm.signIn')}
           <div style={{ marginTop: 16 }}>
             <Link to="/auth" className="btn btn--primary">{t('auth.signIn')}</Link>
@@ -77,7 +77,7 @@ export default function ProfilePage() {
         <div className="page">
           <h1 className="page-title">{t('nav.profile')}</h1>
           <div className="empty-state">
-            <InkScene kind="calm" />
+            <EmptyPaw />
             {t('profile.loadFailed')}
             {/* TEMP (debugging the "every fresh login" profile hang): raw
                 cause on-screen so a tester can report it without opening
@@ -133,7 +133,7 @@ export default function ProfilePage() {
         </div>
         <h1 className="page-title" style={{ fontSize: 24 }}>
           {profile.display_name}
-          {profile.role === 'vet' ? ' 🏥' : ''}
+          {profile.role === 'vet' && <VetTag />}
         </h1>
         <p className="page-subtitle">
           {t('profile.memberSince', {
@@ -157,7 +157,9 @@ export default function ProfilePage() {
         <>
           <VetVisibilityNotice />
           <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
-            <Link to="/vet-dashboard" className="btn btn--primary">🏥 {t('profile.vetDashboard')}</Link>
+            <Link to="/vet-dashboard" className="btn btn--primary">
+              <IconStethoscope size={18} /> {t('profile.vetDashboard')}
+            </Link>
             <Link to="/vet-setup" className="btn btn--secondary">{t('vetSetup.title')}</Link>
           </div>
         </>

@@ -16,7 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { timeAgo } from '../lib/time';
 import { distanceKm, formatDistance, type LatLng } from '../lib/geo';
 import { tierForXp, tierName } from '../lib/xp';
-import { animalEmoji, IconBell, IconChat, IconMap, IconPlus, IconStethoscope, IconUser } from './Icons';
+import { animalEmoji, IconBell, IconChat, IconMap, IconPlus, IconStethoscope, IconUser, PawHeartMark } from './Icons';
 import { CasePhoto } from './CasePhoto';
 
 // ---------------------------------------------------------------------------
@@ -337,7 +337,7 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
   return (
     <aside className="side-nav" aria-label="Main">
       <div className="side-nav__brand" onClick={() => navigate('/')} role="button" tabIndex={0}>
-        <span className="side-nav__paw">🐾</span>
+        <PawHeartMark className="side-nav__mark" />
         <span className="side-nav__name">{t('app.name')}</span>
       </div>
 

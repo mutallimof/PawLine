@@ -19,7 +19,7 @@ import {
 } from '../lib/api';
 import { Avatar, StatusBadge, useToast } from '../components/ui';
 import { ReportSheet } from '../components/Report';
-import { IconBack, IconSend } from '../components/Icons';
+import { IconBack, IconSend, VetTag } from '../components/Icons';
 import { getLocale, t } from '../i18n';
 import { clockTime } from '../lib/time';
 import type { CaseMessage } from '../lib/types';
@@ -247,7 +247,7 @@ export default function CaseChatPage() {
                 <div className="bubble__sender" style={{ color: senderColor(m.sender.id) }}>
                   <Link to={`/user/${m.sender.id}`} style={{ color: 'inherit' }}>
                     {m.sender.display_name}
-                    {m.sender.role === 'vet' ? ' 🏥' : ''}
+                    {m.sender.role === 'vet' && <VetTag />}
                   </Link>
                   {isRegistered && m.sender_id && m.sender_id !== user.id && (
                     <button

@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { fetchCaseChatInbox, fetchInbox } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { Avatar, StatusBadge } from '../components/ui';
-import { animalEmoji } from '../components/Icons';
+import { animalEmoji, VetTag } from '../components/Icons';
 import type { CaseChatInboxEntry, InboxEntry } from '../lib/types';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
@@ -136,7 +136,7 @@ export default function MessagesPage() {
             <div className="list-row__main">
               <div className="list-row__title">
                 {t('dm.directTag')} · {item.entry.other.display_name}
-                {item.entry.other.role === 'vet' ? ' 🏥' : ''}
+                {item.entry.other.role === 'vet' && <VetTag />}
               </div>
               <div className="list-row__sub">
                 {item.entry.lastMessage

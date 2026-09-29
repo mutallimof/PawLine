@@ -33,7 +33,7 @@ import {
   unblockUser,
 } from '../lib/api';
 import { Avatar, useToast } from '../components/ui';
-import { IconBack, IconSend } from '../components/Icons';
+import { IconBack, IconSend, VetTag } from '../components/Icons';
 import type { InboxEntry } from '../lib/types';
 import { t } from '../i18n';
 import { clockTime } from '../lib/time';
@@ -118,7 +118,7 @@ export default function DmThreadPage() {
             <Avatar name={partner.display_name} url={partner.avatar_url} small />
             <div style={{ fontWeight: 800, fontSize: 15, flex: 1, minWidth: 0 }}>
               {partner.display_name}
-              {partner.role === 'vet' ? ' 🏥' : ''}
+              {partner.role === 'vet' && <VetTag />}
             </div>
             <button
               className="btn btn--ghost btn--small"

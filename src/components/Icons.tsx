@@ -1,4 +1,5 @@
 /** Small inline SVG icon set — no icon-font dependency, works offline. */
+import { t } from '../i18n';
 
 interface IconProps {
   size?: number;
@@ -68,6 +69,31 @@ export const IconStethoscope = ({ size }: IconProps) => (
     <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
     <path d="M8 15a6 6 0 0 0 12 0v-3" />
     <circle cx="20" cy="10" r="2" />
+  </svg>
+);
+
+/**
+ * Marks a vet/clinic account after a display name (chat senders, DM rows,
+ * profiles). Unlike the decorative icons it carries meaning, so it is
+ * announced as "Vet". Sized in em via .vet-tag to track the name's text.
+ */
+export const VetTag = () => (
+  <span className="vet-tag" role="img" aria-label={t('admin.roleVet')}>
+    <IconStethoscope />
+  </span>
+);
+
+/** The design's brand mark: a paw whose main pad carries a heart. Filled, currentColor. */
+export const PawHeartMark = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 28 28" fill="currentColor" aria-hidden="true">
+    <ellipse cx="5" cy="11.2" rx="2.9" ry="3.4" transform="rotate(-18 5 11.2)" />
+    <ellipse cx="10.4" cy="5.4" rx="3" ry="3.6" transform="rotate(-6 10.4 5.4)" />
+    <ellipse cx="17.6" cy="5.4" rx="3" ry="3.6" transform="rotate(6 17.6 5.4)" />
+    <ellipse cx="23" cy="11.2" rx="2.9" ry="3.4" transform="rotate(18 23 11.2)" />
+    <path
+      fillRule="evenodd"
+      d="M14 11.6c5.4 0 9.6 4.9 9.6 9.3 0 3.6-2.6 5.6-5.6 5.6-1.6 0-2.8-.6-4-.6s-2.4.6-4 .6c-3 0-5.6-2-5.6-5.6 0-4.4 4.2-9.3 9.6-9.3Zm0 7.1c-.8-1.5-3.6-1.4-3.6.8 0 1.8 2.2 3.3 3.6 4.3 1.4-1 3.6-2.5 3.6-4.3 0-2.2-2.8-2.3-3.6-.8Z"
+    />
   </svg>
 );
 

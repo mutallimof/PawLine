@@ -27,7 +27,7 @@ import {
 import { useCases } from '../hooks/useRealtime';
 import { Avatar, CaseCard, useToast } from '../components/ui';
 import { PinDropMap } from '../components/maps';
-import { IconBack } from '../components/Icons';
+import { IconBack, IconStethoscope, VetTag } from '../components/Icons';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import type { AnimalType, Profile, Vet, VetDocument } from '../lib/types';
@@ -118,7 +118,7 @@ export function UserProfilePage() {
         </div>
         <h1 className="page-title" style={{ fontSize: 24 }}>
           {profile.display_name}
-          {profile.role === 'vet' ? ' 🏥' : ''}
+          {profile.role === 'vet' && <VetTag />}
         </h1>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '10px 0 14px' }}>
           {/* No tier badge: XP is off every user-facing surface until the
@@ -239,7 +239,9 @@ export function VetPublicPage() {
         <IconBack size={18} /> {t('common.back')}
       </button>
       <div className="card" style={{ padding: 18, textAlign: 'center' }}>
-        <div style={{ fontSize: 42 }}>🏥</div>
+        <div className="vet-page__icon" aria-hidden="true">
+          <IconStethoscope size={42} />
+        </div>
         <h1 className="page-title" style={{ fontSize: 24 }}>{vet.clinic_name}</h1>
         <p className="page-subtitle">{vet.address}</p>
         {vet.contact_phone && (
