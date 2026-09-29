@@ -15,3 +15,4 @@ dev-dist/
 # Claude Code / Supabase CLI local state — machine-specific, not project config.
 .claude/
 supabase/.temp/
+*.tsbuildinfo
