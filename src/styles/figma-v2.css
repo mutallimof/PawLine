@@ -979,3 +979,43 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 }
 .v2-switch.on { background: var(--brand-fill); }
 .v2-switch.on::after { transform: translateX(18px); }
+
+/* ==== Messages list + DM thread =========================================== */
+.msg-row { gap: 12px; }
+.msg-row__tile {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--v2-lav);
+  color: #fff7ea;
+  font-size: 15px;
+  font-weight: 500;
+}
+.msg-row__tile--case { background: var(--v2-surface); font-size: 22px; }
+.msg-row__preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-row--unread .v2-row__title { font-weight: 600; }
+.msg-row--unread .msg-row__preview { color: var(--v2-ink); }
+.msg-row__side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.msg-row__time { font-size: 11px; color: var(--v2-ink-2); white-space: nowrap; }
+.msg-row__count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--brand-fill);
+  color: var(--color-text-on-brand);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.msg-row__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--coral); }
+.icon-btn--on { background: var(--v2-open-bg); border-color: var(--v2-open-bg); color: var(--v2-open-ink); }
+
+.chat-top--dm .screen-header__title { text-transform: none; letter-spacing: 0; font-size: 14px; }
+.chat-top--dm .screen-header__title .vet-tag { vertical-align: -0.15em; }

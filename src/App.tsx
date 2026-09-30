@@ -7,7 +7,7 @@
  * notifications (Group D — desktop uses SideNav's own Alerts link instead).
  */
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useNotifications } from './hooks/useRealtime';
 import { BottomNav, SideNav, ToastProvider, UnreadAlertsContext, useToast } from './components/ui';
@@ -46,7 +46,6 @@ import {
 function Shell() {
   const { user, loading } = useAuth();
   const { unread } = useNotifications(user?.id);
-  const location = useLocation();
   const [online, setOnline] = useState(navigator.onLine);
   const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
   // Re-render the whole tree when the language changes so every t() call
@@ -87,10 +86,6 @@ function Shell() {
       </div>
     );
   }
-
-  // DM threads replace the tab bar with their composer. Case chat keeps it
-  // (Figma v2): its composer sits just above the nav instead.
-  const hideNav = /^\/messages\/.+/.test(location.pathname);
 
   if (showOnboarding) {
     return <Onboarding onDone={() => setShowOnboarding(false)} />;
@@ -140,7 +135,8 @@ function Shell() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
         </ErrorBoundary>
-        {!hideNav && <BottomNav />}
+        {/* Figma v2: every screen keeps the tab bar — chat composers sit above it. */}
+        <BottomNav />
       </div>
     </div>
     </UnreadAlertsContext.Provider>

@@ -19,8 +19,8 @@
  * lost approval) stays readable here but can't be posted in — the send
  * policy refuses it, and the composer is swapped for a notice.
  */
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDmThread } from '../hooks/useRealtime';
 import {
@@ -32,11 +32,11 @@ import {
   sendMessage,
   unblockUser,
 } from '../lib/api';
-import { Avatar, useToast } from '../components/ui';
-import { IconBack, IconSend, VetTag } from '../components/Icons';
+import { ScreenHeader, useToast } from '../components/ui';
+import { IconBlock, IconSend, VetTag } from '../components/Icons';
 import type { InboxEntry } from '../lib/types';
 import { t } from '../i18n';
-import { clockTime } from '../lib/time';
+import { clockTime, dayKey, dayLabel } from '../lib/time';
 
 export default function DmThreadPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,7 +49,6 @@ export default function DmThreadPage() {
   // null while checking; the server's send policy is the real gate.
   const [canSend, setCanSend] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const toast = useToast();
 
   useEffect(() => {
@@ -109,37 +108,54 @@ export default function DmThreadPage() {
 
   return (
     <div className="chat-page">
-      <header className="chat-header">
-        <button onClick={() => navigate('/messages')} aria-label={t('common.back')}>
-          <IconBack />
-        </button>
-        {partner && (
-          <>
-            <Avatar name={partner.display_name} url={partner.avatar_url} small />
-            <div style={{ fontWeight: 800, fontSize: 15, flex: 1, minWidth: 0 }}>
-              {partner.display_name}
-              {partner.role === 'vet' && <VetTag />}
-            </div>
-            <button
-              className="btn btn--ghost btn--small"
-              title={blocked ? t('settings.unblock') : t('settings.block')}
-              aria-label={blocked ? t('settings.unblock') : t('settings.block')}
-              onClick={() => void toggleBlock()}
-            >
-              🚫
-            </button>
-          </>
-        )}
-      </header>
+      <div className="chat-top chat-top--dm">
+        <ScreenHeader
+          title={
+            partner ? (
+              <>
+                {partner.display_name}
+                {partner.role === 'vet' && <VetTag />}
+              </>
+            ) : (
+              t('dm.title')
+            )
+          }
+          fallback="/messages"
+          action={
+            partner ? (
+              <button
+                type="button"
+                className={`icon-btn${blocked ? ' icon-btn--on' : ''}`}
+                title={blocked ? t('settings.unblock') : t('settings.block')}
+                aria-label={blocked ? t('settings.unblock') : t('settings.block')}
+                aria-pressed={blocked}
+                onClick={() => void toggleBlock()}
+              >
+                <IconBlock />
+              </button>
+            ) : undefined
+          }
+        />
+      </div>
 
       <div className="chat-scroll" ref={scrollRef}>
         {loading && <div className="spinner" />}
-        {messages.map((m) => (
-          <div key={m.id} className={`bubble${m.sender_id === user?.id ? ' bubble--mine' : ''}`}>
-            {m.body}
-            <span className="bubble__time">{clockTime(m.created_at)}</span>
-          </div>
-        ))}
+        {messages.map((m, i) => {
+          const mine = m.sender_id === user?.id;
+          const newDay = i === 0 || dayKey(messages[i - 1].created_at) !== dayKey(m.created_at);
+          return (
+            <Fragment key={m.id}>
+              {newDay && <div className="chat-day">{dayLabel(m.created_at)}</div>}
+              <div className={`chat-msg${mine ? ' chat-msg--mine' : ''}`}>
+                <div className="chat-msg__meta">
+                  <span className="chat-msg__who">{mine ? t('common.you') : partner?.display_name}</span>
+                  <span className="bubble__time">{clockTime(m.created_at)}</span>
+                </div>
+                <div className={`bubble${mine ? ' bubble--mine' : ''}`}>{m.body}</div>
+              </div>
+            </Fragment>
+          );
+        })}
       </div>
 
       {canSend === false ? (
@@ -156,7 +172,12 @@ export default function DmThreadPage() {
             maxLength={4000}
             disabled={canSend === null}
           />
-          <button onClick={() => void send()} disabled={sending || !draft.trim() || canSend === null} aria-label={t('common.send')}>
+          <button
+            className="chat-composer__send"
+            onClick={() => void send()}
+            disabled={sending || !draft.trim() || canSend === null}
+            aria-label={t('common.send')}
+          >
             <IconSend size={18} />
           </button>
         </div>

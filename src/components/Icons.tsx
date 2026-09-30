@@ -163,6 +163,13 @@ export const IconClinic = ({ size }: IconProps) => (
   </svg>
 );
 
+export const IconBlock = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m5.6 5.6 12.8 12.8" />
+  </svg>
+);
+
 export const IconArrowUpRight = ({ size }: IconProps) => (
   <svg {...base(size)}>
     <path d="M7 17 17 7M8 7h9v9" />

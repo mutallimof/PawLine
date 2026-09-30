@@ -21,7 +21,7 @@ import { caseTitle, ScreenHeader, statusLabel, useToast } from '../components/ui
 import { ReportSheet } from '../components/Report';
 import { IconHelp, IconSend, VetTag } from '../components/Icons';
 import { getLocale, t } from '../i18n';
-import { clockTime } from '../lib/time';
+import { clockTime, dayKey, dayLabel } from '../lib/time';
 import type { CaseMessage } from '../lib/types';
 
 /**
@@ -39,15 +39,6 @@ function pinHintSeen(): boolean {
   }
 }
 
-/** Local calendar day, for the centred date separators. */
-function dayKey(iso: string): string {
-  const d = new Date(iso);
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-}
-function dayLabel(iso: string): string {
-  if (dayKey(iso) === dayKey(new Date().toISOString())) return t('common.today');
-  return new Date(iso).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
-}
 
 export default function CaseChatPage() {
   const { id } = useParams<{ id: string }>();

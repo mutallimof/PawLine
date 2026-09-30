@@ -16,8 +16,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchCaseChatInbox, fetchInbox } from '../lib/api';
 import { supabase } from '../lib/supabase';
-import { Avatar, StatusBadge } from '../components/ui';
-import { animalEmoji, VetTag } from '../components/Icons';
+import { ScreenHeader, StatusGroupBadge } from '../components/ui';
+import { animalEmoji, EmptyPaw, VetTag } from '../components/Icons';
 import type { CaseChatInboxEntry, InboxEntry } from '../lib/types';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
@@ -68,9 +68,9 @@ export default function MessagesPage() {
   if (!isRegistered) {
     return (
       <div className="page">
-        <h1 className="page-title">{t('dm.title')}</h1>
+        <ScreenHeader title={t('dm.title')} />
         <div className="empty-state">
-          <div className="empty-state__icon">💬</div>
+          <EmptyPaw />
           {t('dm.signIn')}
           <div style={{ marginTop: 16 }}>
             <Link to="/auth" className="btn btn--primary">{t('auth.signIn')}</Link>
@@ -82,76 +82,78 @@ export default function MessagesPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title">{t('dm.title')}</h1>
+      <ScreenHeader title={t('dm.title')} />
 
       {loading && <div className="spinner" />}
       {!loading && entries.length === 0 && (
         <div className="empty-state">
-          <div className="empty-state__icon">💬</div>
+          <EmptyPaw />
           {t('dm.empty')}
         </div>
       )}
 
+      {entries.length > 0 && (
+      <div className="v2-group msg-list">
       {entries.map((item) =>
         item.kind === 'case' ? (
           <Link
             key={`case-${item.entry.caseId}`}
             to={`/case/${item.entry.caseId}/chat`}
-            className={`list-row${item.entry.unread ? ' list-row--unread' : ''}`}
+            className={`v2-row v2-row--sub msg-row${item.entry.unread ? ' msg-row--unread' : ''}`}
           >
-            <div
-              className="avatar"
-              style={{ background: 'rgba(232,93,74,.14)', color: 'var(--coral-deep)', fontSize: 18 }}
-            >
+            <span className="msg-row__tile msg-row__tile--case" aria-hidden="true">
               {animalEmoji(item.entry.animal)}
-            </div>
-            <div className="list-row__main">
-              <div className="list-row__title">
+            </span>
+            <span className="v2-row__main">
+              <span className="v2-row__title">
                 {t('dm.caseChatTag')} · {item.entry.addressHint || t(`animal.${item.entry.animal}` as const)}
-              </div>
-              <div className="list-row__sub">
+              </span>
+              <span className="v2-row__sub msg-row__preview">
                 {item.entry.lastMessage &&
                   `${item.entry.lastMessage.sender_id === user.id ? `${t('common.you')}: ` : item.entry.lastMessage.sender ? `${item.entry.lastMessage.sender.display_name}: ` : ''}${item.entry.lastMessage.body}`}
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-              <StatusBadge status={item.entry.status} />
+              </span>
+            </span>
+            <span className="msg-row__side">
               {item.entry.lastMessage && (
-                <span className="list-row__sub">{timeAgo(item.entry.lastMessage.created_at)}</span>
+                <span className="msg-row__time">{timeAgo(item.entry.lastMessage.created_at)}</span>
               )}
-              {item.entry.unread && (
-                <span className="nav-badge" style={{ position: 'static' }}>
-                  {Math.min(item.entry.unreadCount, 99)}
-                </span>
+              {item.entry.unread ? (
+                <span className="msg-row__count">{Math.min(item.entry.unreadCount, 99)}</span>
+              ) : (
+                <StatusGroupBadge status={item.entry.status} />
               )}
-            </div>
+            </span>
           </Link>
         ) : (
           <Link
             key={`dm-${item.entry.conversationId}`}
             to={`/messages/${item.entry.conversationId}`}
-            className={`list-row${item.entry.unread ? ' list-row--unread' : ''}`}
+            className={`v2-row v2-row--sub msg-row${item.entry.unread ? ' msg-row--unread' : ''}`}
           >
-            <Avatar name={item.entry.other.display_name} url={item.entry.other.avatar_url} />
-            <div className="list-row__main">
-              <div className="list-row__title">
+            <span className="msg-row__tile" aria-hidden="true">
+              {item.entry.other.display_name.trim().charAt(0).toUpperCase() || '?'}
+            </span>
+            <span className="v2-row__main">
+              <span className="v2-row__title">
                 {t('dm.directTag')} · {item.entry.other.display_name}
                 {item.entry.other.role === 'vet' && <VetTag />}
-              </div>
-              <div className="list-row__sub">
+              </span>
+              <span className="v2-row__sub msg-row__preview">
                 {item.entry.lastMessage
                   ? `${item.entry.lastMessage.sender_id === user.id ? `${t('common.you')}: ` : ''}${item.entry.lastMessage.body}`
                   : '—'}
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+              </span>
+            </span>
+            <span className="msg-row__side">
               {item.entry.lastMessage && (
-                <span className="list-row__sub">{timeAgo(item.entry.lastMessage.created_at)}</span>
+                <span className="msg-row__time">{timeAgo(item.entry.lastMessage.created_at)}</span>
               )}
-              {item.entry.unread && <span className="unread-dot" />}
-            </div>
+              {item.entry.unread && <span className="msg-row__dot" aria-hidden="true" />}
+            </span>
           </Link>
         )
+      )}
+      </div>
       )}
     </div>
   );

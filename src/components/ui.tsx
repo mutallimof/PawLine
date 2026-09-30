@@ -468,7 +468,7 @@ export function ScreenHeader({
   fallback = '/',
   action,
 }: {
-  title: string;
+  title: ReactNode;
   back?: boolean;
   fallback?: string;
   action?: ReactNode;
