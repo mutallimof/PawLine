@@ -3,7 +3,7 @@
 > **Status:** Part C is the policy text, live in the app in English, Azerbaijani and Turkish (`PRIVACY` in `src/components/extras.tsx`, `TERMS_VERSION` 2026-10-01). The AZ and TR translations await review by a native speaker. Not reviewed by legal counsel.
 > **Basis:** every statement below was checked against the code and migrations on `main` at commit `f407367` (migrations 001–038, the `delete-account` Edge Function, captcha tokens on every Supabase auth call). The one open point is in **Part E**.
 > **Production (confirmed by the operator):** migrations 036, 037 and 038 and the `delete-account` Edge Function are live; Supabase region `eu-west-3` (Paris, France); Vercel serves static files only (no Vercel Functions); Sentry, Cloudflare Turnstile (Supabase Auth captcha), web push and Google Maps are on.
-> **Target law:** Law of the Republic of Azerbaijan "On Personal Data". Users are in Azerbaijan; the data is stored outside Azerbaijan (§C5).
+> **Target law:** Law of the Republic of Azerbaijan "On Personal Data". Users are in Azerbaijan; the data is stored outside Azerbaijan (§C6).
 
 ---
 
@@ -121,101 +121,61 @@ Since 036, `cases` has a **column-level** read grant to `anon, authenticated`: `
 
 ## Part C — Privacy Policy
 
-*(Plain-language text for users. The in-app policy is this text, in English, Azerbaijani and Turkish.)*
+*(The in-app policy is this text, in English, Azerbaijani and Turkish; formal register.)*
 
-### C1. Who runs Stray's Call
+**Privacy Policy**
 
-Stray's Call is run by **Fikrat Mutallimov**, an individual, who is the controller of the personal data described here. Contact by email only: **fikretmutallimov@gmail.com** (no postal address is published).
+Effective date: 1 October 2026
 
-### C2. What we collect and why
+This Privacy Policy describes how personal data is processed in connection with the Stray’s Call web application and its related services.
 
-- **Your account:** email and password (to sign you in); first name, last name and optional phone (so clinics and rescuers know who they are dealing with); a display name built from your name; your language. With Google sign-in we receive your name, email and profile picture from Google.
-- **Alert settings:** if you choose "alerts near me", the home area and radius you set.
-- **Reports:** photos, description, the animal's condition and urgency, the exact spot you place on the map, an optional landmark, and a street address we look up from that spot. As a guest, the optional name you type.
-- **Rescues:** your role on a case and — only while you are driving an animal to a clinic — your device's location, about every 45 seconds.
-- **Messages:** what you write in case chats and in direct messages with clinics.
-- **Ratings, blocks and content reports** you make.
-- **Notifications:** copies of the alerts we send you; if you turn on push, a technical address for your device.
-- **Consent records:** when you confirmed you are 18+ and accepted the Terms and this policy, and which version.
-- **Clinics** also provide clinic details, a private manager contact, and verification documents.
-- **Technical data:** a session identity for your device (also for guests), a bot check (Cloudflare Turnstile), and error reports (Sentry).
+### C1. Data Controller
 
-We use this data only to run the rescue service: publishing reports, alerting nearby helpers, coordinating rescues and clinics, keeping the platform safe (bot checks, spam limits, moderation), and providing your account.
+The data controller responsible for the processing of personal data described in this Policy is Fikrat Mutallimov, an individual (the “Controller”, “we”, “us”). The Controller may be contacted by email only, at fikretmutallimov@gmail.com.
 
-### C3. Legal basis
+### C2. Personal Data We Process and Purposes
 
-We process your data on the basis of **your consent**, and of **what is necessary to run the service and keep it safe**.
+We process the following categories of personal data: (a) account data: email address and password; first name, last name and, optionally, telephone number, so that clinics and rescuers can identify the persons with whom they are dealing; a display name derived from the first and last name; and the selected language. Where you sign in with Google, we receive your name, email address and profile picture from Google; (b) alert settings: where you elect to receive alerts about nearby cases, the home area and radius you specify; (c) report data: photographs, description, the animal's condition and urgency, the exact location marked on the map, an optional landmark, and a street address derived from that location; for guest reports, the name optionally provided; (d) rescue data: your role in a case and, solely while you are transporting an animal to a clinic, the location of your device at intervals of approximately 45 seconds; (e) the content of messages you send in case chats and in direct messages with clinics; (f) ratings, blocks and content reports you submit; (g) copies of notifications sent to you and, where you enable push notifications, a technical address of your device; (h) consent records: the date and version of your confirmation that you are at least 18 years of age and of your acceptance of the Terms of Service and this Policy; (i) for clinics, in addition: clinic details, the private contact details of a manager, and verification documents; (j) technical data: a session identifier for your device (including for guests), data processed for automated bot detection (Cloudflare Turnstile), and error reports (Sentry). Personal data is processed solely for the purposes of operating the rescue service: publishing reports, alerting nearby helpers, coordinating rescues and clinics, maintaining the security of the platform (bot detection, spam limits and moderation), and providing your account.
 
-Consent, which you give:
-- when you create an account — the two required boxes "I am 18 or older" and "I agree to the Terms of Service and the Privacy policy", recorded with the date and version;
-- as a guest, on each report (the same two boxes), recorded with the report;
-- for location while transporting an animal, by starting the transport; for push notifications, by turning them on.
+### C3. Legal Basis for Processing
 
-Necessary to run the service and keep it safe: bot checks, spam limits, moderation, and keeping rescue history in anonymised form after an account is deleted.
+Personal data is processed on the basis of your consent and where processing is necessary to operate the service and maintain its security. Consent is given: when you create an account, by ticking the mandatory boxes “I am 18 or older” and “I agree to the Terms of Service and the Privacy policy”, which are recorded together with the date and version; for guest reports, by ticking the same boxes for each report, which are recorded with the report; for location data during transport, by starting the transport; and for push notifications, by enabling them. Processing necessary to operate the service and maintain its security comprises bot detection, spam limits, moderation, and the retention of rescue history in anonymised form after an account has been deleted.
 
-### C4. Who can see what
+### C4. Publicly Visible Information
 
-**Public means anyone, even without an account or the app.** For a case, that is:
-- the animal, description, condition, urgency, the exact location and street address, landmark, status and its timestamps, and the guest name if one was given;
-- the case timeline and the case chat;
-- which accounts reported, rescued and treated it (their display names);
-- photos: everyone using the app can see the photos of a visible case.
+Information described as public may be viewed by anyone, including persons without an account. In respect of a case, the following information is public: the animal, description, condition, urgency, exact location and street address, landmark, status and associated times, the guest name where provided, the case timeline, the case chat, and the accounts that reported, rescued and treated the animal. Photographs of a case are visible to all users of the application. The following information is also public: your display name, profile picture, role, date of joining, number of animals helped and partner organisation; clinic ratings, including the identity of the person who submitted them; and the public details of approved clinics. The following information is not public: the device or guest session from which a report was submitted; consent records; cases hidden by moderators; and the live location of the rescuer, which is accessible only to the participants in the case concerned (the reporter, the rescuer and the clinic) and to administrators.
 
-Also public: your display name, profile picture, role, join date, "animals helped" count and partner organisation; clinic ratings including who left them; approved clinics' public details.
+### C5. Access to Personal Data and Recipients
 
-**Not public:** which device or guest session submitted a report; consent records; the rescuer's live location, which only the people on that case (reporter, rescuer, clinic) and administrators can see; cases hidden by moderators.
+Direct messages are accessible to the two participants in the conversation and to administrators. Your email address, name and telephone number, home area and alert settings, language, notifications, block list, content reports submitted by you and consent records are accessible only to you and to administrators. Administrators have access to the email addresses of all users, all direct messages, content reports, hidden content, clinic verification documents and manager contact details, and use such access solely to review abuse reports, approve clinics and resolve technical issues. In its capacity as database operator, the Controller has technical access to all stored data. The recipients of personal data are the service providers listed in Section 6.
 
-**Direct messages** are visible to the two participants **and to administrators**.
+### C6. Storage Location and International Transfers
 
-**Only you** (and administrators): your email, name and phone fields, home area and alert settings, language, notifications, block list, the content reports you filed, and your consent records.
+The database, files and authentication service are hosted by Supabase in the European Union (Paris, France), outside the Republic of Azerbaijan. The application's files are delivered through Vercel's global network; Vercel retains request logs for a short period for security purposes. Maps, place search and street-address lookups are provided by Google, and bot detection by Cloudflare. Error reports are transmitted to Sentry and retained for its standard retention period. Push notifications are delivered through the push service of your browser. Personal data is stored in the European Union (France) and processed by the above providers in various countries. By using Stray's Call, you consent to this international transfer of personal data.
 
-**Administrators** can see all users' email addresses, **all direct messages**, content reports, hidden content, clinic verification documents and manager contacts. They use this only to review abuse reports, approve clinics and fix problems. As the database operator, the controller has technical access to all stored data.
+### C7. Retention Periods
 
-### C5. Where your data is stored
+Personal data is retained for the following periods: account and profile data — until the account is deleted; reports and case timelines — retained as the rescue record, and open reports that are not taken up are closed after 24 hours and are not deleted; case chats — deleted 90 days after the case is resolved or closed, save that a message under review by moderators is retained until the review is completed; photographs — currently retained together with the case, and a retention period will be added to this Policy once automated deletion of photographs is in place; live location during transport — deleted upon delivery of the animal, withdrawal from the rescue, or automatic reopening of the rescue after 75 minutes without progress; direct messages — until either participant deletes their account, whereupon the entire conversation is deleted; notifications — 90 days; guest sessions — deleted after 30 days unless an open report exists, while completed reports are retained without any link to the session; clinic verification documents — for as long as the clinic's account exists; push device addresses — until push notifications are disabled, the device ceases to accept them, or the account is deleted. Data stored on your device (session, settings and unsent offline reports) remains in your browser until it is sent or the browser data is cleared; cached photographs are kept for up to 7 days.
 
-Our database, files and sign-in service are hosted by Supabase in the European Union (Paris, France), outside Azerbaijan. The app's files are delivered by Vercel's global network; Vercel keeps request logs briefly for security. Maps, place search and street-address lookups are provided by Google, and the bot check by Cloudflare; error reports go to Sentry, which keeps them for its standard period; push notifications go through your browser's push service. Your data is stored in the EU (France) and processed by these providers around the world. By using Stray's Call you consent to this transfer.
+### C8. Your Rights
 
-### C6. How long we keep it
+You have the right to access your personal data and obtain a copy of it via Settings → Data & account → Export my data, and to rectify it via Settings → Personal information; alert, area and language settings may be changed in Settings. You may delete your account via Settings → Data & account → Delete my account. Deletion permanently removes your sign-in credentials and email address, profile, alert settings, notifications, push devices, block list, content reports submitted by you, “not here” flags, watched cases, clinic ratings submitted by you, all direct-message conversations in which you participate (for both participants) and, in the case of clinics, the clinic and its verification documents. Messages you have posted in case chats remain in the case and are displayed as “Deleted account”. Cases you created or rescued are retained as rescue history without any link to you. Where a rescue in which you are participating is in progress, the case is reopened to other rescuers; where your clinic is expecting an animal, the rescuer is asked to select another clinic. You may withdraw your consent by deleting your account or, in respect of location data or push notifications, by stopping the transport or disabling push notifications. Any other request may be sent to fikretmutallimov@gmail.com. We will respond as soon as possible and within any time limit prescribed by law. You also have the right to lodge a complaint with the data protection authority in your country.
 
-- **Your account and profile:** until you delete your account.
-- **Reports and case timelines:** kept as the rescue record. Open reports nobody takes are closed after 24 hours, not deleted.
-- **Case chats:** deleted 90 days after the case is resolved or closed. A message under review by moderators is kept until the review ends.
-- **Photos:** currently kept with the case. We will add a deletion period to this policy when automatic photo cleanup is in place.
-- **Your live location while transporting:** deleted when the animal is delivered, the rescue is dropped, or the rescue is reopened after 75 minutes without progress.
-- **Direct messages:** until you or the other person deletes their account; then the whole conversation is deleted.
-- **Notifications:** 90 days.
-- **Guest sessions:** deleted after 30 days unless you still have an open report; your finished reports stay, no longer linked to the session.
-- **Clinic verification documents:** while the clinic's account exists.
-- **Push device addresses:** until you turn push off, the device stops accepting pushes, or you delete your account.
-- **On your device:** your session, settings and any unsent offline reports stay in your browser until sent or until you clear its data; cached photos for up to 7 days.
+### C9. Age Requirement
 
-### C7. Your rights
+Stray's Call is intended solely for persons aged 18 and over. Each user confirms that they meet this requirement before creating an account or submitting a report as a guest.
 
-- **See and export your data:** Settings → Data & account → **Export my data** downloads a file with your profile, clinic details, the cases you reported or rescued, the case chat and direct messages you sent, the cases you watch, the content reports you filed, your push devices and your block list.
-- **Correct your data:** Settings → Personal information (name, phone); alerts, area and language in Settings.
-- **Delete your account:** Settings → Data & account → **Delete my account**. This permanently removes your sign-in and email, profile, alert settings, notifications, push devices, block list, the content reports you filed, "not here" flags, watched cases, the clinic ratings you left, every direct-message conversation you are in (for both people), and — for clinics — the clinic and its verification document files. Your case-chat messages stay in the case, shown as "Deleted account". Reports you created or rescued stay as rescue history, no longer linked to you. If you were in the middle of a rescue, the case reopens for other rescuers; if your clinic was expecting an animal, the rescuer is asked to choose another clinic.
-- **Withdraw consent:** by deleting your account (for location or push: by stopping the transport or turning push off).
-- For anything else, write to fikretmutallimov@gmail.com. We'll respond as soon as we can, within any time limit the law sets. You can also complain to the data protection authority in your country.
+### C10. Photographs and Location Data
 
-### C8. 18+ only
+Photographs are resized and re-encoded on your device before upload, which removes embedded metadata such as GPS position; where this cannot be done, the photograph is not uploaded. Clinic verification documents are uploaded in their original form and are accessible only to the clinic concerned and to administrators. Location data is used solely for the following purposes: the location marked on a report (public); the home area selected for alerts (not public); the location of your device while transporting an animal (accessible only to the participants in the case concerned and to administrators, and deleted at the end of the transport); and centring the map and displaying distances on your device (not stored). Report locations are transmitted to Google in order to determine a street address.
 
-Stray's Call is only for people aged 18 and over. Everyone confirms this before creating an account or submitting a report as a guest.
+### C11. Our Commitments
 
-### C9. Photos
+We do not sell personal data, do not display targeted advertising and do not process payments. Where a clinic shares bank details in a case chat, any payment is made directly between you and the clinic, outside Stray's Call.
 
-Photos are resized and re-encoded on your device before upload, which removes hidden metadata such as GPS position. If that can't be done, the photo is not uploaded. Report photos can be seen by everyone using the app, so rescuers can recognise the animal. Clinic verification documents are uploaded as they are and are visible only to the clinic and administrators.
+### C12. Changes to This Policy
 
-### C10. Location
-
-We use location only: (1) where you place the pin on a report (public), (2) your chosen home area for alerts (private), (3) your device location while you transport an animal (visible only to the people on that case and administrators, deleted at the end of the transport), and (4) to centre the map and show distances on your device (not stored). Report locations are sent to Google to look up a street address.
-
-### C11. What we never do
-
-We don't sell your data, we don't show targeted advertising, and we don't process payments. If a clinic shares bank details in a case chat, any payment happens directly between you and the clinic, outside Stray's Call.
-
-### C12. Changes to this policy
-
-When we change the Terms or this policy materially, we update the version, and everyone with an account is asked to accept again before continuing. Guests accept the current version with each report.
+In the event of material changes to the Terms of Service or this Policy, the version will be updated and all account holders will be asked to accept the updated version before continuing to use the service. Guests accept the version in force when submitting each report.
 
 ---
 
