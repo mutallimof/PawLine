@@ -16,7 +16,20 @@ import { useAuth } from '../context/AuthContext';
 import { timeAgo } from '../lib/time';
 import { distanceKm, formatDistance, type LatLng } from '../lib/geo';
 import { tierForXp, tierName } from '../lib/xp';
-import { animalEmoji, IconBell, IconChat, IconMap, IconPlus, IconStethoscope, IconUser, PawHeartMark } from './Icons';
+import {
+  animalEmoji,
+  IconBack,
+  IconBell,
+  IconChatRound,
+  IconChevronRight,
+  IconClock,
+  IconGrid,
+  IconPin,
+  IconPlus,
+  IconStethoscope,
+  IconUser,
+  PawHeartMark,
+} from './Icons';
 import { CasePhoto } from './CasePhoto';
 
 // ---------------------------------------------------------------------------
@@ -35,6 +48,29 @@ export const STATUS_COLOR: Record<CaseStatus, string> = {
 
 export function statusLabel(status: CaseStatus): string {
   return t(`status.${status}` as const);
+}
+
+/**
+ * Figma v2: one status vocabulary. The seven DB statuses fold into four
+ * groups shown on filter chips and card badges; the exact step still shows
+ * on Case Detail (statusLabel) and in the paw trail.
+ */
+export type StatusGroup = 'open' | 'progress' | 'done' | 'closed';
+export function statusGroup(status: CaseStatus): StatusGroup {
+  if (status === 'open') return 'open';
+  if (status === 'resolved') return 'done';
+  if (status === 'closed') return 'closed';
+  return 'progress';
+}
+export function statusGroupLabel(group: StatusGroup): string {
+  return group === 'open' ? t('status.open')
+    : group === 'progress' ? t('status.inProgress')
+    : group === 'done' ? t('status.resolved')
+    : t('status.closed');
+}
+export function StatusGroupBadge({ status }: { status: CaseStatus }) {
+  const g = statusGroup(status);
+  return <span className={`v2-badge v2-badge--${g}`}>{statusGroupLabel(g)}</span>;
 }
 
 export function StatusBadge({
@@ -189,6 +225,12 @@ export function ConfirmModal({
 // Case card (feed)
 // ---------------------------------------------------------------------------
 
+export function caseTitle(c: Pick<CaseWithDetails, 'animal' | 'injury_type'>): string {
+  const animal = t(`animal.${c.animal}` as const);
+  return c.injury_type ? `${animal} · ${t(`injury.${c.injury_type}` as const)}` : animal;
+}
+
+/** Figma v2 "UI Card": 140px photo left, badge · title · description · meta. */
 export function CaseCard({
   caseData,
   userLocation,
@@ -205,20 +247,12 @@ export function CaseCard({
   const distance = userLocation
     ? formatDistance(distanceKm(userLocation, { lat: caseData.lat, lng: caseData.lng }))
     : null;
+  const place = [caseData.address_hint, distance].filter(Boolean).join(' · ');
+  const escalated = caseData.status === 'open' && !!caseData.escalated_at;
 
   return (
-    <Link
-      to={`/case/${caseData.id}`}
-      className={`card case-card case-card--compact case-card--${
-        // Done (resolved OR closed) gets the done tint — closed used to fall
-        // through to the amber in-progress tint.
-        !isCaseLive(caseData.status) ? 'resolved'
-        : caseData.status === 'en_route' ? 'enroute'
-        : caseData.status === 'open' ? 'open'
-        : 'progress'
-      }${caseData.status === 'open' && caseData.escalated_at ? ' case-card--escalated' : ''}`}
-    >
-      <div className={`case-card__photo${showPhoto ? '' : ' case-card__photo--empty'}`}>
+    <Link to={`/case/${caseData.id}`} className="v2-card">
+      <div className={`v2-card__photo${showPhoto ? '' : ' v2-card__photo--empty'}`}>
         {showPhoto ? (
           <CasePhoto
             url={photo!.url!}
@@ -227,33 +261,28 @@ export function CaseCard({
             urgency={caseData.urgency}
           />
         ) : (
-          <span>{animalEmoji(caseData.animal)}</span>
+          <span aria-hidden="true">{animalEmoji(caseData.animal)}</span>
         )}
       </div>
-      <div className="case-card__body">
-        <div className="case-card__meta">
-          <StatusBadge status={caseData.status} />
-          <UrgencyBadge level={caseData.urgency} />
-          <span>{animalEmoji(caseData.animal)} {t(`animal.${caseData.animal}` as const)}</span>
+      <div className="v2-card__body">
+        <div className="v2-card__badges">
+          <StatusGroupBadge status={caseData.status} />
+          {(caseData.urgency === 'high' || caseData.urgency === 'critical') && (
+            <span className={`v2-badge v2-badge--urgency-${caseData.urgency}`}>
+              {urgencyLabel(caseData.urgency)}
+            </span>
+          )}
         </div>
-        <p className="case-card__desc">{caseData.description}</p>
-        <div className="case-card__meta case-card__meta--sub">
-          <span>{timeAgo(caseData.created_at)}</span>
-          {distance && (
-            <>
-              <span>·</span>
-              <span>{distance}</span>
-            </>
+        <h3 className="v2-card__title">{caseTitle(caseData)}</h3>
+        {caseData.description && <p className="v2-card__desc">{caseData.description}</p>}
+        <div className="v2-card__meta">
+          {place && (
+            <span className="v2-meta"><IconPin /><span>{place}</span></span>
           )}
-          {caseData.status === 'open' && caseData.escalated_at && (
-            <span className="case-card__waiting">{t('home.stillWaiting')}</span>
-          )}
-          {caseData.address_hint && (
-            <>
-              <span>·</span>
-              <span className="case-card__addr">{caseData.address_hint}</span>
-            </>
-          )}
+          <span className="v2-meta">
+            <IconClock />
+            <span>{timeAgo(caseData.created_at)}{escalated ? ` · ${t('home.stillWaiting')}` : ''}</span>
+          </span>
         </div>
       </div>
     </Link>
@@ -346,13 +375,13 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
       </button>
 
       <NavLink to="/" end className={({ isActive }) => item(isActive)}>
-        <IconMap /> {t('nav.home')}
+        <IconGrid /> {t('nav.home')}
       </NavLink>
       <NavLink to="/vets" className={({ isActive }) => item(isActive)}>
         <IconStethoscope /> {t('home.browseVets')}
       </NavLink>
       <NavLink to="/messages" className={({ isActive }) => item(isActive)}>
-        <IconChat /> {t('nav.messages')}
+        <IconChatRound /> {t('nav.messages')}
       </NavLink>
       <NavLink to="/alerts" className={({ isActive }) => item(isActive)}>
         <IconBell /> {t('nav.alerts')}
@@ -368,15 +397,15 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
 }
 
 /**
- * Group D: Vets replaces Alerts here — notifications moved to the top-right
- * bell (see TopBar below). Same five slots as before, just swapped.
+ * Group D: Vets replaces Alerts here — on phones, alerts live behind the
+ * header bell (AlertsBell). Same five slots as the Figma bottom nav.
  */
 export function BottomNav() {
   const navigate = useNavigate();
   return (
     <nav className="bottom-nav" aria-label="Main">
       <NavLink to="/" end className={({ isActive }) => `bottom-nav__item${isActive ? ' active' : ''}`}>
-        <IconMap />
+        <IconGrid />
         {t('nav.home')}
       </NavLink>
       <NavLink to="/vets" className={({ isActive }) => `bottom-nav__item${isActive ? ' active' : ''}`}>
@@ -389,14 +418,14 @@ export function BottomNav() {
           onClick={() => navigate('/report')}
           aria-label={t('report.title')}
         >
-          <IconPlus size={26} />
+          <IconPlus size={24} />
         </button>
       </div>
       <NavLink
         to="/messages"
         className={({ isActive }) => `bottom-nav__item${isActive ? ' active' : ''}`}
       >
-        <IconChat />
+        <IconChatRound />
         {t('nav.messages')}
       </NavLink>
       <NavLink
@@ -410,20 +439,108 @@ export function BottomNav() {
   );
 }
 
+/** Unread alert count, provided once by the app shell (same hook as before). */
+export const UnreadAlertsContext = createContext(0);
+
 /**
- * Group D: top-right bell, mobile only (CSS hides it at the ≥1024px
- * breakpoint where SideNav's own Alerts link takes over — see side-nav in
- * index.css). Replaces the bottom tab bar's old Alerts slot.
+ * Header bell (Figma v2): 40×40 icon button with a green dot when there are
+ * unread alerts. Phones only — the desktop sidebar has its own Alerts link.
  */
-export function TopBar({ unreadAlerts }: { unreadAlerts: number }) {
+export function AlertsBell() {
+  const unread = useContext(UnreadAlertsContext);
+  const label = unread > 0 ? `${t('nav.alerts')} (${Math.min(unread, 99)})` : t('nav.alerts');
   return (
-    <div className="top-bar">
-      <NavLink to="/alerts" className="top-bar__bell" aria-label={t('nav.alerts')}>
-        <IconBell size={22} />
-        {unreadAlerts > 0 && <span className="nav-badge">{Math.min(unreadAlerts, 99)}</span>}
-      </NavLink>
-    </div>
+    <Link to="/alerts" className="icon-btn icon-btn--mobile" aria-label={label}>
+      <IconBell />
+      {unread > 0 && <span className="icon-btn__dot" />}
+    </Link>
   );
+}
+
+/**
+ * Figma v2 screen header: 40×40 back · centred uppercase title · 40×40
+ * action. Back returns to the previous in-app page, or to `fallback` when
+ * the page was opened directly (nothing in-app to go back to).
+ */
+export function ScreenHeader({
+  title,
+  back = true,
+  fallback = '/',
+  action,
+}: {
+  title: string;
+  back?: boolean;
+  fallback?: string;
+  action?: ReactNode;
+}) {
+  const navigate = useNavigate();
+  const goBack = () => {
+    const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+    if (idx > 0) navigate(-1);
+    else navigate(fallback);
+  };
+  return (
+    <header className="screen-header">
+      {back ? (
+        <button type="button" className="icon-btn" onClick={goBack} aria-label={t('common.back')}>
+          <IconBack />
+        </button>
+      ) : (
+        <span />
+      )}
+      <h1 className="screen-header__title">{title}</h1>
+      {action ?? <span />}
+    </header>
+  );
+}
+
+/** One row of a grouped card (Settings, Profile menu). Link, button or static. */
+export function GroupRow({
+  title,
+  sub,
+  value,
+  icon,
+  iconTone,
+  to,
+  onClick,
+  danger = false,
+  chevron,
+  children,
+}: {
+  title: ReactNode;
+  sub?: ReactNode;
+  value?: ReactNode;
+  icon?: ReactNode;
+  iconTone?: 'danger' | 'brand';
+  to?: string;
+  onClick?: () => void;
+  danger?: boolean;
+  chevron?: boolean;
+  children?: ReactNode;
+}) {
+  const cls = `v2-row${sub ? ' v2-row--sub' : ''}${danger ? ' v2-row--danger' : ''}`;
+  const showChev = chevron ?? !!(to || onClick);
+  const inner = (
+    <>
+      {icon && (
+        <span className={`v2-row__icon${iconTone ? ` v2-row__icon--${iconTone}` : ''}`} aria-hidden="true">
+          {icon}
+        </span>
+      )}
+      <span className="v2-row__main">
+        <span className="v2-row__title">{title}</span>
+        {sub && <span className="v2-row__sub">{sub}</span>}
+      </span>
+      {value != null && <span className="v2-row__value">{value}</span>}
+      {children}
+      {showChev && (
+        <span className="v2-row__chev" aria-hidden="true"><IconChevronRight /></span>
+      )}
+    </>
+  );
+  if (to) return <Link to={to} className={cls}>{inner}</Link>;
+  if (onClick) return <button type="button" className={cls} onClick={onClick}>{inner}</button>;
+  return <div className={cls}>{inner}</div>;
 }
 
 // ---------------------------------------------------------------------------

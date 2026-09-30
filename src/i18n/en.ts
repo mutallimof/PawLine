@@ -13,7 +13,7 @@ export const en = {
   'nav.profile': 'Profile',
 
   // Case statuses
-  'status.open': 'Needs help',
+  'status.open': 'Needs rescue',
   'status.accepted': 'Rescuer on it',
   'status.vet_selected': 'Waiting for vet',
   'status.vet_confirmed': 'Vet ready',
@@ -559,4 +559,5 @@ export const en = {
   // The arrival — Direction A emotional peak (live resolution)
   'case.arrivalTitle': 'At the clinic',
   'case.arrivalSub': 'The rescuer has handed the animal to the clinic. You were part of this.',
+  'status.inProgress': 'In progress',
 };

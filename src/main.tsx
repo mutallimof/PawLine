@@ -14,6 +14,7 @@ import { registerSW } from 'virtual:pwa-register';
 import '@fontsource-variable/dm-sans/wght.css';
 
 import './styles/index.css';
+import './styles/figma-v2.css';
 import App from './App';
 import { initErrorMonitoring } from './lib/monitoring';
 

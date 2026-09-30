@@ -15,7 +15,7 @@ export const ru: Dict = {
   'nav.profile': 'Профиль',
 
   // Case statuses
-  'status.open': 'Нужна помощь',
+  'status.open': 'Нужно спасение',
   'status.accepted': 'Спасатель занимается',
   'status.vet_selected': 'Ожидание клиники',
   'status.vet_confirmed': 'Клиника готова',
@@ -561,4 +561,5 @@ export const ru: Dict = {
   // The arrival — Direction A emotional peak (live resolution)
   'case.arrivalTitle': 'В клинике',
   'case.arrivalSub': 'Спасатель передал животное в клинику. Вы стали частью этого.',
+  'status.inProgress': 'В процессе',
 };

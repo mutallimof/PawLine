@@ -15,7 +15,7 @@ export const tr: Dict = {
   'nav.profile': 'Profil',
 
   // Case statuses
-  'status.open': 'Yardım gerekiyor',
+  'status.open': 'Kurtarılmayı bekliyor',
   'status.accepted': 'Kurtarıcı bulundu',
   'status.vet_selected': 'Veteriner bekleniyor',
   'status.vet_confirmed': 'Veteriner hazır',
@@ -561,4 +561,5 @@ export const tr: Dict = {
   // The arrival — Direction A emotional peak (live resolution)
   'case.arrivalTitle': 'Klinikte',
   'case.arrivalSub': 'Kurtarıcı hayvanı kliniğe teslim etti. Sen de bunun bir parçasıydın.',
+  'status.inProgress': 'Devam ediyor',
 };

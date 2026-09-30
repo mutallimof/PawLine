@@ -1,0 +1,427 @@
+/* ============================================================================
+   Figma v2 — "Soul & Foundation" (file 3AVKv7DrY3dm22Pnaav6JY).
+   Loaded after index.css so it has the final say over the older passes
+   (ink/wobble, first Figma tokens). Values come from the Home Screen V2 and
+   Case Detail frames; screens without a frame reuse these same pieces.
+
+   Contrast: Figma's secondary text (Zeus 55%) and its badge inks are below
+   AA at these sizes, so v2 uses Figma's own Soya Bean #6B6053 for secondary
+   text and darker shades of each badge hue. Fills under text keep the AA
+   --brand-fill; the bright --coral green stays for non-text accents.
+   ========================================================================== */
+
+:root {
+  --v2-surface: #ffffff;
+  --v2-fill: #f4f4f4;            /* Bridal Heath — chips, inputs, icon buttons */
+  --v2-border: #eaeaea;          /* Border Gray */
+  --v2-ink: #241f1a;             /* Zeus */
+  --v2-ink-2: #6b6053;           /* Soya Bean — AA secondary text */
+  --v2-quote: #574f45;           /* Fuscous Gray */
+  --v2-lav: #9c85e6;             /* Dull Lavender */
+  --v2-lav-16: rgba(156, 133, 230, 0.16);
+  --v2-lav-14: rgba(156, 133, 230, 0.14);
+  --v2-card-shadow: 0 0 13px rgba(0, 0, 0, 0.25);
+  --v2-soft-shadow: 0 14px 26px -20px rgba(36, 31, 26, 0.45);
+  --v2-gutter: 20px;
+
+  /* Status groups (one vocabulary across chips, badges and the trail). */
+  --v2-open-bg: #fce4e0;   --v2-open-ink: #be362b;   /* Burnt Sienna 18% / Cinnabar, AA */
+  --v2-prog-bg: #d8defb;   --v2-prog-ink: #3060b0;   /* Royal Blue 18% / Cornflower, AA */
+  --v2-done-bg: #cdf1e3;   --v2-done-ink: var(--brand-text);
+  --v2-closed-bg: var(--v2-fill); --v2-closed-ink: var(--v2-ink-2);
+}
+
+body { background: var(--v2-surface); }
+body::before { display: none; } /* paper grain — Figma screens are flat white */
+
+.page {
+  padding-left: var(--v2-gutter);
+  padding-right: var(--v2-gutter);
+}
+
+/* ---- Screen header: 40×40 icon button · centred uppercase title · action -- */
+.screen-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 14px;
+}
+.screen-header__title {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--v2-ink);
+  overflow-wrap: anywhere;
+}
+.screen-header__title::after { content: none; }
+
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--v2-fill);
+  border: 1px solid var(--v2-border);
+  color: var(--v2-ink);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn:active { transform: scale(0.95); }
+.icon-btn__dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 1px solid var(--v2-fill);
+}
+
+/* ---- Section label (uppercase 11 / +0.66) ------------------------------- */
+.section-label,
+.v2-label {
+  margin: 20px 0 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--v2-ink-2);
+}
+.v2-h2 {
+  margin: 20px 0 10px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--v2-ink);
+}
+
+/* ---- Buttons ------------------------------------------------------------ */
+.btn {
+  border-radius: 14px;
+  font-weight: 500;
+}
+.btn--primary {
+  min-height: 52px;
+  background: var(--brand-fill);
+  color: var(--color-text-on-brand);
+  font-size: 15.5px;
+  border: none;
+  box-shadow: 0 10px 20px -10px rgba(3, 184, 117, 0.6);
+}
+.btn--primary:hover { background: var(--brand-fill); }
+.btn--primary:active {
+  transform: scale(0.99);
+  box-shadow: 0 6px 14px -10px rgba(3, 184, 117, 0.6);
+}
+.btn--secondary {
+  min-height: 48px;
+  background: var(--v2-fill);
+  border: 1px solid var(--v2-border);
+  color: var(--v2-ink);
+  font-size: 14px;
+  box-shadow: none;
+}
+.btn--small { min-height: 36px; border-radius: 11px; font-size: 13px; }
+.link-btn--v2,
+.v2-link {
+  background: none;
+  border: none;
+  padding: 2px 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--v2-ink-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ---- Chips (filter row) -------------------------------------------------- */
+.v2-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0;
+  margin: 0 calc(-1 * var(--v2-gutter));
+  padding-inline: var(--v2-gutter);
+  scrollbar-width: none;
+}
+.v2-chips::-webkit-scrollbar { display: none; }
+.v2-chip {
+  flex-shrink: 0;
+  padding: 10px 16px 11px;
+  border-radius: 999px;
+  border: none;
+  background: var(--v2-fill);
+  color: var(--v2-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2-chip.active,
+.v2-chip[aria-pressed='true'] {
+  background: var(--brand-fill);
+  color: var(--color-text-on-brand);
+}
+
+/* Small tag chip (Case Detail): 28 tall, 11.5px. */
+.v2-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--v2-fill);
+  color: var(--v2-ink-2);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---- Status badge (one vocabulary) --------------------------------------- */
+.v2-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4.5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.v2-badge--open    { background: var(--v2-open-bg);   color: var(--v2-open-ink); }
+.v2-badge--progress { background: var(--v2-prog-bg);  color: var(--v2-prog-ink); }
+.v2-badge--done    { background: var(--v2-done-bg);   color: var(--v2-done-ink); }
+.v2-badge--closed  { background: var(--v2-closed-bg); color: var(--v2-closed-ink); }
+
+/* ---- Grouped card with rows (Settings, Profile menu, lists) -------------- */
+.v2-group {
+  background: var(--v2-fill);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.v2-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 10px 14px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--v2-ink);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+.v2-row + .v2-row { border-top: 1px solid var(--v2-border); }
+.v2-row--sub { min-height: 65px; }
+.v2-row:active { background: rgba(36, 31, 26, 0.04); }
+.v2-row__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--v2-lav-16);
+  color: var(--v2-lav);
+}
+.v2-row__icon svg { width: 19px; height: 19px; }
+.v2-row__icon--danger { background: var(--v2-open-bg); color: var(--v2-open-ink); }
+.v2-row__icon--brand { background: var(--v2-done-bg); color: var(--brand-text); }
+.v2-row__main { flex: 1; min-width: 0; }
+.v2-row__title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+.v2-row__sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--v2-ink-2);
+  line-height: 1.3;
+}
+.v2-row__value {
+  font-size: 13px;
+  color: var(--v2-ink-2);
+  white-space: nowrap;
+}
+.v2-row__chev { color: var(--v2-ink-2); flex-shrink: 0; display: flex; }
+.v2-row__chev svg { width: 16px; height: 16px; }
+.v2-row--danger .v2-row__title { color: var(--v2-open-ink); }
+.v2-group__body { padding: 14px; }
+
+/* ---- UI card (348×160, photo left) --------------------------------------- */
+.v2-card {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  min-height: 160px;
+  padding: 10px;
+  margin-bottom: 14px;
+  background: var(--v2-surface);
+  border-radius: 16px;
+  box-shadow: var(--v2-card-shadow);
+  color: var(--v2-ink);
+  text-decoration: none;
+  transform: none;
+  animation: none;
+  border: none;
+}
+.v2-card:active { transform: scale(0.99); }
+.v2-card__photo {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+  align-self: center;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(148deg, #f0876f 0%, #d8503f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+.v2-card__photo--empty { background: var(--v2-lav-16); }
+.v2-card__photo img,
+.v2-card__photo .case-photo,
+.v2-card__photo .case-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.v2-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 2px 4px;
+}
+.v2-card__badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.v2-card__title {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.v2-card__desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--v2-ink-2);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.v2-card__meta {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--v2-ink-2);
+  min-width: 0;
+}
+.v2-meta svg { width: 12px; height: 12px; color: var(--v2-lav); flex-shrink: 0; }
+.v2-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- Stats row (3 equal columns) ------------------------------------------ */
+.v2-stats {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  margin: 16px 0 4px;
+}
+.v2-stat {
+  text-align: center;
+  padding: 0 6px;
+}
+.v2-stat + .v2-stat { border-left: 1px solid var(--v2-border); }
+.v2-stat__value { font-size: 26px; font-weight: 500; line-height: 1.1; }
+.v2-stat__label { margin-top: 4px; font-size: 11px; color: var(--v2-ink-2); line-height: 1.25; }
+
+/* ---- Bottom nav (Figma: white bar, raised square +) ------------------------ */
+.bottom-nav {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: none;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid var(--v2-border);
+  background: var(--v2-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  padding: 0 10px var(--safe-bottom);
+  height: calc(62px + var(--safe-bottom));
+  justify-content: center;
+  gap: 14px;
+}
+.bottom-nav__item {
+  flex: 0 0 56px;
+  min-width: 56px;
+  gap: 3px;
+  border-radius: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--v2-ink-2);
+  background: none;
+}
+.bottom-nav__item.active {
+  background: none;
+  color: var(--brand-text);
+}
+.bottom-nav__item svg { width: 21px; height: 21px; }
+.bottom-nav__report { flex: 0 0 52px; }
+.bottom-nav__report-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  border: 4px solid var(--v2-surface);
+  background: var(--brand-fill);
+  color: var(--color-text-on-brand);
+  box-shadow: 0 10px 20px -8px rgba(3, 184, 117, 0.71);
+  transform: translateY(-18px);
+}
+.bottom-nav__report-btn:active { transform: translateY(-18px) scale(0.94); }
+.bottom-nav__report-btn svg { width: 24px; height: 24px; }
+.page {
+  padding-bottom: calc(62px + var(--safe-bottom) + 28px);
+}
+
+@media (min-width: 1024px) {
+  .icon-btn--mobile { display: none; }
+  .page { padding-bottom: 40px; }
+}
+
+/* Urgency only surfaces on cards when it's high/critical — same solid
+   urgency tokens as before (AA with white text). */
+.v2-badge--urgency-high     { background: #c2410c; color: #fff; } /* --urgency-high is 3.3:1 under white */
+.v2-badge--urgency-critical { background: var(--urgency-critical); color: #fff; }

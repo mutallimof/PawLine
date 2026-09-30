@@ -64,7 +64,103 @@ export const IconUser = ({ size }: IconProps) => (
   </svg>
 );
 
-export const IconStethoscope = ({ size }: IconProps) => (
+/* ---- Figma v2 set (same 24px / stroke-2 base as the rest) ---- */
+
+export const IconGrid = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="3" y="3" width="7" height="7" rx="2" />
+    <rect x="14" y="3" width="7" height="7" rx="2" />
+    <rect x="3" y="14" width="7" height="7" rx="2" />
+    <rect x="14" y="14" width="7" height="7" rx="2" />
+  </svg>
+);
+
+export const IconChatRound = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z" />
+  </svg>
+);
+
+export const IconChevronRight = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+);
+
+export const IconHelp = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
+    <path d="M12 17h.01" />
+  </svg>
+);
+
+export const IconSearch = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+export const IconFilter = ({ size }: IconProps) => (
+  <svg {...base(size)} strokeWidth={1.5}>
+    <path d="M13 18.5H3M13 5.5H3M11 12h10" />
+    <circle cx="18" cy="18.5" r="2.5" />
+    <circle cx="18" cy="5.5" r="2.5" />
+    <circle cx="6" cy="12" r="2.5" />
+  </svg>
+);
+
+export const IconPin = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+export const IconClock = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 3" />
+  </svg>
+);
+
+export const IconHistory = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+    <path d="M3 3v5h5" />
+    <path d="M12 7v5l4 2" />
+  </svg>
+);
+
+export const IconSettings = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+export const IconLogOut = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <path d="m16 17 5-5-5-5" />
+    <path d="M21 12H9" />
+  </svg>
+);
+
+export const IconShield = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+export const IconArrowUpRight = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M7 17 17 7M8 7h9v9" />
+  </svg>
+);
+
+export const IconStethoscope =({ size }: IconProps) => (
   <svg {...base(size)}>
     <path d="M11 2v2M5 2v2" />
     <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
