@@ -562,4 +562,5 @@ export const az: Dict = {
   'case.arrivalTitle': 'Klinikadadır',
   'case.arrivalSub': 'Xilasedici heyvanı klinikaya təhvil verdi. Sən də bunun bir hissəsi oldun.',
   'status.inProgress': 'Davam edir',
+  'home.nearbyCases': 'Yaxınlıqdakı hadisələr',
 };

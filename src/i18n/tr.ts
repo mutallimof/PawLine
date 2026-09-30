@@ -562,4 +562,5 @@ export const tr: Dict = {
   'case.arrivalTitle': 'Klinikte',
   'case.arrivalSub': 'Kurtarıcı hayvanı kliniğe teslim etti. Sen de bunun bir parçasıydın.',
   'status.inProgress': 'Devam ediyor',
+  'home.nearbyCases': 'Yakındaki vakalar',
 };

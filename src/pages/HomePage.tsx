@@ -9,15 +9,17 @@ import { useCases } from '../hooks/useRealtime';
 import { fetchVets } from '../lib/api';
 import { isCaseLive, type AnimalType, type CaseStatus, type Vet } from '../lib/types';
 import { CasesMap, LocationSearch } from '../components/maps';
-import { CaseCard, useToast } from '../components/ui';
+import { AlertsBell, CaseCard, useToast } from '../components/ui';
 import { SponsorStrip } from '../components/extras';
 import { distanceKm, geoErrorKind, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import { PawTrailInk } from '../components/Ink';
-import { EmptyPaw, IconStethoscope } from '../components/Icons';
+import { EmptyPaw, IconChevronRight, IconFilter, IconMap, IconStethoscope, PawHeartMark } from '../components/Icons';
 
 type View = 'map' | 'feed';
-type Filter = 'active' | 'all' | 'resolved';
+/** Figma v2 chips: Active (default) · Needs rescue · At the vet · All. */
+type Filter = 'active' | 'open' | 'resolved' | 'all';
+const FILTERS: Filter[] = ['active', 'open', 'resolved', 'all'];
 
 const ANIMAL_TYPES: AnimalType[] = ['dog', 'cat', 'other'];
 const STATUS_TYPES: CaseStatus[] = [
@@ -28,7 +30,8 @@ const RADIUS_OPTIONS = [5, 15, 30, 50] as const;
 export default function HomePage() {
   const { cases, loading, error, reload } = useCases();
   const [vets, setVets] = useState<Vet[]>([]);
-  const [view, setView] = useState<View>('map');
+  // Figma's home is the card list; the map is one tap away (search row).
+  const [view, setView] = useState<View>('feed');
   const [filter, setFilter] = useState<Filter>('active');
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [searchFocus, setSearchFocus] = useState<LatLng | null>(null);
@@ -56,10 +59,11 @@ export default function HomePage() {
 
   const filtered = useMemo(() => {
     let list = cases;
-    // "Done" = resolved OR closed; "Active" = live only (closed used to count
-    // as active here).
-    if (filter === 'resolved') list = cases.filter((c) => !isCaseLive(c.status));
-    else if (filter === 'active') list = cases.filter((c) => isCaseLive(c.status));
+    // "Active" = live only (Needs rescue + In progress); "At the vet" =
+    // resolved only. Closed cases show under "All" (and in history).
+    if (filter === 'active') list = cases.filter((c) => isCaseLive(c.status));
+    else if (filter === 'open') list = cases.filter((c) => c.status === 'open');
+    else if (filter === 'resolved') list = cases.filter((c) => c.status === 'resolved');
 
     // Group G: radius / animal type / (finer) status, on top of the tab above.
     if (radiusKm && userLocation) {
@@ -92,140 +96,153 @@ export default function HomePage() {
   return (
     <div className="page page--flush">
       <div className="home-header">
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div>
-            <h1 className="page-title">{t('app.name')}</h1>
-            <p className="page-subtitle">{t('app.tagline')}</p>
-          </div>
+        <div className="home-top">
+          <Link to="/" className="home-brand">
+            <span className="home-brand__tile" aria-hidden="true"><PawHeartMark /></span>
+            <span className="home-brand__name">{t('app.name')}</span>
+          </Link>
+          <AlertsBell />
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
-          {/* Map/feed toggle only exists on phones — desktop shows both. */}
-          <div className="segmented home-view-toggle" style={{ flex: 1, minWidth: 120 }}>
+        <p className="home-sub">{t('app.tagline')}</p>
+
+        <div className="v2-chips home-chips" role="group" aria-label={t('home.filterStatus')}>
+          {FILTERS.map((f) => (
             <button
-              className={`segmented__option${view === 'map' ? ' active' : ''}`}
-              onClick={() => setView('map')}
+              key={f}
+              type="button"
+              className={`v2-chip${filter === f ? ' active' : ''}`}
+              aria-pressed={filter === f}
+              onClick={() => setFilter(f)}
             >
-              {t('home.map')}
+              {f === 'active' ? t('home.filter.active')
+                : f === 'open' ? t('status.open')
+                : f === 'resolved' ? t('status.resolved')
+                : t('home.filter.all')}
             </button>
-            <button
-              className={`segmented__option${view === 'feed' ? ' active' : ''}`}
-              onClick={() => setView('feed')}
-            >
-              {t('home.feed')}
-            </button>
-          </div>
-          <div className="segmented" style={{ flex: 1.4, minWidth: 160 }}>
-            {(['active', 'all', 'resolved'] as Filter[]).map((f) => (
-              <button
-                key={f}
-                className={`segmented__option${filter === f ? ' active' : ''}`}
-                onClick={() => setFilter(f)}
-              >
-                {t(`home.filter.${f}` as const)}
-              </button>
-            ))}
-          </div>
-          {/* Group G: radius / animal type / status — additional to the tabs
-              above, so "Filters" opens a panel instead of crowding the bar. */}
-          <button
-            type="button"
-            className={`chip${showFilters || activeFilterCount > 0 ? ' active' : ''}`}
-            style={{ flexShrink: 0 }}
-            onClick={() => setShowFilters((v) => !v)}
-          >
-            ⚙️ {t('home.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
-          </button>
+          ))}
         </div>
-
-        {showFilters && (
-          <div className="card" style={{ padding: 12, marginTop: 10 }}>
-            <div className="field__label" style={{ marginBottom: 6 }}>{t('home.filterRadius')}</div>
-            <div className="segmented" style={{ marginBottom: 12, flexWrap: 'wrap' }}>
-              <button
-                className={`segmented__option${radiusKm === null ? ' active' : ''}`}
-                onClick={() => setRadiusKm(null)}
-              >
-                {t('home.filterRadiusAny')}
-              </button>
-              {RADIUS_OPTIONS.map((km) => (
-                <button
-                  key={km}
-                  className={`segmented__option${radiusKm === km ? ' active' : ''}`}
-                  disabled={!userLocation}
-                  onClick={() => setRadiusKm(km)}
-                >
-                  {km} km
-                </button>
-              ))}
-            </div>
-            {!userLocation && (
-              <p className="page-subtitle" style={{ marginTop: -8, marginBottom: 12 }}>
-                {t('home.filterRadiusNoLocation')}
-              </p>
-            )}
-
-            {/* chip-row, not the .segmented pill track. .segmented__option is
-                `flex: 1` (so flex-basis 0) plus `white-space: nowrap; overflow:
-                hidden; text-overflow: ellipsis` — with more than about three
-                options they never wrap, they just compress until every label
-                ellipsises away to nothing. Chips size to their content and
-                genuinely wrap, which is why ReportPage already uses them for
-                its multi-option pickers. */}
-            <div className="field__label" style={{ marginBottom: 6 }}>{t('home.filterAnimal')}</div>
-            <div className="chip-row" style={{ marginBottom: 12 }}>
-              {ANIMAL_TYPES.map((a) => (
-                <button
-                  key={a}
-                  type="button"
-                  className={`chip${animalFilter.includes(a) ? ' active' : ''}`}
-                  onClick={() => setAnimalFilter((prev) => toggleIn(prev, a))}
-                >
-                  {t(`animal.${a}` as const)}
-                </button>
-              ))}
-            </div>
-
-            <div className="field__label" style={{ marginBottom: 6 }}>{t('home.filterStatus')}</div>
-            <div className="chip-row" style={{ marginBottom: activeFilterCount > 0 ? 12 : 0 }}>
-              {STATUS_TYPES.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`chip${statusFilter.includes(s) ? ' active' : ''}`}
-                  onClick={() => setStatusFilter((prev) => toggleIn(prev, s))}
-                >
-                  {t(`status.${s}` as const)}
-                </button>
-              ))}
-            </div>
-
-            {activeFilterCount > 0 && (
-              <button
-                type="button"
-                className="btn btn--ghost btn--small"
-                onClick={() => {
-                  setRadiusKm(null);
-                  setAnimalFilter([]);
-                  setStatusFilter([]);
-                }}
-              >
-                {t('home.filterClear')}
-              </button>
-            )}
-          </div>
-        )}
 
         {nearbyVetCount > 0 && (
           <Link to="/vets" className="home-vet-banner">
             <span className="home-vet-banner__icon" aria-hidden="true">
-              <IconStethoscope size={20} />
+              <IconStethoscope size={19} />
             </span>
             <span className="home-vet-banner__text">
               <span className="home-vet-banner__title">{t('home.vetsNearby', { n: nearbyVetCount })}</span>
               <span className="home-vet-banner__sub">{t('home.vetsNearbyHint')}</span>
             </span>
-            <span className="home-vet-banner__chevron" aria-hidden="true">›</span>
+            <span className="home-vet-banner__chevron" aria-hidden="true"><IconChevronRight /></span>
           </Link>
+        )}
+
+        <div className="home-tools">
+          <div className="home-tools__search">
+            {/* Picking a place focuses the map on it, as before — on phones
+                that means switching to the map view. */}
+            <LocationSearch
+              onSelect={(p) => {
+                setSearchFocus(p);
+                setView('map');
+              }}
+              bias={userLocation}
+            />
+          </div>
+          {/* Map/feed toggle only exists on phones — desktop shows both. */}
+          <button
+            type="button"
+            className="home-tools__btn home-view-toggle"
+            aria-pressed={view === 'map'}
+            aria-label={t('home.map')}
+            onClick={() => setView((v) => (v === 'map' ? 'feed' : 'map'))}
+          >
+            <IconMap />
+          </button>
+          {/* Group G: radius / animal type / status, behind one button. */}
+          <button
+            type="button"
+            className={`home-tools__btn home-tools__filter${showFilters || activeFilterCount > 0 ? ' active' : ''}`}
+            aria-expanded={showFilters}
+            onClick={() => setShowFilters((v) => !v)}
+          >
+            <IconFilter />
+            {t('home.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+          </button>
+        </div>
+
+        {showFilters && (
+          <div className="v2-group home-filters">
+            <div className="v2-group__body">
+              <div className="v2-label" style={{ marginTop: 0 }}>{t('home.filterRadius')}</div>
+              <div className="v2-chips v2-chips--wrap">
+                <button
+                  type="button"
+                  className={`v2-chip v2-chip--light${radiusKm === null ? ' active' : ''}`}
+                  aria-pressed={radiusKm === null}
+                  onClick={() => setRadiusKm(null)}
+                >
+                  {t('home.filterRadiusAny')}
+                </button>
+                {RADIUS_OPTIONS.map((km) => (
+                  <button
+                    key={km}
+                    type="button"
+                    className={`v2-chip v2-chip--light${radiusKm === km ? ' active' : ''}`}
+                    aria-pressed={radiusKm === km}
+                    disabled={!userLocation}
+                    onClick={() => setRadiusKm(km)}
+                  >
+                    {km} km
+                  </button>
+                ))}
+              </div>
+              {!userLocation && <p className="home-filters__note">{t('home.filterRadiusNoLocation')}</p>}
+
+              <div className="v2-label">{t('home.filterAnimal')}</div>
+              <div className="v2-chips v2-chips--wrap">
+                {ANIMAL_TYPES.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    className={`v2-chip v2-chip--light${animalFilter.includes(a) ? ' active' : ''}`}
+                    aria-pressed={animalFilter.includes(a)}
+                    onClick={() => setAnimalFilter((prev) => toggleIn(prev, a))}
+                  >
+                    {t(`animal.${a}` as const)}
+                  </button>
+                ))}
+              </div>
+
+              <div className="v2-label">{t('home.filterStatus')}</div>
+              <div className="v2-chips v2-chips--wrap">
+                {STATUS_TYPES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`v2-chip v2-chip--light${statusFilter.includes(s) ? ' active' : ''}`}
+                    aria-pressed={statusFilter.includes(s)}
+                    onClick={() => setStatusFilter((prev) => toggleIn(prev, s))}
+                  >
+                    {t(`status.${s}` as const)}
+                  </button>
+                ))}
+              </div>
+
+              {activeFilterCount > 0 && (
+                <button
+                  type="button"
+                  className="v2-link"
+                  style={{ marginTop: 12 }}
+                  onClick={() => {
+                    setRadiusKm(null);
+                    setAnimalFilter([]);
+                    setStatusFilter([]);
+                  }}
+                >
+                  {t('home.filterClear')}
+                </button>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
@@ -233,6 +250,7 @@ export default function HomePage() {
           phones, the desktop split view shows both side by side. */}
       <div className={`home-layout home-layout--${view}`}>
         <div className="home-feed">
+          <h2 className="home-h1">{t('home.nearbyCases')}</h2>
           {loading && (
             <div aria-hidden="true">
               <div style={{ padding: '18px 0 22px' }}>
@@ -265,9 +283,6 @@ export default function HomePage() {
         </div>
 
         <div className="home-map">
-          <div className="home-map__search">
-            <LocationSearch onSelect={setSearchFocus} bias={userLocation} />
-          </div>
           <CasesMap
             cases={filtered}
             vets={vets}
