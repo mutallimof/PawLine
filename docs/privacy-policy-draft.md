@@ -127,7 +127,7 @@ Since 036, `cases` has a **column-level** read grant to `anon, authenticated`: `
 
 Effective date: 1 October 2026
 
-This Privacy Policy describes how personal data is processed in connection with the Stray’s Call web application and its related services.
+This Privacy Policy describes how personal data is processed in connection with the Stray's Call web application and its related services.
 
 ### C1. Data Controller
 
@@ -135,7 +135,20 @@ The data controller responsible for the processing of personal data described in
 
 ### C2. Personal Data We Process and Purposes
 
-We process the following categories of personal data: (a) account data: email address and password; first name, last name and, optionally, telephone number, so that clinics and rescuers can identify the persons with whom they are dealing; a display name derived from the first and last name; and the selected language. Where you sign in with Google, we receive your name, email address and profile picture from Google; (b) alert settings: where you elect to receive alerts about nearby cases, the home area and radius you specify; (c) report data: photographs, description, the animal's condition and urgency, the exact location marked on the map, an optional landmark, and a street address derived from that location; for guest reports, the name optionally provided; (d) rescue data: your role in a case and, solely while you are transporting an animal to a clinic, the location of your device at intervals of approximately 45 seconds; (e) the content of messages you send in case chats and in direct messages with clinics; (f) ratings, blocks and content reports you submit; (g) copies of notifications sent to you and, where you enable push notifications, a technical address of your device; (h) consent records: the date and version of your confirmation that you are at least 18 years of age and of your acceptance of the Terms of Service and this Policy; (i) for clinics, in addition: clinic details, the private contact details of a manager, and verification documents; (j) technical data: a session identifier for your device (including for guests), data processed for automated bot detection (Cloudflare Turnstile), and error reports (Sentry). Personal data is processed solely for the purposes of operating the rescue service: publishing reports, alerting nearby helpers, coordinating rescues and clinics, maintaining the security of the platform (bot detection, spam limits and moderation), and providing your account.
+We process the following categories of personal data:
+
+- Account data: email address and password; first name, last name and, optionally, telephone number, so that clinics and rescuers can identify the persons with whom they are dealing; a display name derived from the first and last name; and the selected language. Where you sign in with Google, we receive your name, email address and profile picture from Google.
+- Alert settings: where you elect to receive alerts about nearby cases, the home area and radius you specify.
+- Report data: photographs, description, the animal's condition and urgency, the exact location marked on the map, an optional landmark, and a street address derived from that location; for guest reports, the name optionally provided.
+- Rescue data: your role in a case and, solely while you are transporting an animal to a clinic, the location of your device at intervals of approximately 45 seconds.
+- The content of messages you send in case chats and in direct messages with clinics.
+- Ratings, blocks and content reports you submit.
+- Copies of notifications sent to you and, where you enable push notifications, a technical address of your device.
+- Consent records: the date and version of your confirmation that you are at least 18 years of age and of your acceptance of the Terms of Service and this Policy.
+- For clinics, in addition: clinic details, the private contact details of a manager, and verification documents.
+- Technical data: a session identifier for your device (including for guests), data processed for automated bot detection (Cloudflare Turnstile), and error reports (Sentry).
+
+Personal data is processed solely for the purposes of operating the rescue service: publishing reports, alerting nearby helpers, coordinating rescues and clinics, maintaining the security of the platform (bot detection, spam limits and moderation), and providing your account.
 
 ### C3. Legal Basis for Processing
 

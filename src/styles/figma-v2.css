@@ -1209,6 +1209,8 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .doc-page .doc-section li { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--v2-ink-2); }
 .doc-page .doc-section ul { margin: 0; padding-left: 18px; }
 .doc-page .doc-section li + li { margin-top: 4px; }
+.doc-page .doc-section p + ul,
+.doc-page .doc-section ul + p { margin-top: 6px; }
 .doc-page .platform-stats { margin: 0; }
 .doc-page .card { background: var(--v2-fill); border: none; box-shadow: none; border-radius: 16px; transform: none; }
 .platform-stats__value { color: var(--brand-text); font-weight: 500; }
