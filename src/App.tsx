@@ -7,7 +7,7 @@
  * notifications (Group D — desktop uses SideNav's own Alerts link instead).
  */
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useNotifications } from './hooks/useRealtime';
 import { BottomNav, SideNav, ToastProvider, UnreadAlertsContext, useToast } from './components/ui';
@@ -16,6 +16,8 @@ import Onboarding, { shouldShowOnboarding } from './components/Onboarding';
 import { InkDefs } from './components/Ink';
 import { PawHeartMark } from './components/Icons';
 import { flushQueue } from './lib/offlineQueue';
+import { needsConsent } from './lib/consent';
+import { ConsentGate } from './components/legal';
 
 import HomePage from './pages/HomePage';
 import ReportPage from './pages/ReportPage';
@@ -44,7 +46,14 @@ import {
 } from './pages/vetAndUserPages';
 
 function Shell() {
-  const { user, loading } = useAuth();
+  const { user, loading, isGuest, profile } = useAuth();
+  const location = useLocation();
+  // 034: a signed-in account without (current) 18+ / Terms acceptance can't
+  // use the app until it accepts — except to read the two documents it's
+  // accepting. Guests have no profile and aren't gated (see report notes).
+  const showConsent =
+    !!user && !isGuest && !!profile && needsConsent(profile) &&
+    !['/terms', '/privacy'].includes(location.pathname);
   const { unread } = useNotifications(user?.id);
   const [online, setOnline] = useState(navigator.onLine);
   const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
@@ -137,6 +146,7 @@ function Shell() {
         </ErrorBoundary>
         {/* Figma v2: every screen keeps the tab bar — chat composers sit above it. */}
         <BottomNav />
+        {showConsent && <ConsentGate />}
       </div>
     </div>
     </UnreadAlertsContext.Provider>

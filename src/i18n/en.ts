@@ -593,4 +593,11 @@ export const en = {
   'vets.rating': 'Rating',
   'vets.call': 'Call clinic',
   'error.banned': 'Your account is suspended, so you can’t do this. If you think this is a mistake, contact us.',
+  'consent.age': 'I am 18 or older',
+  'consent.agreePrefix': 'I agree to the ',
+  'consent.agreeMiddle': ' and the ',
+  'consent.agreeSuffix': '.',
+  'consent.title': 'Before you continue',
+  'consent.intro': 'Stray’s Call is for people aged 18 and over. Please confirm both to keep using the app.',
+  'consent.continue': 'Continue',
 };

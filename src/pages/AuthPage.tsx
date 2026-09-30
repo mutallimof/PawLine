@@ -6,6 +6,9 @@ import { LanguageSwitcher, PasswordField, useToast } from '../components/ui';
 import { IconGoogle, PawHeartMark } from '../components/Icons';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
+import { ConsentChecks } from '../components/legal';
+import { recordTermsAcceptance } from '../lib/api';
+import { TERMS_VERSION } from '../lib/consent';
 
 // Set right when a vet signs up, consumed on whichever sign-in actually
 // starts their session next — immediately below if email confirmation is
@@ -24,6 +27,10 @@ export default function AuthPage() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [isVet, setIsVet] = useState(false);
+  // 034: both required to create an account (sign-up mode only).
+  const [ageOk, setAgeOk] = useState(false);
+  const [termsOk, setTermsOk] = useState(false);
+  const consentOk = ageOk && termsOk;
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -66,6 +73,7 @@ export default function AuthPage() {
           navigate('/');
         }
       } else {
+        if (!consentOk) return;
         if (isVet) localStorage.setItem(VET_SETUP_PENDING_KEY, email.trim().toLowerCase());
         const { needsEmailConfirm } = await signUp(
           email.trim(),
@@ -76,8 +84,13 @@ export default function AuthPage() {
           isVet ? 'vet' : 'user'
         );
         if (needsEmailConfirm) {
+          // No session yet: the consent travels in the sign-up metadata and
+          // is recorded on first sign-in (ConsentGate).
           setInfo(t('auth.checkEmail'));
         } else {
+          // Session exists — record the acceptance server-side now. If this
+          // fails, ConsentGate asks again before the app is usable.
+          await recordTermsAcceptance(TERMS_VERSION).catch(() => {});
           // Session created immediately (email confirmation disabled) —
           // send new vets straight to clinic setup.
           if (isVet) localStorage.removeItem(VET_SETUP_PENDING_KEY);
@@ -212,10 +225,14 @@ export default function AuthPage() {
           </button>
         )}
 
+        {mode === 'signup' && (
+          <ConsentChecks age={ageOk} terms={termsOk} onAge={setAgeOk} onTerms={setTermsOk} />
+        )}
+
         <button
           className="btn btn--primary auth-card__cta"
           onClick={() => void submit()}
-          disabled={busy || !email || !password}
+          disabled={busy || !email || !password || (mode === 'signup' && !consentOk)}
         >
           {mode === 'signin' ? t('auth.signIn') : t('auth.signUp')}
         </button>
@@ -234,15 +251,6 @@ export default function AuthPage() {
           {t('auth.continueWithGoogle')}
         </button>
 
-        {mode === 'signup' && (
-          <p className="auth-card__terms">
-            {t('auth.termsPrefix')}
-            <Link to="/terms">{t('legal.terms')}</Link>
-            {t('auth.termsMiddle')}
-            <Link to="/privacy">{t('legal.privacy')}</Link>
-            {t('auth.termsSuffix')}
-          </p>
-        )}
 
         <button
           type="button"

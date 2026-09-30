@@ -1260,3 +1260,23 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .admin .impact-stat__label { color: var(--v2-ink-2); }
 .admin .list-row { background: var(--v2-fill); border-radius: 16px; box-shadow: none; }
 .admin .section-label { color: var(--v2-ink-2); }
+
+/* ==== Consent (034) ======================================================== */
+.consent-checks { display: grid; gap: 10px; margin: 14px 0 16px; text-align: left; }
+.consent-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--v2-ink);
+  cursor: pointer;
+}
+.consent-check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--brand-fill);
+}
+.consent-check a { color: var(--brand-text); font-weight: 500; }

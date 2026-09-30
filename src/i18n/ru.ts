@@ -595,4 +595,11 @@ export const ru: Dict = {
   'vets.rating': 'Рейтинг',
   'vets.call': 'Позвонить в клинику',
   'error.banned': 'Ваш аккаунт заблокирован, поэтому это действие недоступно. Если вы считаете это ошибкой, свяжитесь с нами.',
+  'consent.age': 'Мне 18 лет или больше',
+  'consent.agreePrefix': 'Я принимаю документы: ',
+  'consent.agreeMiddle': ' и ',
+  'consent.agreeSuffix': '.',
+  'consent.title': 'Прежде чем продолжить',
+  'consent.intro': 'Stray’s Call — для людей от 18 лет. Подтвердите оба пункта, чтобы продолжить пользоваться приложением.',
+  'consent.continue': 'Продолжить',
 };

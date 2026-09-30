@@ -595,4 +595,11 @@ export const az: Dict = {
   'vets.rating': 'Reytinq',
   'vets.call': 'Klinikaya zəng et',
   'error.banned': 'Hesabınız dayandırılıb, ona görə bunu edə bilməzsiniz. Səhv olduğunu düşünürsünüzsə, bizimlə əlaqə saxlayın.',
+  'consent.age': '18 yaşım tamam olub',
+  'consent.agreePrefix': '',
+  'consent.agreeMiddle': ' və ',
+  'consent.agreeSuffix': ' ilə razıyam.',
+  'consent.title': 'Davam etməzdən əvvəl',
+  'consent.intro': 'Stray’s Call 18 yaş və yuxarı şəxslər üçündür. Tətbiqdən istifadəyə davam etmək üçün hər ikisini təsdiqləyin.',
+  'consent.continue': 'Davam et',
 };

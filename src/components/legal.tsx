@@ -6,10 +6,13 @@
  *
  * Also exports the app-wide ErrorBoundary and NotFound page.
  */
-import { Component, type ReactNode } from 'react';
+import { Component, useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { getLocale, t, type LocaleCode } from '../i18n';
 import { PlatformStats, ScreenHeader } from './ui';
+import { useAuth } from '../context/AuthContext';
+import { recordTermsAcceptance } from '../lib/api';
+import { TERMS_VERSION } from '../lib/consent';
 import { captureBoundaryError } from '../lib/monitoring';
 
 type Section = [heading: string, body: string | string[]];
@@ -59,7 +62,7 @@ const TERMS: LocalizedDoc = {
       ['What Stray’s Call is — and isn’t',
         'Stray’s Call is a coordination platform only. It is NOT a rescue service, a veterinary service, an emergency responder, or an animal-control authority. We connect people who want to help; we don’t employ rescuers or vets, and we can’t guarantee that any report gets a response.'],
       ['Who can use it',
-        'You must be old enough to enter a binding agreement where you live. Report responsibly, act lawfully, and treat animals and people humanely.'],
+        'You must be 18 or older to use Stray’s Call. Report responsibly, act lawfully, and treat animals and people humanely.'],
       ['Your responsibilities',
         [
           'Report honestly — no fake, duplicate, or malicious reports.',
@@ -90,7 +93,7 @@ const TERMS: LocalizedDoc = {
       ['Stray’s Call nədir — və nə deyil',
         'Stray’s Call yalnız əlaqələndirmə platformasıdır. O, xilasetmə, baytarlıq, təcili yardım xidməti və ya heyvanlara nəzarət orqanı DEYİL. Biz kömək etmək istəyən insanları birləşdiririk; xilasedici və ya baytar işə götürmürük və hər bildirişə cavab veriləcəyinə zəmanət verə bilmərik.'],
       ['Kim istifadə edə bilər',
-        'Yaşadığınız yerdə bağlayıcı razılaşma bağlamaq üçün kifayət qədər yaşlı olmalısınız. Məsuliyyətlə bildirin, qanuna uyğun hərəkət edin.'],
+        'Stray’s Call-dan istifadə etmək üçün 18 yaş və ya daha böyük olmalısınız. Məsuliyyətlə bildirin, qanuna uyğun hərəkət edin.'],
       ['Sizin məsuliyyətiniz',
         [
           'Dürüst bildirin — saxta, təkrar və ya zərərli bildirişlər yoxdur.',
@@ -121,7 +124,7 @@ const TERMS: LocalizedDoc = {
       ['Stray’s Call nedir — ve ne değildir',
         'Stray’s Call yalnızca bir koordinasyon platformudur. Bir kurtarma, veterinerlik, acil müdahale hizmeti veya hayvan kontrol otoritesi DEĞİLDİR. Yardım etmek isteyen insanları bağlarız; kurtarıcı veya veteriner çalıştırmayız ve her bildirimin yanıtlanacağını garanti edemeyiz.'],
       ['Kimler kullanabilir',
-        'Yaşadığınız yerde bağlayıcı bir anlaşma yapacak yaşta olmalısınız. Sorumlu bildirin, yasalara uygun davranın.'],
+        'Stray’s Call’u kullanmak için 18 yaşında veya daha büyük olmalısınız. Sorumlu bildirin, yasalara uygun davranın.'],
       ['Sorumluluklarınız',
         [
           'Dürüst bildirin — sahte, mükerrer veya kötü niyetli bildirim yok.',
@@ -322,19 +325,19 @@ const ABOUT: LocalizedDoc = {
 const CONTACT: LocalizedDoc = {
   en: { title: 'Contact Us', sections: [
     ['Get in touch', 'For questions, problems, partnership requests, or to report something urgent that the in-app tools can’t handle, email us:'],
-    ['Email', 'hello@pawline.app  (replace with your real address before launch)'],
+    ['Email', 'fikretmutallimov@gmail.com'],
     ['Partner organizations & clinics', 'If you run an animal-welfare organization or a vet clinic and want to join Stray’s Call, we’d love to hear from you — email the address above with a short introduction.'],
     ['Urgent safety issues', 'Stray’s Call is not an emergency service. For an animal in immediate danger, also contact a local rescue organization or the relevant authorities directly.'],
   ]},
   az: { title: 'Bizimlə əlaqə', sections: [
     ['Əlaqə saxlayın', 'Suallar, problemlər, tərəfdaşlıq müraciətləri və ya təcili bir şey üçün bizə e-poçt göndərin:'],
-    ['E-poçt', 'hello@pawline.app  (buraxılışdan əvvəl real ünvanla əvəz edin)'],
+    ['E-poçt', 'fikretmutallimov@gmail.com'],
     ['Tərəfdaş təşkilatlar və klinikalar', 'Heyvan rifahı təşkilatı və ya klinika işlədirsinizsə və qoşulmaq istəyirsinizsə, yuxarıdakı ünvana yazın.'],
     ['Təcili təhlükəsizlik məsələləri', 'Stray’s Call təcili yardım xidməti deyil. Təhlükədə olan heyvan üçün yerli təşkilatla və ya orqanlarla birbaşa əlaqə saxlayın.'],
   ]},
   tr: { title: 'Bize Ulaşın', sections: [
     ['İletişime geçin', 'Sorular, sorunlar, ortaklık talepleri veya acil bir şey için bize e-posta gönderin:'],
-    ['E-posta', 'hello@pawline.app  (lansmandan önce gerçek adresle değiştirin)'],
+    ['E-posta', 'fikretmutallimov@gmail.com'],
     ['Ortak kuruluşlar ve klinikler', 'Bir hayvan refahı kuruluşu veya klinik işletiyorsanız ve katılmak istiyorsanız, yukarıdaki adrese yazın.'],
     ['Acil güvenlik sorunları', 'Stray’s Call bir acil durum hizmeti değildir. Tehlikedeki bir hayvan için yerel bir kuruluşla veya yetkililerle doğrudan iletişime geçin.'],
   ]},
@@ -448,6 +451,103 @@ export const ConductPage = () => <DocView doc={CONDUCT} />;
 export const AboutPage = () => <DocView doc={ABOUT} footer={<PlatformStats />} />;
 export const ContactPage = () => <DocView doc={CONTACT} />;
 export const FaqPage = () => <DocView doc={FAQ} />;
+
+// ===========================================================================
+// Age + Terms consent (migration 034)
+// ---------------------------------------------------------------------------
+// The two required boxes, shared by the sign-up form and ConsentGate.
+// ===========================================================================
+export function ConsentChecks({
+  age,
+  terms,
+  onAge,
+  onTerms,
+}: {
+  age: boolean;
+  terms: boolean;
+  onAge: (v: boolean) => void;
+  onTerms: (v: boolean) => void;
+}) {
+  return (
+    <div className="consent-checks">
+      <label className="consent-check">
+        <input type="checkbox" checked={age} onChange={(e) => onAge(e.target.checked)} required />
+        <span>{t('consent.age')}</span>
+      </label>
+      <label className="consent-check">
+        <input type="checkbox" checked={terms} onChange={(e) => onTerms(e.target.checked)} required />
+        <span>
+          {t('consent.agreePrefix')}
+          <Link to="/terms" target="_blank" rel="noopener">{t('legal.terms')}</Link>
+          {t('consent.agreeMiddle')}
+          <Link to="/privacy" target="_blank" rel="noopener">{t('legal.privacy')}</Link>
+          {t('consent.agreeSuffix')}
+        </span>
+      </label>
+    </div>
+  );
+}
+
+/**
+ * Blocking consent screen for signed-in accounts whose profile has no (or an
+ * outdated) terms acceptance — Google sign-ups, accounts created before 034,
+ * and anyone after TERMS_VERSION is bumped. Same modal look as SafetyAck,
+ * but with no way past it except accepting or signing out.
+ *
+ * An email sign-up already ticked both boxes on the form; when email
+ * confirmation meant there was no session to record it then, the account
+ * carries terms_version in its sign-up metadata and it's recorded here
+ * without asking twice.
+ */
+export function ConsentGate() {
+  const { user, refreshProfile, signOut } = useAuth();
+  const [age, setAge] = useState(false);
+  const [terms, setTerms] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const signedUpWithConsent = user?.user_metadata?.terms_version === TERMS_VERSION;
+  const [autoTried, setAutoTried] = useState(false);
+
+  const accept = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await recordTermsAcceptance(TERMS_VERSION);
+      await refreshProfile();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('common.error'));
+      setBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (signedUpWithConsent && !autoTried) {
+      setAutoTried(true);
+      void accept();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedUpWithConsent, autoTried]);
+
+  // Recording the sign-up form's consent — nothing to ask.
+  if (signedUpWithConsent && (busy || !error)) return null;
+
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={t('consent.title')}>
+      <div className="modal-sheet">
+        <h2 className="modal-sheet__title">{t('consent.title')}</h2>
+        <p className="modal-sheet__intro">{t('consent.intro')}</p>
+        <ConsentChecks age={age} terms={terms} onAge={setAge} onTerms={setTerms} />
+        {error && <div className="banner banner--warn" role="alert">{error}</div>}
+        <button className="btn btn--primary" disabled={busy || !age || !terms} onClick={() => void accept()}>
+          {t('consent.continue')}
+        </button>
+        <button className="link-btn" onClick={() => void signOut()} style={{ marginTop: 8, width: '100%' }}>
+          {t('auth.signOut')}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ===========================================================================
 // 404

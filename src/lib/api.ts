@@ -361,6 +361,10 @@ async function rpc(fn: string, args: Record<string, unknown>): Promise<void> {
 
 export const acceptCase = (caseId: string) => rpc('accept_case', { p_case: caseId });
 
+/** 18+ and Terms/Privacy acceptance, stored on the caller's profile (034). */
+export const recordTermsAcceptance = (version: string) =>
+  rpc('record_terms_acceptance', { p_version: version });
+
 export const dropCase = (caseId: string) => rpc('drop_case', { p_case: caseId });
 
 export const selectVet = (caseId: string, vetId: string) =>

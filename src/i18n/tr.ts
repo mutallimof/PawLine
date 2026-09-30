@@ -595,4 +595,11 @@ export const tr: Dict = {
   'vets.rating': 'Puan',
   'vets.call': 'Kliniği ara',
   'error.banned': 'Hesabınız askıya alındığı için bunu yapamazsınız. Bir hata olduğunu düşünüyorsanız bizimle iletişime geçin.',
+  'consent.age': '18 yaşında veya daha büyüğüm',
+  'consent.agreePrefix': '',
+  'consent.agreeMiddle': ' ve ',
+  'consent.agreeSuffix': '’nı kabul ediyorum.',
+  'consent.title': 'Devam etmeden önce',
+  'consent.intro': 'Stray’s Call 18 yaş ve üzeri kişiler içindir. Uygulamayı kullanmaya devam etmek için ikisini de onaylayın.',
+  'consent.continue': 'Devam et',
 };

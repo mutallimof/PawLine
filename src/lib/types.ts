@@ -62,6 +62,9 @@ export interface Profile {
   first_name?: string | null;
   last_name?: string | null;
   phone?: string | null;
+  /** Migration 034 — own profile only; undefined until 034 is applied. */
+  terms_accepted_at?: string | null;
+  terms_version?: string | null;
   created_at: string;
 }
 

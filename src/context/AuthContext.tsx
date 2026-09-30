@@ -45,6 +45,7 @@ import { becomeVet, fetchMyProfile } from '../lib/api';
 import { captureError } from '../lib/monitoring';
 import type { Profile } from '../lib/types';
 import { getLocale, resolveLocale, setLocale } from '../i18n';
+import { TERMS_VERSION } from '../lib/consent';
 
 interface AuthState {
   user: User | null;
@@ -249,6 +250,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             phone: phone || undefined,
             role,
             locale: getLocale(),
+            // The sign-up form can't be submitted without both consent boxes.
+            // Kept with the account so it can be recorded on first sign-in
+            // when email confirmation means there's no session yet.
+            terms_version: TERMS_VERSION,
           },
         },
       });
