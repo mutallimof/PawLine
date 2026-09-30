@@ -116,6 +116,7 @@ export const en = {
   'caseChat.signIn': 'Sign in to join the conversation.',
   'caseChat.empty': 'No messages yet. Say hello and coordinate the rescue.',
   'caseChat.pinned': 'Pinned by the clinic',
+  'caseChat.deletedAccount': 'Deleted account',
   'caseChat.pin': 'Pin to top',
   'caseChat.unpin': 'Unpin',
   'caseChat.actions': 'Message actions',

@@ -242,10 +242,11 @@ export interface DirectMessage {
 export interface CaseMessage {
   id: number;
   case_id: string;
-  sender_id: string;
+  /** null once the author deleted their account (migration 037). */
+  sender_id: string | null;
   body: string;
   created_at: string;
-  sender?: Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'role'>;
+  sender?: Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'role'> | null;
 }
 
 /** Conversation summary for the Messages inbox. */

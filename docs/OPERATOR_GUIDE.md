@@ -93,6 +93,12 @@ supabase functions deploy send-push --no-verify-jwt
    **Supabase Edge Function** → `send-push` · Add HTTP header:
    name `x-push-secret`, value = the PUSH_WEBHOOK_SECRET you generated.
 
+6. Deploy the account-deletion function (Settings → Delete account calls it;
+   without it, deleting an account fails). JWT verification stays ON here:
+```bash
+supabase functions deploy delete-account
+```
+
 ### A3. Google Maps (~15 min)
 
 Follow the README section **"Google Maps setup"** exactly — it walks
@@ -437,6 +443,16 @@ inviting partner organizations:
 
 **Quarterly:** rotate what B2 marks as hygiene; re-run the A6 smoke test
 after any big dependency update.
+
+**Orphaned vet documents** (only if the delete-account function logged
+`storage cleanup failed`): SQL Editor, list document folders whose owner no
+longer exists, then delete those files in Storage → `vet-documents`:
+```sql
+select name from storage.objects o
+where bucket_id = 'vet-documents'
+  and not exists (select 1 from public.profiles p
+                  where p.id::text = (storage.foldername(o.name))[1]);
+```
 
 ### B11. Fix-it-yourself vs. call a professional
 

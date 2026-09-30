@@ -118,6 +118,7 @@ export const ru: Dict = {
   'caseChat.signIn': 'Войдите, чтобы присоединиться к беседе.',
   'caseChat.empty': 'Сообщений пока нет. Поздоровайтесь и обсудите спасение.',
   'caseChat.pinned': 'Закреплено клиникой',
+  'caseChat.deletedAccount': 'Удалённый аккаунт',
   'caseChat.pin': 'Закрепить сверху',
   'caseChat.unpin': 'Открепить',
   'caseChat.actions': 'Действия с сообщением',

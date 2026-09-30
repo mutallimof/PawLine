@@ -46,8 +46,9 @@ export default function CaseChatPage() {
   // Reading this chat is deliberately public (case_messages is granted SELECT
   // to anon, and its policy only hides hidden rows), so a guest keeps full
   // read access — same as a signed-out visitor. Only POSTING needs an account:
-  // the insert policy (003) excludes anonymous sessions, and sender_id is a
-  // NOT NULL FK into profiles, which a guest has no row in. So gate the
+  // the insert policy (003) excludes anonymous sessions and requires
+  // sender_id = auth.uid(), an FK into profiles, which a guest has no row in
+  // (sender_id is nullable only so a deleted author's messages survive, 037). So gate the
   // composer and the per-message actions, never the thread itself.
   const isRegistered = !!user && !isGuest;
   const { caseData, reload: reloadCase } = useCase(id);
@@ -241,6 +242,10 @@ export default function CaseChatPage() {
                 <div className="chat-msg__meta">
                   {mine ? (
                     <span className="chat-msg__who">{t('common.you')}</span>
+                  ) : m.sender_id === null ? (
+                    isFirstOfRun && (
+                      <span className="chat-msg__who">{t('caseChat.deletedAccount')}</span>
+                    )
                   ) : (
                     m.sender && isFirstOfRun && (
                       <Link to={`/user/${m.sender.id}`} className="chat-msg__who">
@@ -258,6 +263,7 @@ export default function CaseChatPage() {
                       onClick={() => {
                         const senderName = m.sender?.display_name ?? '';
                         const senderId = m.sender_id;
+                        if (!senderId) return;
                         if (!window.confirm(t('settings.blockConfirm', { name: senderName }))) return;
                         void blockUser(user.id, senderId)
                           .then(() => toast(t('settings.blocked_done')))
@@ -326,7 +332,7 @@ export default function CaseChatPage() {
           targetType="case_message"
           targetCase={reportFor.case_id}
           targetMessage={reportFor.id}
-          targetProfile={reportFor.sender_id}
+          targetProfile={reportFor.sender_id ?? undefined}
           onClose={() => setReportFor(null)}
         />
       )}

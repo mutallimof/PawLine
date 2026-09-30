@@ -1465,16 +1465,20 @@ export async function exportMyData(): Promise<unknown> {
 }
 
 /**
- * Delete the caller's account. Supabase has no client-side user-delete, so
- * this scrubs profile data and signs out; auth-row removal is completed by
- * the operator (documented) or a scheduled cleanup. Cases anonymize via
- * ON DELETE SET NULL / the profile scrub, matching the privacy policy.
+ * Delete the caller's account. Goes through the delete-account Edge
+ * Function, which runs delete_my_account() (009/037: complete, atomic,
+ * incl. the auth row) as the caller and then removes their clinic documents
+ * from Storage, which SQL cannot do. Cases keep their rescue history with
+ * identity detached, per the privacy policy.
  */
 export async function deleteMyAccount(): Promise<void> {
-  // Complete, atomic deletion incl. the auth row (migration 009). Cases keep
-  // their rescue history with identity detached, per the privacy policy.
-  const { error } = await supabase.rpc('delete_my_account');
-  if (error) throw new Error(error.message);
+  const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+  if (error) {
+    // Non-2xx: the function's { error } body is more useful than the
+    // generic "Edge Function returned a non-2xx status code".
+    const body = await (error.context as Response | undefined)?.json?.().catch(() => null);
+    throw new Error(body?.error ?? error.message);
+  }
   await supabase.auth.signOut();
 }
 

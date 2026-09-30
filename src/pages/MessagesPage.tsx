@@ -110,7 +110,7 @@ export default function MessagesPage() {
               </span>
               <span className="v2-row__sub msg-row__preview">
                 {item.entry.lastMessage &&
-                  `${item.entry.lastMessage.sender_id === user.id ? `${t('common.you')}: ` : item.entry.lastMessage.sender ? `${item.entry.lastMessage.sender.display_name}: ` : ''}${item.entry.lastMessage.body}`}
+                  `${item.entry.lastMessage.sender_id === user.id ? `${t('common.you')}: ` : item.entry.lastMessage.sender ? `${item.entry.lastMessage.sender.display_name}: ` : item.entry.lastMessage.sender_id === null ? `${t('caseChat.deletedAccount')}: ` : ''}${item.entry.lastMessage.body}`}
               </span>
             </span>
             <span className="msg-row__side">

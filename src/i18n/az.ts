@@ -118,6 +118,7 @@ export const az: Dict = {
   'caseChat.signIn': 'Söhbətə qoşulmaq üçün daxil olun.',
   'caseChat.empty': 'Hələ mesaj yoxdur. Salam deyin və xilasetməni əlaqələndirin.',
   'caseChat.pinned': 'Klinika tərəfindən sabitləndi',
+  'caseChat.deletedAccount': 'Silinmiş hesab',
   'caseChat.pin': 'Yuxarıya sabitlə',
   'caseChat.unpin': 'Sabitləməni ləğv et',
   'caseChat.actions': 'Mesaj əməliyyatları',
