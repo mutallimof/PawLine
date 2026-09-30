@@ -16,6 +16,16 @@
 --          (notifications.conversation_id has no FK, so it would dangle).
 --        - Case chat: if one of the user's messages is a case's pinned
 --          message, the case is unpinned first (it may hold bank details).
+--        - Cases: the old combined update nulled rescuer_id on every case
+--          the user CREATED, un-assigning someone else's rescue. Now each
+--          column is cleared only where it is the user's. Active rescues
+--          (accepted / vet_selected / vet_confirmed / en_route) are handed
+--          back as drop_case (036) does: status open, vet and accepted_at
+--          cleared, a case_dropped event. Finished ones just lose
+--          rescuer_id. The user's case_rescuer_locations rows (036) are
+--          deleted first.
+--
+-- Requires 036 (case_rescuer_locations), which is applied.
 --   3. Guard: aborts if any foreign key into public.profiles or auth.users
 --      (outside the auth schema) would block the delete — ON DELETE NO
 --      ACTION / RESTRICT, or SET NULL on a NOT NULL column. Reads the live
@@ -147,11 +157,33 @@ begin
   -- If the user is a vet, remove the clinic (it should not linger verified).
   delete from public.vets where id = uid;
 
+  -- The rescuer's live location (036) goes before anything else on cases.
+  delete from public.case_rescuer_locations
+    where case_id in (select id from public.cases where rescuer_id = uid);
+
   -- Cases: reporter/rescuer set null keeps the rescue record without the
   -- person (matches the privacy policy). vet_id already handled above.
+  -- Each column is cleared only where it is the user's own.
   update public.cases set reporter_id = null where reporter_id = uid;
-  update public.cases set rescuer_id = null, creator_uid = null
-    where rescuer_id = uid or creator_uid = uid;
+  update public.cases set creator_uid = null where creator_uid = uid;
+
+  -- Active rescues go back to open exactly as drop_case (036) does it,
+  -- with the same case_dropped event so watchers see the case needs help.
+  with dropped as (
+    update public.cases
+      set status = 'open', rescuer_id = null, vet_id = null,
+          accepted_at = null
+      where rescuer_id = uid
+        and status in ('accepted', 'vet_selected', 'vet_confirmed', 'en_route')
+      returning id
+  )
+  insert into public.case_events (case_id, actor_id, type, note)
+  select id, uid, 'case_dropped'::public.notification_type,
+         'The rescuer dropped this case — it still needs help.'
+  from dropped;
+
+  -- Finished rescues keep their history without the person.
+  update public.cases set rescuer_id = null where rescuer_id = uid;
 
   -- Finally the identity itself. profiles has FK ... references auth.users
   -- on delete cascade, so the profile row goes with it.
