@@ -149,9 +149,6 @@ export interface RescueCase {
   status: CaseStatus;
   rescuer_id: string | null;
   vet_id: string | null;
-  rescuer_lat: number | null;
-  rescuer_lng: number | null;
-  rescuer_loc_at: string | null;
   hidden: boolean;
   escalated_at: string | null;
   closed_reason: 'community' | 'expired' | null;
@@ -323,4 +320,16 @@ export interface Sponsor {
   active: boolean;
   sort: number;
   created_at: string;
+}
+
+/**
+ * The rescuer's last shared position while en route. Migration 036 moved it
+ * off `cases` into case_rescuer_locations, readable only by the case's
+ * participants (reporter, rescuer, vet) and admins.
+ */
+export interface RescuerLocation {
+  lat: number;
+  lng: number;
+  /** When the rescuer's device last shared it (ISO timestamp). */
+  at: string;
 }

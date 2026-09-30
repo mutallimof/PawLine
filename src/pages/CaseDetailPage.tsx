@@ -20,7 +20,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useCase } from '../hooks/useRealtime';
+import { useCase, useRescuerLocation } from '../hooks/useRealtime';
 import {
   acceptCase,
   recordSafetyAck,
@@ -68,6 +68,11 @@ export default function CaseDetailPage() {
   // the database. They get the sign-in prompt instead of dead buttons.
   const isRegistered = !!user && !isGuest;
   const { caseData, events, loading, reload } = useCase(id);
+  // 036: the live position comes from its own participants-only table.
+  const rescuerLocation = useRescuerLocation(
+    id,
+    caseData?.status === 'en_route' || caseData?.status === 'vet_confirmed'
+  );
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -494,10 +499,10 @@ export default function CaseDetailPage() {
             )}
             {(caseData.status === 'en_route' || caseData.status === 'vet_confirmed') && caseData.vet && (
               <div className="case-detail__track">
-                <EnRouteMap caseData={caseData} />
-                {caseData.rescuer_loc_at && (
+                <EnRouteMap caseData={caseData} rescuer={rescuerLocation} />
+                {rescuerLocation?.at && (
                   <p className="case-detail__track-note">
-                    {t('case.lastKnown')} · {timeAgo(caseData.rescuer_loc_at)}
+                    {t('case.lastKnown')} · {timeAgo(rescuerLocation.at)}
                   </p>
                 )}
               </div>

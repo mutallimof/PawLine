@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { withCaseColumns } from '../lib/api';
 import { CaseCard, GroupRow, LanguageSwitcher, ScreenHeader } from '../components/ui';
 import { VetVisibilityNotice } from './vetAndUserPages';
 import { t } from '../i18n';
@@ -32,12 +33,13 @@ function useMyCases(userId: string | null) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!userId) return;
-    supabase
-      .from('cases')
-      .select('*, photos:case_photos (*)')
-      .or(`reporter_id.eq.${userId},rescuer_id.eq.${userId},vet_id.eq.${userId}`)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
+    void withCaseColumns((cols) =>
+      supabase
+        .from('cases')
+        .select(`${cols}, photos:case_photos (*)`)
+        .or(`reporter_id.eq.${userId},rescuer_id.eq.${userId},vet_id.eq.${userId}`)
+        .order('created_at', { ascending: false })
+    ).then(({ data }) => {
         setCases((data ?? []) as unknown as CaseWithDetails[]);
         setLoading(false);
       });

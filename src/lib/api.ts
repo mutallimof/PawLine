@@ -27,6 +27,7 @@ import type {
   Vet,
   VetDocument,
   VetRating,
+  RescuerLocation,
 } from './types';
 import { uploadCasePhoto } from './photos';
 import { computeDHash } from './phash';
@@ -44,8 +45,24 @@ import { reverseGeocode } from './gmaps';
 // made the whole cases query fail with a permission error for anon/
 // authenticated, i.e. the entire live feed. Keep this in sync with
 // migration 014's `grant select (...) on public.vets` column list.
-const CASE_SELECT = `
-  *,
+/**
+ * The case columns everyone may read (migration 036 turns this into the
+ * column-level grant on `cases`). Explicit on purpose: once 036 is applied a
+ * `select=*` is refused, because creator_uid, terms_version,
+ * terms_accepted_at and last_progress_at are server-only and the rescuer's
+ * live location has moved to case_rescuer_locations.
+ *
+ * CASE_COLUMNS_LATER were added by 027/029/032; if a database predates any of
+ * them the query is retried with the base list (see withCaseColumns).
+ */
+const CASE_COLUMNS_BASE =
+  'id, reporter_id, guest_name, animal, description, lat, lng, address_hint, status, ' +
+  'rescuer_id, vet_id, created_at, accepted_at, resolved_at, hidden, escalated_at, ' +
+  'closed_reason, injury_type, spot_type, urgency';
+const CASE_COLUMNS_LATER = 'street_address, pinned_message_id, chat_closed_at';
+export const CASE_COLUMNS = `${CASE_COLUMNS_BASE}, ${CASE_COLUMNS_LATER}`;
+
+const CASE_EMBEDS = `
   photos:case_photos (*),
   reporter:profiles!cases_reporter_id_fkey (id, display_name, avatar_url),
   rescuer:profiles!cases_rescuer_id_fkey (id, display_name, avatar_url, xp),
@@ -56,12 +73,26 @@ const CASE_SELECT = `
   )
 `;
 
+type QueryResult = { data: unknown; error: { code?: string; message: string } | null };
+
+/**
+ * Run a `cases` query with the full public column list, retrying with the
+ * base list if the database is missing a later column (42703).
+ */
+export async function withCaseColumns(run: (cols: string) => PromiseLike<QueryResult>): Promise<QueryResult> {
+  const res = await run(CASE_COLUMNS);
+  if (res.error?.code === '42703') return run(CASE_COLUMNS_BASE);
+  return res;
+}
+
 export async function fetchCases(): Promise<CaseWithDetails[]> {
-  const { data, error } = await supabase
-    .from('cases')
-    .select(CASE_SELECT)
-    .order('created_at', { ascending: false })
-    .limit(200);
+  const { data, error } = await withCaseColumns((cols) =>
+    supabase
+      .from('cases')
+      .select(`${cols}, ${CASE_EMBEDS}`)
+      .order('created_at', { ascending: false })
+      .limit(200)
+  );
   if (error) throw error;
   const cases = (data ?? []) as unknown as CaseWithDetails[];
   await resolvePhotoUrls(cases);
@@ -69,11 +100,13 @@ export async function fetchCases(): Promise<CaseWithDetails[]> {
 }
 
 export async function fetchCase(id: string): Promise<CaseWithDetails | null> {
-  const { data, error } = await supabase
-    .from('cases')
-    .select(CASE_SELECT)
-    .eq('id', id)
-    .maybeSingle();
+  const { data, error } = await withCaseColumns((cols) =>
+    supabase
+      .from('cases')
+      .select(`${cols}, ${CASE_EMBEDS}`)
+      .eq('id', id)
+      .maybeSingle()
+  );
   if (error) throw error;
   const caseData = data as unknown as CaseWithDetails | null;
   if (caseData) await resolvePhotoUrls([caseData]);
@@ -337,6 +370,42 @@ export async function createCase(input: NewCaseInput): Promise<string> {
   );
 
   return caseId;
+}
+
+/** 036 not applied yet? (PostgREST: unknown table / relation.) */
+function isMissingRelationError(e: { code?: string }): boolean {
+  return e.code === 'PGRST205' || e.code === '42P01';
+}
+
+/**
+ * The rescuer's live position for one case. After 036 it lives in
+ * case_rescuer_locations, which RLS only returns to the case's participants
+ * and admins — anyone else simply gets null. Before 036 it is still on the
+ * `cases` row. `live` says whether the new table exists (so the caller can
+ * subscribe to it).
+ */
+export async function fetchRescuerLocation(
+  caseId: string
+): Promise<{ location: RescuerLocation | null; live: boolean }> {
+  const { data, error } = await supabase
+    .from('case_rescuer_locations')
+    .select('lat, lng, updated_at')
+    .eq('case_id', caseId)
+    .maybeSingle();
+  if (!error) {
+    const row = data as { lat: number; lng: number; updated_at: string } | null;
+    return { location: row ? { lat: row.lat, lng: row.lng, at: row.updated_at } : null, live: true };
+  }
+  if (!isMissingRelationError(error)) throw new Error(error.message);
+
+  const legacy = await supabase
+    .from('cases')
+    .select('rescuer_lat, rescuer_lng, rescuer_loc_at')
+    .eq('id', caseId)
+    .maybeSingle();
+  const d = legacy.data as { rescuer_lat: number | null; rescuer_lng: number | null; rescuer_loc_at: string | null } | null;
+  if (legacy.error || !d || d.rescuer_lat == null || d.rescuer_lng == null) return { location: null, live: false };
+  return { location: { lat: d.rescuer_lat, lng: d.rescuer_lng, at: d.rescuer_loc_at ?? '' }, live: false };
 }
 
 export async function fetchCaseEvents(caseId: string): Promise<CaseEvent[]> {
@@ -1275,14 +1344,21 @@ export interface HiddenMessageRow {
 export async function fetchHiddenContentBy(
   profileId: string,
 ): Promise<{ cases: HiddenCaseRow[]; messages: HiddenMessageRow[] }> {
-  const [c, m] = await Promise.all([
-    supabase
+  // 036 makes creator_uid server-only, so this goes through an admin RPC;
+  // before 036 the RPC doesn't exist and the direct query still works.
+  const hiddenCases = async (): Promise<QueryResult> => {
+    const viaRpc = await supabase.rpc('admin_hidden_cases_by', { p_profile: profileId });
+    if (!viaRpc.error || !['PGRST202', '42883'].includes(viaRpc.error.code ?? '')) return viaRpc;
+    return supabase
       .from('cases')
       .select('id, animal, description, created_at')
       .eq('creator_uid', profileId)
       .eq('hidden', true)
       .order('created_at', { ascending: false })
-      .limit(50),
+      .limit(50);
+  };
+  const [c, m] = await Promise.all([
+    hiddenCases(),
     supabase
       .from('case_messages')
       .select('id, case_id, body, created_at')

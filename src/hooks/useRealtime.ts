@@ -16,6 +16,7 @@ import {
   fetchCases,
   fetchMessages,
   fetchNotifications,
+  fetchRescuerLocation,
   purgeCachedCasePhotos,
 } from '../lib/api';
 import type {
@@ -24,6 +25,7 @@ import type {
   CaseMessage,
   CaseWithDetails,
   DirectMessage,
+  RescuerLocation,
 } from '../lib/types';
 
 /**
@@ -69,6 +71,55 @@ function subscribeReporting(channel: RealtimeChannel, label: string): RealtimeCh
   });
 }
 
+/**
+ * Case change notifications, 036-aware. Migration 036 takes `cases` out of
+ * the realtime publication (full rows carried server-only data) and
+ * publishes a tiny `case_signals` table instead: case_id + hidden, bumped by
+ * a trigger whenever a public column changes. Subscribe to that first; if
+ * its channel can't be established (036 not applied yet) fall back to
+ * watching `cases` directly, as before. Separate channels, because one
+ * unpublished table errors the whole channel (see subscribeReporting).
+ */
+function subscribeCaseChanges(
+  label: string,
+  caseId: string | null,
+  onChange: (payload: { new?: { id?: string; case_id?: string; hidden?: boolean } }) => void
+): () => void {
+  let closed = false;
+  let fallback: RealtimeChannel | null = null;
+  const primary = supabase
+    .channel(uniqueTopic(`${label}-signals`))
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'case_signals', ...(caseId ? { filter: `case_id=eq.${caseId}` } : {}) },
+      onChange
+    );
+  primary.subscribe((status) => {
+    if (closed || fallback) return;
+    if (
+      status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR ||
+      status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT
+    ) {
+      void supabase.removeChannel(primary);
+      fallback = subscribeReporting(
+        supabase
+          .channel(uniqueTopic(label))
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'cases', ...(caseId ? { filter: `id=eq.${caseId}` } : {}) },
+            onChange
+          ),
+        label
+      );
+    }
+  });
+  return () => {
+    closed = true;
+    void supabase.removeChannel(primary);
+    if (fallback) void supabase.removeChannel(fallback);
+  };
+}
+
 /** Debounced refetcher — bursts of changes collapse into one query. */
 function useRefetch(fn: () => Promise<void>, delayMs = 250) {
   const timer = useRef<number | null>(null);
@@ -88,8 +139,10 @@ function useRefetch(fn: () => Promise<void>, delayMs = 250) {
  * have) — purging an already-hidden or already-purged case is a harmless
  * no-op, so checking `new.hidden` alone is enough.
  */
-function purgeIfHidden(payload: { new?: { id?: string; hidden?: boolean } }) {
-  if (payload.new?.hidden && payload.new.id) purgeCachedCasePhotos(payload.new.id);
+function purgeIfHidden(payload: { new?: { id?: string; case_id?: string; hidden?: boolean } }) {
+  // case_signals rows carry case_id; `cases` rows (pre-036 fallback) carry id.
+  const id = payload.new?.case_id ?? payload.new?.id;
+  if (payload.new?.hidden && id) purgeCachedCasePhotos(id);
 }
 
 // ---------------------------------------------------------------------------
@@ -119,16 +172,10 @@ export function useCases() {
     // it never delivered anything and took this whole channel down with it.
     // A case's photos are written while it is being created, so the `cases`
     // INSERT this channel already watches brings the row in with them.
-    const channel = subscribeReporting(
-      supabase
-        .channel(uniqueTopic('cases-list'))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'cases' }, (payload) => {
-          purgeIfHidden(payload);
-          refetch();
-        }),
-      'cases-list'
-    );
-    return () => void supabase.removeChannel(channel);
+    return subscribeCaseChanges('cases-list', null, (payload) => {
+      purgeIfHidden(payload);
+      refetch();
+    });
   }, [load, refetch]);
 
   return { cases, loading, error, reload: load };
@@ -164,28 +211,84 @@ export function useCase(caseId: string | undefined) {
     // channel, which is what stopped status from updating live for BOTH the
     // acting user and the observer. Delivery photos are covered by the acting
     // client's own reload().
-    const channel = subscribeReporting(
+    const unsubscribeCase = subscribeCaseChanges(`case-${caseId}`, caseId, (payload) => {
+      purgeIfHidden(payload);
+      refetch();
+    });
+    const events = subscribeReporting(
       supabase
-        .channel(uniqueTopic(`case-${caseId}`))
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'cases', filter: `id=eq.${caseId}` },
-          (payload) => {
-            purgeIfHidden(payload);
-            refetch();
-          }
-        )
+        .channel(uniqueTopic(`case-events-${caseId}`))
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'case_events', filter: `case_id=eq.${caseId}` },
           refetch
         ),
-      `case-${caseId}`
+      `case-events-${caseId}`
     );
-    return () => void supabase.removeChannel(channel);
+    return () => {
+      unsubscribeCase();
+      void supabase.removeChannel(events);
+    };
   }, [caseId, load, refetch]);
 
   return { caseData, events, loading, reload: load };
+}
+
+// ---------------------------------------------------------------------------
+// The rescuer's live position on one case — participants only (036).
+// ---------------------------------------------------------------------------
+const LOCATION_POLL_MS = 30_000;
+
+/**
+ * Only fetches while `enabled` (the case is vet_confirmed / en_route). After
+ * 036 the row comes from case_rescuer_locations — RLS hands it only to the
+ * reporter, rescuer, vet and admins; everyone else gets null — and updates
+ * live via realtime. Before 036 it is read from the `cases` row. A 30 s poll
+ * backs up both (the rescuer's device shares roughly every 45 s).
+ */
+export function useRescuerLocation(caseId: string | undefined, enabled: boolean): RescuerLocation | null {
+  const [location, setLocation] = useState<RescuerLocation | null>(null);
+
+  useEffect(() => {
+    if (!caseId || !enabled) {
+      setLocation(null);
+      return;
+    }
+    let cancelled = false;
+    let channel: RealtimeChannel | null = null;
+
+    const load = async () => {
+      try {
+        const { location: loc, live } = await fetchRescuerLocation(caseId);
+        if (cancelled) return;
+        setLocation(loc);
+        if (live && !channel) {
+          channel = subscribeReporting(
+            supabase
+              .channel(uniqueTopic(`rescuer-location-${caseId}`))
+              .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'case_rescuer_locations', filter: `case_id=eq.${caseId}` },
+                () => void load()
+              ),
+            `rescuer-location-${caseId}`
+          );
+        }
+      } catch {
+        /* non-fatal: the map just shows no car */
+      }
+    };
+
+    void load();
+    const timer = window.setInterval(() => void load(), LOCATION_POLL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      if (channel) void supabase.removeChannel(channel);
+    };
+  }, [caseId, enabled]);
+
+  return location;
 }
 
 // ---------------------------------------------------------------------------

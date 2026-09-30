@@ -654,7 +654,14 @@ export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
 // ---------------------------------------------------------------------------
 // En-route mini map — photo pin for the animal, vet cross, rescuer dot.
 // ---------------------------------------------------------------------------
-export function EnRouteMap({ caseData }: { caseData: CaseWithDetails }) {
+export function EnRouteMap({
+  caseData,
+  rescuer,
+}: {
+  caseData: CaseWithDetails;
+  /** Participants only (036) — null for everyone else, so no car marker. */
+  rescuer: { lat: number; lng: number } | null;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const { map, failed } = useGoogleMap(ref, {
     center: { lat: caseData.lat, lng: caseData.lng },
@@ -682,11 +689,11 @@ export function EnRouteMap({ caseData }: { caseData: CaseWithDetails }) {
       add({ lat: caseData.vet.lat, lng: caseData.vet.lng },
         vetPinEl(caseData.vet.clinic_name, () => {}));
     }
-    if (caseData.rescuer_lat && caseData.rescuer_lng) {
+    if (rescuer) {
       const car = document.createElement('div');
       car.className = 'pin-rescuer';
       car.textContent = '🚗';
-      add({ lat: caseData.rescuer_lat, lng: caseData.rescuer_lng }, car);
+      add({ lat: rescuer.lat, lng: rescuer.lng }, car);
     }
 
     map.fitBounds(bounds, 48);
@@ -694,7 +701,7 @@ export function EnRouteMap({ caseData }: { caseData: CaseWithDetails }) {
       markers.current.forEach((m) => m.setMap(null));
       markers.current = [];
     };
-  }, [map, caseData]);
+  }, [map, caseData, rescuer]);
 
   if (failed) return <MapUnavailable height={220} />;
   return (
