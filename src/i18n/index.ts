@@ -60,6 +60,14 @@ export const ENABLED_LOCALES: readonly LocaleCode[] = ['az', 'tr', 'en'];
 /** Where a known-but-disabled locale (a saved 'ru') lands instead. */
 const DISABLED_FALLBACK: LocaleCode = 'en';
 
+/** Each language's own name, for the Settings language list. */
+export const LOCALE_NATIVE: Record<LocaleCode, string> = {
+  az: 'Azərbaycanca',
+  tr: 'Türkçe',
+  en: 'English',
+  ru: 'Русский',
+};
+
 const STORAGE_KEY = 'pawline-locale';
 const DEFAULT_LOCALE: LocaleCode = 'az'; // launch market first
 

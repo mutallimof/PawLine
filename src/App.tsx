@@ -136,6 +136,7 @@ function Shell() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/:section" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
         </ErrorBoundary>
