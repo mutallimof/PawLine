@@ -566,4 +566,5 @@ export const en = {
   'case.condition': 'Condition',
   'case.urgency': 'Urgency',
   'case.place': 'Place',
+  'common.today': 'Today',
 };

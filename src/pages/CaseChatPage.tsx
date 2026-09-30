@@ -4,8 +4,8 @@
  * bank details so people can chip in for treatment. Payments happen entirely
  * OUTSIDE the platform — this is information-sharing only, by design.
  */
-import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
 import {
@@ -17,23 +17,13 @@ import {
   sendCaseMessage,
   unpinCaseMessage,
 } from '../lib/api';
-import { Avatar, StatusBadge, useToast } from '../components/ui';
+import { caseTitle, ScreenHeader, statusLabel, useToast } from '../components/ui';
 import { ReportSheet } from '../components/Report';
-import { IconBack, IconSend, VetTag } from '../components/Icons';
+import { IconHelp, IconSend, VetTag } from '../components/Icons';
 import { getLocale, t } from '../i18n';
 import { clockTime } from '../lib/time';
 import type { CaseMessage } from '../lib/types';
 
-/**
- * Group E: a consistent colour per sender across the thread, distinct from
- * the semantic status/brand colours (--coral, --status-*) so a sender's
- * name is never mistaken for a status cue. Plain hash of their id — no
- * state, so it's naturally stable across renders and reloads.
- */
-const SENDER_COLORS = [
-  '#c2402f', '#3f7fae', '#3f9b6c', '#8a5cb5',
-  '#b5762f', '#4a7a6b', '#a8477a', '#5c6bc0',
-];
 /**
  * Whether this device has already been shown the "you can pin a message" hint.
  * Same posture as legal.tsx's safety ACK_KEY: on a storage error we treat it as
@@ -49,10 +39,14 @@ function pinHintSeen(): boolean {
   }
 }
 
-function senderColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  return SENDER_COLORS[hash % SENDER_COLORS.length];
+/** Local calendar day, for the centred date separators. */
+function dayKey(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+function dayLabel(iso: string): string {
+  if (dayKey(iso) === dayKey(new Date().toISOString())) return t('common.today');
+  return new Date(iso).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function CaseChatPage() {
@@ -70,7 +64,6 @@ export default function CaseChatPage() {
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const toast = useToast();
 
   // Only the clinic assigned to THIS case may pin. The server enforces it too
@@ -167,30 +160,41 @@ export default function CaseChatPage() {
 
   return (
     <div className="chat-page">
-      <header className="chat-header">
-        <button onClick={() => navigate(-1)} aria-label={t('common.back')}>
-          <IconBack />
-        </button>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 800, fontSize: 15 }}>{t('caseChat.title')}</div>
-          {caseData && (
-            <div className="list-row__sub">{caseData.description}</div>
-          )}
-        </div>
-        {caseData && <StatusBadge status={caseData.status} />}
-        {isCaseVet && !chatClosedAt && (
-          <button
-            type="button"
-            className="chat-header__action"
-            disabled={togglingChat}
-            onClick={() => void toggleChatClosed()}
-            title={t('caseChat.close')}
-            aria-label={t('caseChat.close')}
-          >
-            🔒 {t('caseChat.closeShort')}
-          </button>
+      <div className="chat-top">
+        <ScreenHeader
+          title={t('caseChat.title')}
+          fallback={id ? `/case/${id}` : '/'}
+          action={
+            // Figma's help button: opens the case this chat belongs to.
+            <Link to={`/case/${id}`} className="icon-btn" aria-label={t('case.detailTitle')}>
+              <IconHelp />
+            </Link>
+          }
+        />
+        {caseData && (
+          <div className="chat-context">
+            <div className="chat-context__main">
+              <div className="chat-context__title">{caseTitle(caseData)}</div>
+              <div className="chat-context__sub">
+                {statusLabel(caseData.status)}
+                {caseData.address_hint ? ` · ${caseData.address_hint}` : ''}
+              </div>
+            </div>
+            {isCaseVet && !chatClosedAt && (
+              <button
+                type="button"
+                className="chat-context__action"
+                disabled={togglingChat}
+                onClick={() => void toggleChatClosed()}
+                title={t('caseChat.close')}
+                aria-label={t('caseChat.close')}
+              >
+                🔒 {t('caseChat.closeShort')}
+              </button>
+            )}
+          </div>
         )}
-      </header>
+      </div>
 
       {pinned && (
         <div className="chat-pinned">
@@ -216,19 +220,17 @@ export default function CaseChatPage() {
       )}
 
       <div className="chat-scroll" ref={scrollRef}>
-        <div className="banner banner--info" style={{ fontWeight: 600 }}>
-          {t('caseChat.subtitle')}
-        </div>
+        <p className="chat-note">{t('caseChat.subtitle')}</p>
         {loading && <div className="spinner" />}
         {!loading && messages.length === 0 && (
           <div className="empty-state">{t('caseChat.empty')}</div>
         )}
         {messages.map((m, i) => {
           const mine = m.sender_id === user?.id;
-          // Group E: sender name shows only on the first message of a run —
-          // consecutive messages from the same person collapse together,
-          // WhatsApp-style.
-          const isFirstOfRun = i === 0 || messages[i - 1].sender_id !== m.sender_id;
+          const newDay = i === 0 || dayKey(messages[i - 1].created_at) !== dayKey(m.created_at);
+          // Group E: the sender's name shows only on the first message of a
+          // run — consecutive messages from one person collapse together.
+          const isFirstOfRun = newDay || messages[i - 1].sender_id !== m.sender_id;
           // Menu contents by viewer. Reporting is for other people's messages;
           // pinning is for the case's own vet, and only on their OWN message —
           // a clinic pins its condition/bank-details post, nothing else. Both
@@ -240,18 +242,26 @@ export default function CaseChatPage() {
           // No affordance at all when there would be nothing in the menu.
           const hasMenu = canReport || canPin || canUnpin;
           return (
-            <div key={m.id} className={`bubble${mine ? ' bubble--mine' : ''}`}>
-              {/* Sender name + block: identity info, so only once per run —
-                  block acts on the PERSON, not this one message. */}
-              {!mine && m.sender && isFirstOfRun && (
-                <div className="bubble__sender" style={{ color: senderColor(m.sender.id) }}>
-                  <Link to={`/user/${m.sender.id}`} style={{ color: 'inherit' }}>
-                    {m.sender.display_name}
-                    {m.sender.role === 'vet' && <VetTag />}
-                  </Link>
-                  {isRegistered && m.sender_id && m.sender_id !== user.id && (
+            <Fragment key={m.id}>
+              {newDay && <div className="chat-day">{dayLabel(m.created_at)}</div>}
+              <div className={`chat-msg${mine ? ' chat-msg--mine' : ''}`}>
+                {/* Meta line ABOVE the bubble (Figma): sender · time. Block
+                    acts on the PERSON, so it sits with the name. */}
+                <div className="chat-msg__meta">
+                  {mine ? (
+                    <span className="chat-msg__who">{t('common.you')}</span>
+                  ) : (
+                    m.sender && isFirstOfRun && (
+                      <Link to={`/user/${m.sender.id}`} className="chat-msg__who">
+                        {m.sender.display_name}
+                        {m.sender.role === 'vet' && <VetTag />}
+                      </Link>
+                    )
+                  )}
+                  <span className="bubble__time">{clockTime(m.created_at)}</span>
+                  {!mine && isFirstOfRun && isRegistered && m.sender_id && m.sender_id !== user.id && (
                     <button
-                      style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-soft)' }}
+                      className="chat-msg__block"
                       title={t('settings.block')}
                       aria-label={t('settings.block')}
                       onClick={() => {
@@ -266,63 +276,55 @@ export default function CaseChatPage() {
                       🚫
                     </button>
                   )}
+                  {hasMenu && (
+                    <div className="bubble__menu">
+                      <button
+                        className="bubble__menu-btn"
+                        aria-label={t('caseChat.actions')}
+                        aria-haspopup="menu"
+                        aria-expanded={openMenu === m.id}
+                        onClick={() => setOpenMenu(openMenu === m.id ? null : m.id)}
+                      >
+                        ⋯
+                      </button>
+                      {openMenu === m.id && (
+                        <>
+                          {/* Tap-anywhere-else to close, without a document
+                              listener to attach and tear down. */}
+                          <div className="bubble__menu-backdrop" onClick={() => setOpenMenu(null)} />
+                          <div className="bubble__menu-list" role="menu">
+                            {canPin && (
+                              <button role="menuitem" onClick={() => void setPin(m.id)}>
+                                📌 {t('caseChat.pin')}
+                              </button>
+                            )}
+                            {canUnpin && (
+                              <button role="menuitem" onClick={() => void setPin(null)}>
+                                📌 {t('caseChat.unpin')}
+                              </button>
+                            )}
+                            {/* Report (B2): closes the menu and opens the form
+                                as a sheet, so it gets the whole screen width. */}
+                            {canReport && (
+                              <button
+                                role="menuitem"
+                                onClick={() => {
+                                  setOpenMenu(null);
+                                  setReportFor(m);
+                                }}
+                              >
+                                ⚑ {t('mod.report')}
+                              </button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-              {m.body}
-              {/* One footer row for the timestamp and the ⋯ menu.
-                  .bubble__time is `display: block` and shared with
-                  DmThreadPage, so it keeps that — the row overrides the time's
-                  display locally instead, otherwise anything after it starts a
-                  new line. */}
-              <div className="bubble__footer">
-                <span className="bubble__time">{clockTime(m.created_at)}</span>
-                {hasMenu && (
-                  <div className="bubble__menu">
-                    <button
-                      className="bubble__menu-btn"
-                      aria-label={t('caseChat.actions')}
-                      aria-haspopup="menu"
-                      aria-expanded={openMenu === m.id}
-                      onClick={() => setOpenMenu(openMenu === m.id ? null : m.id)}
-                    >
-                      ⋯
-                    </button>
-                    {openMenu === m.id && (
-                      <>
-                        {/* Tap-anywhere-else to close, without a document
-                            listener to attach and tear down. */}
-                        <div className="bubble__menu-backdrop" onClick={() => setOpenMenu(null)} />
-                        <div className="bubble__menu-list" role="menu">
-                          {canPin && (
-                            <button role="menuitem" onClick={() => void setPin(m.id)}>
-                              📌 {t('caseChat.pin')}
-                            </button>
-                          )}
-                          {canUnpin && (
-                            <button role="menuitem" onClick={() => void setPin(null)}>
-                              📌 {t('caseChat.unpin')}
-                            </button>
-                          )}
-                          {/* Report (B2): closes the menu and opens the form
-                              as a sheet, so it gets the whole screen width. */}
-                          {canReport && (
-                            <button
-                              role="menuitem"
-                              onClick={() => {
-                                setOpenMenu(null);
-                                setReportFor(m);
-                              }}
-                            >
-                              ⚑ {t('mod.report')}
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+                <div className={`bubble${mine ? ' bubble--mine' : ''}`}>{m.body}</div>
               </div>
-            </div>
+            </Fragment>
           );
         })}
       </div>
@@ -359,9 +361,6 @@ export default function CaseChatPage() {
         </div>
       ) : isRegistered ? (
         <div className="chat-composer">
-          <div style={{ alignSelf: 'center' }}>
-            <Avatar name={user.email ?? 'me'} small />
-          </div>
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -369,7 +368,12 @@ export default function CaseChatPage() {
             placeholder={t('caseChat.placeholder')}
             maxLength={4000}
           />
-          <button onClick={() => void send()} disabled={sending || !draft.trim()} aria-label={t('common.send')}>
+          <button
+            className="chat-composer__send"
+            onClick={() => void send()}
+            disabled={sending || !draft.trim()}
+            aria-label={t('common.send')}
+          >
             <IconSend size={18} />
           </button>
         </div>

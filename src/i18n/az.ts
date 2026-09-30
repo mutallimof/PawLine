@@ -568,4 +568,5 @@ export const az: Dict = {
   'case.condition': 'Vəziyyət',
   'case.urgency': 'Təcililik',
   'case.place': 'Yer',
+  'common.today': 'Bu gün',
 };

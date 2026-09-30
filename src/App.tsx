@@ -88,9 +88,9 @@ function Shell() {
     );
   }
 
-  // Full-screen chat routes replace the tab bar with their composer.
-  const hideNav =
-    /^\/messages\/.+/.test(location.pathname) || /\/chat$/.test(location.pathname);
+  // DM threads replace the tab bar with their composer. Case chat keeps it
+  // (Figma v2): its composer sits just above the nav instead.
+  const hideNav = /^\/messages\/.+/.test(location.pathname);
 
   if (showOnboarding) {
     return <Onboarding onDone={() => setShowOnboarding(false)} />;

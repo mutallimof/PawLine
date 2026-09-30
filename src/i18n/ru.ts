@@ -568,4 +568,5 @@ export const ru: Dict = {
   'case.condition': 'Состояние',
   'case.urgency': 'Срочность',
   'case.place': 'Место',
+  'common.today': 'Сегодня',
 };

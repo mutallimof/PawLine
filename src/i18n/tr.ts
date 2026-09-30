@@ -568,4 +568,5 @@ export const tr: Dict = {
   'case.condition': 'Durum',
   'case.urgency': 'Aciliyet',
   'case.place': 'Yer',
+  'common.today': 'Bugün',
 };
