@@ -22,6 +22,7 @@ import {
   isUserBlocked,
   unblockUser,
   uploadVetDocument,
+  VET_DOC_ACCEPT,
   upsertVet,
 } from '../lib/api';
 import { useCases } from '../hooks/useRealtime';
@@ -632,6 +633,7 @@ export function VetSetupPage() {
             {uploading ? t('common.loading') : t('vetSetup.uploadDocument')}
             <input
               type="file"
+              accept={VET_DOC_ACCEPT}
               hidden
               disabled={uploading}
               onChange={(e) => void onUploadDocument(e.target.files)}

@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createCase, fetchCases, isGuestConsentError, openVetsNear } from '../lib/api';
+import { createCase, fetchCases, isBannedError, isGuestConsentError, openVetsNear } from '../lib/api';
 import { isNetworkError, queueReport } from '../lib/offlineQueue';
 import { cleanPhotoFile, PhotoPrivacyError } from '../lib/photos';
 import { PinDropMap } from '../components/maps';
@@ -202,7 +202,11 @@ export default function ReportPage() {
       toast(t('report.success'));
       navigate(`/case/${existingCaseId ?? caseId}`);
     } catch (e) {
-      if (e instanceof PhotoPrivacyError) {
+      if (isBannedError(e)) {
+        // Before the network branch: a refused account's report must never
+        // be queued — it would be refused again on every flush.
+        toast(t('error.banned'));
+      } else if (e instanceof PhotoPrivacyError) {
         // Checked first: offline, isNetworkError() says yes to anything,
         // and a queued report with this photo could never be sent.
         toast(e.message);

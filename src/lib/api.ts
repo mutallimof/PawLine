@@ -441,6 +441,15 @@ function rpcError(message: string): Error {
   return new Error(message.startsWith(BANNED_PREFIX) ? t('error.banned') : message);
 }
 
+/**
+ * A ban refusal from a direct table write (createCase inserts the case row,
+ * so it doesn't go through rpc()). The raw error is left untouched for
+ * callers like the offline queue; the UI checks this to show error.banned.
+ */
+export function isBannedError(e: unknown): boolean {
+  return (e as { message?: string } | null)?.message?.startsWith(BANNED_PREFIX) ?? false;
+}
+
 /** 035: the server's refusal of a guest report sent without consent. */
 export function isGuestConsentError(e: unknown): boolean {
   return (e as { message?: string } | null)?.message?.startsWith('Please confirm you are 18 or older') ?? false;
@@ -591,11 +600,53 @@ function safeDocId(): string {
     : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/** Upload any file toward vet verification — no type/validation checks (simplified C1). */
+/**
+ * Clinic documents may only be images (JPEG, PNG, WebP, HEIC) or PDF — the
+ * same list the vet-documents bucket enforces (migration 039). Keep the
+ * input's accept attribute (vetAndUserPages) in step with this.
+ */
+export const VET_DOC_ACCEPT =
+  'image/jpeg,image/png,image/webp,image/heic,application/pdf,.jpg,.jpeg,.png,.webp,.heic,.pdf';
+
+/** Allowed types with the file extensions that may carry them. */
+const VET_DOC_TYPES: Record<string, string[]> = {
+  'image/jpeg': ['jpg', 'jpeg'],
+  'image/png': ['png'],
+  'image/webp': ['webp'],
+  'image/heic': ['heic'],
+  'application/pdf': ['pdf'],
+};
+
+/**
+ * The document's real type from its first bytes, not its name or the
+ * browser's guess (a renamed .exe must not pass; Chrome reports HEIC as '').
+ */
+async function sniffVetDocType(file: File): Promise<string | null> {
+  const b = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const ascii = (from: number, to: number) => String.fromCharCode(...b.subarray(from, to));
+  if (ascii(0, 5) === '%PDF-') return 'application/pdf';
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b[0] === 0x89 && ascii(1, 4) === 'PNG') return 'image/png';
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp';
+  if (ascii(4, 8) === 'ftyp' && ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1', 'msf1'].includes(ascii(8, 12))) {
+    return 'image/heic';
+  }
+  return null;
+}
+
+/** Upload a verification document: allowed types only, stored under a random name. */
 export async function uploadVetDocument(file: File, vetId: string): Promise<void> {
-  const path = `${vetId}/${safeDocId()}-${file.name}`;
+  const type = await sniffVetDocType(file);
+  if (!type) throw new Error(t('vetSetup.docTypeInvalid'));
+  // Random storage name; keep the file's own extension when it fits the
+  // detected type, else the type's usual one. The original name is kept only
+  // in vet_documents.filename, for the clinic's and admins' document list.
+  const ownExt = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : '';
+  const ext = VET_DOC_TYPES[type].includes(ownExt) ? ownExt : VET_DOC_TYPES[type][0];
+  const path = `${vetId}/${safeDocId()}.${ext}`;
   const { error: upErr } = await supabase.storage.from('vet-documents').upload(path, file, {
     upsert: false,
+    contentType: type,
   });
   if (upErr) throw new Error(upErr.message);
 
