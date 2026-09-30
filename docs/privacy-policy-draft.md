@@ -3,6 +3,7 @@
 > **Status:** draft, not published. The live policy in the app (`src/components/extras.tsx`) is unchanged.
 > **Basis:** every statement below was checked against the code and database migrations on `main` at commit `104e75b` (migrations 001–035). Anything the code cannot tell us is marked **[TO CONFIRM: …]**.
 > **Target law:** Law of the Republic of Azerbaijan "On Personal Data". Users are in Azerbaijan; the data is stored outside Azerbaijan (see §2 and §C5).
+> **Retention periods** (§A, §C6) describe migration 038 (`run_retention()`, daily pg_cron job `pawline-retention`) — **[TO CONFIRM: 038 applied, and the photo-retention Edge Function deployed and scheduled; until then photos are not deleted.]**
 > **Migrations assumed applied:** 001–035. [TO CONFIRM: that production has 033, 034 and 035 applied — 034/035 add the consent fields referenced below.]
 
 ---
@@ -41,7 +42,7 @@
 | **Device/session identity of whoever created the report** | `cases.creator_uid` — forced to `auth.uid()` by `enforce_case_limits()` [005/021/035]; for guests this is the anonymous session ID. | **Public** (table-level grant). Lets anyone see which reports came from the same device/session. | No deletion; set to null by `delete_my_account()` for the deleting user. |
 | **Guest consent** | `cases.terms_version`, `terms_accepted_at` [035] — server sets `terms_accepted_at = now()` for anonymous reporters; cleared for signed-in reporters. | **Public** (table-level grant). | No deletion. |
 | **Rescuer's live location while en route** | `cases.rescuer_lat`, `rescuer_lng`, `rescuer_loc_at`; sent every ~45 s by the rescuer's device only while status is `en_route` (`CaseDetailPage` + `update_rescuer_location()` [007/033]). | **Public** (table-level grant) — not only on the case page. | Cleared (`= null`) by `confirm_delivery()` [005], `drop_case()` [001], and the automatic revert after 75 min without progress (`revert_abandoned_cases()` [007]). |
-| **Photos (report & delivery/recovery)** | Private storage bucket `case-photos` [018]; path in `case_photos.path`; photos are re-encoded in the browser (max 1600 px, JPEG) before upload (`compressImage`, `src/lib/photos.ts`). | Row: `"visible case photos are viewable by everyone"` [011]. Files: storage policy `"case photos are visible unless the case is hidden" … to authenticated` [018] — the app fetches short-lived signed URLs; guest (anonymous) sessions count as `authenticated`, so anyone who opens the app can see them. | **No deletion** — no code deletes case photo files, including on account deletion. Browser cache: service worker cache `case-photos`, max 200 entries / 7 days (`src/sw.ts`). |
+| **Photos (report & delivery/recovery)** | Private storage bucket `case-photos` [018]; path in `case_photos.path`; photos are re-encoded in the browser (max 1600 px, JPEG) before upload (`compressImage`, `src/lib/photos.ts`). | Row: `"visible case photos are viewable by everyone"` [011]. Files: storage policy `"case photos are visible unless the case is hidden" … to authenticated` [018] — the app fetches short-lived signed URLs; guest (anonymous) sessions count as `authenticated`, so anyone who opens the app can see them. | **6 months after the case is resolved or closed**: rows and files deleted by the photo-retention Edge Function (038 counts them; the case itself stays). Browser cache: service worker cache `case-photos`, max 200 entries / 7 days (`src/sw.ts`). |
 | **Photo fingerprint** | `case_photos.phash` (64-bit perceptual hash, computed on the device) [003]. | **Public** (table grant on `case_photos`). | No deletion. |
 | **Case timeline** (events, vet free-text updates) | `case_events` (`actor_id`, `note`). | **Public** — `"case events are viewable by everyone" … using (true)` [001]. | No deletion; `actor_id` set null when that account is deleted (FK `on delete set null`). |
 | **Duplicate-report flags** | `case_duplicate_flags` (distance, minutes apart, photo similarity). | **Public** — `using (true)` [003]. | No deletion. |
@@ -52,9 +53,9 @@
 
 | Data | Where stored | Who can see it | How long kept |
 |---|---|---|---|
-| **Case chat messages** (may include bank details posted by clinics) | `case_messages`. | **Public** — `"visible case chat is viewable by everyone" … using (not hidden or public.is_admin())` [003], table grant to `anon` [004]. Posting requires an account in good standing [032]. | No deletion. On account deletion the code tries to detach authorship (`update public.case_messages set sender_id = null`) — **see D1: this currently fails.** |
+| **Case chat messages** (may include bank details posted by clinics) | `case_messages`. | **Public** — `"visible case chat is viewable by everyone" … using (not hidden or public.is_admin())` [003], table grant to `anon` [004]. Posting requires an account in good standing [032]. | **90 days after the case is resolved or closed** (`run_retention()` [038]); a pinned message is unpinned first. A message with an open content report is kept until an admin resolves or dismisses the report. On account deletion authorship is detached (`sender_id` set null) [037]. |
 | **Direct messages** (user ↔ approved clinic only [032]) | `conversations`, `conversation_participants`, `messages`. | Participants — `"participants read messages" … using (public.is_conversation_member(conversation_id))` [001]. **Admins** — `"admins read all direct messages" … using (public.is_admin())` [032] (and the admin DM oversight tab). | No automatic deletion. On account deletion the user's own sent messages and memberships are deleted [009]; the other person's messages stay. |
-| **Notifications** (title + text excerpt, e.g. first 140 characters of a DM or case description) | `notifications`. | Only the recipient — `"read own notifications"` [001]. | No automatic deletion; deleted on account deletion [009]. |
+| **Notifications** (title + text excerpt, e.g. first 140 characters of a DM or case description) | `notifications`. | Only the recipient — `"read own notifications"` [001]. | **90 days** after creation (`run_retention()` [038]); earlier on account deletion [009]. |
 
 ### A4. Ratings, blocks, moderation
 
@@ -62,7 +63,7 @@
 |---|---|---|---|
 | **Clinic ratings** (stars + optional note, rescuer ID) | `vet_ratings` [014]. | **Public** — `"vet ratings are viewable by everyone" … using (true)` [014]; `grant select … to anon`. Includes `rescuer_id`. | Deleted when the rescuer's account is deleted (FK `on delete cascade`). |
 | **Block list** | `blocked_users`. | Only the blocker — `"manage own block list" … using (blocker_id = auth.uid())` [007]. | Deleted on account deletion (either side) [009]. |
-| **Content reports** (reason text, target) | `content_reports`. | The reporter and admins — `"admins and authors read reports"` [003]. | Deleted if the reporter deletes their account [009] or the target is deleted (cascade); otherwise no deletion. |
+| **Content reports** (reason text, target) | `content_reports`. | The reporter and admins — `"admins and authors read reports"` [003]. | Deleted if the reporter deletes their account [009] or the target case/profile is deleted (cascade). When a reported case-chat message is deleted by retention, the report stays with its message link cleared (`on delete set null` [038]). |
 | **Moderation state** (hidden cases/messages, bans) | `cases.hidden`, `case_messages.hidden`, `profiles.banned`. | Hidden rows: admins only. Ban flag: user + admins. | No deletion. |
 
 ### A5. Vet clinics
@@ -83,7 +84,7 @@
 
 | Data | Where stored | Who can see it | How long kept |
 |---|---|---|---|
-| **Anonymous session** | Supabase Auth creates an anonymous user (`signInAnonymously()` in `src/lib/api.ts`) — silently when browsing (to load photos) or when reporting. No `profiles` row (`handle_new_user` returns early `if new.is_anonymous` [024]). | Its ID appears publicly as `cases.creator_uid` on the guest's reports. | **[TO CONFIRM: whether anonymous auth users are ever cleaned up — nothing in the code deletes them.]** |
+| **Anonymous session** | Supabase Auth creates an anonymous user (`signInAnonymously()` in `src/lib/api.ts`) — silently when browsing (to load photos) or when reporting. No `profiles` row (`handle_new_user` returns early `if new.is_anonymous` [024]). | Its ID appears publicly as `cases.creator_uid` on the guest's reports. | **Deleted 30 days after creation** unless the guest still has an open report; `creator_uid` is cleared on their finished reports first (`run_retention()` [038]). |
 | **Guest report content** | Same as A2 (incl. `guest_name`, `terms_version`/`terms_accepted_at`). | Public. | No deletion. |
 
 ### A8. On the user's device
@@ -175,9 +176,14 @@ Our data is stored with Supabase in **[TO CONFIRM — region]**, outside Azerbai
 ### C6. How long we keep it
 
 - **Your account and profile:** until you delete your account.
-- **Reports and their photos, case timelines, case chats:** kept permanently as the rescue record. Open reports nobody takes are closed after 24 hours but not deleted.
+- **Reports and case timelines:** kept as the rescue record. Open reports nobody takes are closed after 24 hours but not deleted.
+- **Case chats:** deleted 90 days after the case is resolved or closed (a message under review by moderators is kept until the review ends).
+- **Photos:** deleted 6 months after the case is resolved or closed.
+- **Guest (no account) sessions:** deleted after 30 days, unless you still have an open report; your finished reports stay, no longer linked to that session.
+- **Clinic verification documents:** kept while the clinic's account exists.
 - **Your live location while en route:** removed from the case as soon as the animal is delivered, the rescue is dropped, or the rescue is automatically reopened after 75 minutes without progress.
-- **Direct messages and notifications:** until the account that owns them is deleted.
+- **Direct messages:** until the account that owns them is deleted.
+- **Notifications:** 90 days.
 - **Push device addresses:** until you turn push off, the device stops accepting pushes, or you delete your account.
 - **On your device:** your session, settings and any unsent offline reports stay in your browser until sent or until you clear its data; cached photos for up to 7 days.
 
@@ -227,7 +233,7 @@ Live policy = `PRIVACY.en` in `src/components/extras.tsx` (az/tr say the same).
 9. **Photos:** no mention that photos are public, re-encoded (EXIF stripped) on the device, cached on the device for 7 days, and **never deleted** (no code deletes storage files, even on account deletion). Clinic document files are also not deleted on account deletion.
 10. **No mention of third parties** (Supabase, Vercel, Google Maps/Places/Geocoding — which receives every report location — Google Sign-In, Turnstile, Sentry, browser push services).
 11. **No mention of storage location / cross-border transfer.**
-12. **No retention periods** (reports, chats and photos are kept permanently; open cases are closed — not deleted — after 24 h).
+12. **No retention periods** in the live policy. Decided periods (038): case chats 90 days and photos 6 months after the case is resolved/closed, notifications 90 days, guest sessions 30 days (no open report); reports themselves stay.
 13. **No age requirement** in the policy (the app now requires 18+ for accounts and guest reports).
 14. **No legal basis / consent statement**, and no mention that users re-accept when `TERMS_VERSION` changes.
 15. **Public case timeline, duplicate flags and ratings** (with rater ID) are not mentioned.
