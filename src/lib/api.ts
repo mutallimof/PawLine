@@ -29,7 +29,7 @@ import type {
   VetRating,
   RescuerLocation,
 } from './types';
-import { uploadCasePhoto } from './photos';
+import { cleanPhotoFile, uploadCasePhoto } from './photos';
 import { computeDHash } from './phash';
 import { getTurnstileToken, turnstileEnabled } from './turnstile';
 import { reverseGeocode } from './gmaps';
@@ -267,6 +267,13 @@ async function waitForActiveSession(timeoutMs = 3000): Promise<void> {
  * dashboard (Authentication → Sign In / Up).
  */
 export async function createCase(input: NewCaseInput): Promise<string> {
+  // Metadata-free copies of every photo BEFORE anything is created: a photo
+  // that can't be cleaned is refused (PhotoPrivacyError) and must not leave
+  // a case behind with no photos. Files cleaned at pick time pass straight
+  // through; queued reports (offlineQueue) are cleaned here.
+  const photos: File[] = [];
+  for (const file of input.photos) photos.push(await cleanPhotoFile(file));
+
   if (!input.reporterId) {
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
@@ -343,7 +350,7 @@ export async function createCase(input: NewCaseInput): Promise<string> {
   // parallel uploads, and order is preserved for the gallery. Each photo
   // also gets a perceptual hash (computed on-device, milliseconds) so the
   // duplicate scan below can compare images.
-  for (const file of input.photos) {
+  for (const file of photos) {
     // Bad-signal resilience (audit P1): each photo gets three attempts with
     // backoff before we declare the network dead.
     let path = '';

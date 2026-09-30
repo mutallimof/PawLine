@@ -50,6 +50,7 @@ export const az: Dict = {
   'report.subtitle': 'Bir foto, bir nişan, bir neçə söz — bu qədər.',
   'report.photos': 'Fotolar',
   'report.addPhoto': 'Foto əlavə et',
+  'photo.cannotStrip': 'Bu fotodan məkan məlumatlarını silə bilmədik, ona görə əlavə edilmədi. Kamera ilə yeni foto çəkməyə cəhd edin.',
   'report.animalType': 'Bu hansı heyvandır?',
   'report.urgencyLabel': 'Bu nə qədər təcilidir?',
   'report.description': 'Vəziyyət və detallar',

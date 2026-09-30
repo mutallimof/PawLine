@@ -50,6 +50,7 @@ export const tr: Dict = {
   'report.subtitle': 'Bir fotoğraf, bir konum, birkaç kelime — hepsi bu.',
   'report.photos': 'Fotoğraflar',
   'report.addPhoto': 'Fotoğraf ekle',
+  'photo.cannotStrip': 'Bu fotoğraftaki konum bilgilerini kaldıramadık, bu yüzden eklenmedi. Kamerayla yeni bir fotoğraf çekmeyi deneyin.',
   'report.animalType': 'Bu hangi hayvan?',
   'report.urgencyLabel': 'Bu ne kadar acil?',
   'report.description': 'Durum ve ayrıntılar',

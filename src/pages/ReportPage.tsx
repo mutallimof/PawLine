@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createCase, fetchCases, isGuestConsentError, openVetsNear } from '../lib/api';
 import { isNetworkError, queueReport } from '../lib/offlineQueue';
+import { cleanPhotoFile, PhotoPrivacyError } from '../lib/photos';
 import { PinDropMap } from '../components/maps';
 import { ScreenHeader, useToast } from '../components/ui';
 import { ConsentChecks } from '../components/legal';
@@ -100,13 +101,22 @@ export default function ReportPage() {
       .catch(() => {});
   }, []);
 
-  const addPhotos = (files: FileList | null) => {
+  const addPhotos = async (files: FileList | null) => {
     if (!files) return;
     const room = Math.max(0, 5 - photos.length);
-    const added = Array.from(files)
-      .slice(0, room)
-      .map((file) => ({ file, url: URL.createObjectURL(file) }));
-    setPhotos((prev) => [...prev, ...added]);
+    // Clean each photo now (re-encoded, location/EXIF removed): the preview
+    // shows exactly what will be uploaded, and a photo that can't be cleaned
+    // is refused here rather than failing the report at submit.
+    const added: { file: File; url: string }[] = [];
+    for (const original of Array.from(files).slice(0, room)) {
+      try {
+        const file = await cleanPhotoFile(original);
+        added.push({ file, url: URL.createObjectURL(file) });
+      } catch (e) {
+        toast(e instanceof PhotoPrivacyError ? e.message : t('common.error'));
+      }
+    }
+    setPhotos((prev) => [...prev, ...added].slice(0, 5));
   };
 
   const removePhoto = (index: number) => {
@@ -192,7 +202,11 @@ export default function ReportPage() {
       toast(t('report.success'));
       navigate(`/case/${existingCaseId ?? caseId}`);
     } catch (e) {
-      if (isNetworkError(e)) {
+      if (e instanceof PhotoPrivacyError) {
+        // Checked first: offline, isNetworkError() says yes to anything,
+        // and a queued report with this photo could never be sent.
+        toast(e.message);
+      } else if (isNetworkError(e)) {
         // Signal died mid-flight (audit P1) — persist and reassure.
         await queueReport(input);
         photos.forEach((p) => URL.revokeObjectURL(p.url));
@@ -285,7 +299,7 @@ export default function ReportPage() {
              street reports are overwhelmingly mobile. */
           capture="environment"
           hidden
-          onChange={(e) => addPhotos(e.target.files)}
+          onChange={(e) => void addPhotos(e.target.files)}
         />
       </div>
 

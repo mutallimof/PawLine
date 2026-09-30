@@ -50,6 +50,7 @@ export const ru: Dict = {
   'report.subtitle': 'Фото, метка на карте, несколько слов — это всё, что нужно.',
   'report.photos': 'Фото',
   'report.addPhoto': 'Добавить фото',
+  'photo.cannotStrip': 'Не удалось удалить данные о местоположении из этого фото, поэтому оно не добавлено. Попробуйте сделать новое фото камерой.',
   'report.animalType': 'Какое это животное?',
   'report.urgencyLabel': 'Насколько это срочно?',
   'report.description': 'Состояние и детали',

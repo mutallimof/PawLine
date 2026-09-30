@@ -15,6 +15,7 @@
  *    `online` event) — half-flushed queues never drop reports.
  */
 import { createCase, isGuestConsentError, type NewCaseInput } from './api';
+import { PhotoPrivacyError } from './photos';
 
 const DB_NAME = 'pawline-offline';
 const STORE = 'reports';
@@ -129,6 +130,9 @@ export async function flushQueue(): Promise<number> {
         // A guest report queued before consent was required (035) will be
         // refused every time — skip it rather than let it block the rest.
         if (isGuestConsentError(e)) continue;
+        // Same for a photo that can't be made metadata-free on this device:
+        // it is never uploaded, and must not stall the reports behind it.
+        if (e instanceof PhotoPrivacyError) continue;
         break; // still bad signal — keep the rest, retry on next `online`
       }
     }

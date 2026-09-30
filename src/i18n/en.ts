@@ -48,6 +48,7 @@ export const en = {
   'report.subtitle': 'A photo, a pin, a few words — that’s all it takes.',
   'report.photos': 'Photos',
   'report.addPhoto': 'Add photo',
+  'photo.cannotStrip': 'We couldn’t remove the location data from this photo, so it wasn’t added. Try taking a new photo with the camera.',
   'report.animalType': 'What animal is it?',
   'report.urgencyLabel': 'How urgent is this?',
   'report.description': 'Condition & details',
