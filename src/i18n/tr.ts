@@ -602,4 +602,5 @@ export const tr: Dict = {
   'consent.title': 'Devam etmeden önce',
   'consent.intro': 'Stray’s Call 18 yaş ve üzeri kişiler içindir. Uygulamayı kullanmaya devam etmek için ikisini de onaylayın.',
   'consent.continue': 'Devam et',
+  'report.consentRequired': 'Bildirmeden önce 18 yaşında veya daha büyük olduğunuzu onaylayın ve Koşulları kabul edin.',
 };

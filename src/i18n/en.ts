@@ -600,4 +600,5 @@ export const en = {
   'consent.title': 'Before you continue',
   'consent.intro': 'Stray’s Call is for people aged 18 and over. Please confirm both to keep using the app.',
   'consent.continue': 'Continue',
+  'report.consentRequired': 'Please confirm you’re 18 or older and accept the Terms before reporting.',
 };

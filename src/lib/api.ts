@@ -200,6 +200,8 @@ export interface NewCaseInput {
   spotType: import('./types').SpotType | null;
   urgency: import('./types').UrgencyLevel;
   photos: File[];
+  /** Guests only (035): the Terms version they accepted on the report form. */
+  termsVersion?: string | null;
 }
 
 /**
@@ -275,18 +277,27 @@ export async function createCase(input: NewCaseInput): Promise<string> {
     reporter_id: input.reporterId,
   };
 
-  let { data, error } = await supabase
-    .from('cases')
-    .insert({ ...row, street_address: streetAddress })
-    .select('id')
-    .single();
+  // Guests send their consent with the report (035); the server stamps the
+  // time and clears it for signed-in reporters.
+  let payload: Record<string, unknown> = {
+    ...row,
+    street_address: streetAddress,
+    ...(input.termsVersion ? { terms_version: input.termsVersion } : {}),
+  };
+  let { data, error } = await supabase.from('cases').insert(payload).select('id').single();
 
-  // Migration 029 not applied yet? PostgREST rejects the whole insert over the
-  // unknown column. Retry without it rather than let a pending migration break
-  // report creation, which is the one flow this app exists for. Safe to delete
-  // once 029 is live everywhere.
-  if (error && isUnknownColumnError(error, 'street_address')) {
-    ({ data, error } = await supabase.from('cases').insert(row).select('id').single());
+  // Migration 029 / 035 not applied yet? PostgREST rejects the whole insert
+  // over an unknown column. Retry without it rather than let a pending
+  // migration break report creation, which is the one flow this app exists
+  // for. Safe to delete once 029 and 035 are live everywhere.
+  for (let i = 0; i < 2 && error; i++) {
+    const unknown = (['street_address', 'terms_version'] as const).find(
+      (col) => col in payload && isUnknownColumnError(error!, col)
+    );
+    if (!unknown) break;
+    const { [unknown]: _dropped, ...rest } = payload;
+    payload = rest;
+    ({ data, error } = await supabase.from('cases').insert(payload).select('id').single());
   }
   if (error) throw error;
   // The retry path widens `data` to nullable; single() only resolves without
@@ -351,6 +362,11 @@ const BANNED_PREFIX = 'This account cannot';
 /** A readable Error for a failed RPC; ban refusals become error.banned. */
 function rpcError(message: string): Error {
   return new Error(message.startsWith(BANNED_PREFIX) ? t('error.banned') : message);
+}
+
+/** 035: the server's refusal of a guest report sent without consent. */
+export function isGuestConsentError(e: unknown): boolean {
+  return (e as { message?: string } | null)?.message?.startsWith('Please confirm you are 18 or older') ?? false;
 }
 
 /** Call an RPC and throw a readable Error if it failed. */

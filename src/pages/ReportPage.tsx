@@ -5,10 +5,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createCase, fetchCases, openVetsNear } from '../lib/api';
+import { createCase, fetchCases, isGuestConsentError, openVetsNear } from '../lib/api';
 import { isNetworkError, queueReport } from '../lib/offlineQueue';
 import { PinDropMap } from '../components/maps';
 import { ScreenHeader, useToast } from '../components/ui';
+import { ConsentChecks } from '../components/legal';
+import { TERMS_VERSION } from '../lib/consent';
 import { DEFAULT_CENTER, distanceKm, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import type { AnimalType, CaseWithDetails, InjuryType, SpotType, UrgencyLevel } from '../lib/types';
@@ -24,6 +26,11 @@ export default function ReportPage() {
   // them as registered is what sent reporter_id = <anon uid>, which the
   // cases INSERT policy (003) rejects outright with 42501.
   const isRegistered = !!user && !isGuest;
+  // 035: guests confirm 18+ and the Terms on the form; the consent is sent
+  // with the report. Accounts already passed ConsentGate (034).
+  const [ageOk, setAgeOk] = useState(false);
+  const [termsOk, setTermsOk] = useState(false);
+  const consentOk = isRegistered || (ageOk && termsOk);
   const navigate = useNavigate();
   const toast = useToast();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -112,6 +119,7 @@ export default function ReportPage() {
   const submit = async () => {
     if (photos.length === 0) return toast(t('report.needPhoto'));
     if (description.trim().length < 3) return toast(t('report.needDescription'));
+    if (!consentOk) return toast(t('report.consentRequired'));
 
     if (submitting) return; // double-tap guard (audit P1)
     // Audit P2: don't let a never-touched default pin ship silently.
@@ -164,6 +172,7 @@ export default function ReportPage() {
       spotType,
       urgency,
       photos: photos.map((p) => p.file),
+      termsVersion: isRegistered ? null : TERMS_VERSION,
     };
 
     // Fully offline? Queue immediately — don't make the person watch a
@@ -191,6 +200,8 @@ export default function ReportPage() {
         navigate('/');
       } else if (e instanceof Error && e.message === 'captcha-failed') {
         toast(t('report.captchaFailed'));
+      } else if (isGuestConsentError(e)) {
+        toast(t('report.consentRequired'));
       } else {
         // A raw RLS rejection (42501, e.g. the guest-session race this flow
         // guards against) is Postgres-speak, not something a reporter can
@@ -382,7 +393,11 @@ export default function ReportPage() {
         </div>
       )}
 
-      <button className="btn btn--primary" onClick={submit} disabled={submitting}>
+      {!isRegistered && (
+        <ConsentChecks age={ageOk} terms={termsOk} onAge={setAgeOk} onTerms={setTermsOk} />
+      )}
+
+      <button className="btn btn--primary" onClick={submit} disabled={submitting || !consentOk}>
         {submitting ? t('report.submitting') : t('report.submit')}
       </button>
     </div>

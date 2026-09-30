@@ -14,7 +14,7 @@
  *  - Failures during flush keep the record and stop (retried on the next
  *    `online` event) — half-flushed queues never drop reports.
  */
-import { createCase, type NewCaseInput } from './api';
+import { createCase, isGuestConsentError, type NewCaseInput } from './api';
 
 const DB_NAME = 'pawline-offline';
 const STORE = 'reports';
@@ -33,6 +33,8 @@ interface QueuedReport {
   urgency?: string;
   reporterId: string | null;
   photos: Blob[];
+  /** Guest consent ticked on the form (035) — sent with the queued report. */
+  termsVersion?: string | null;
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -73,6 +75,7 @@ export async function queueReport(input: NewCaseInput): Promise<void> {
     urgency: (input as { urgency?: string }).urgency ?? 'medium',
     reporterId: input.reporterId ?? null,
     photos: input.photos.map((f) => f.slice(0, f.size, f.type)), // plain Blobs store cleanly
+    termsVersion: input.termsVersion ?? null,
   };
   await tx(db, 'readwrite', (s) => s.add(record));
   db.close();
@@ -118,10 +121,14 @@ export async function flushQueue(): Promise<number> {
           photos: r.photos.map(
             (b, i) => new File([b], `queued-${i}.jpg`, { type: b.type || 'image/jpeg' })
           ),
+          termsVersion: r.termsVersion ?? null,
         });
         await tx(db, 'readwrite', (s) => s.delete(r.id!));
         sent++;
-      } catch {
+      } catch (e) {
+        // A guest report queued before consent was required (035) will be
+        // refused every time — skip it rather than let it block the rest.
+        if (isGuestConsentError(e)) continue;
         break; // still bad signal — keep the rest, retry on next `online`
       }
     }
