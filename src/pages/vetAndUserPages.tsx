@@ -25,9 +25,9 @@ import {
   upsertVet,
 } from '../lib/api';
 import { useCases } from '../hooks/useRealtime';
-import { Avatar, CaseCard, ScreenHeader, useToast, vetHoursBadge } from '../components/ui';
+import { CaseCard, ScreenHeader, useToast, vetHoursBadge } from '../components/ui';
 import { PinDropMap } from '../components/maps';
-import { IconBack, IconStethoscope, VetTag } from '../components/Icons';
+import { IconBlock, IconStethoscope, VetTag } from '../components/Icons';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import type { AnimalType, Profile, Vet, VetDocument } from '../lib/types';
@@ -108,47 +108,56 @@ export function UserProfilePage() {
   };
 
   return (
-    <div className="page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <IconBack size={18} /> {t('common.back')}
-      </button>
-      <div className="card" style={{ padding: 18, textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-          <Avatar name={profile.display_name} url={profile.avatar_url} />
+    <div className="page profile">
+      <ScreenHeader title={t('nav.profile')} />
+      <div className="profile__id">
+        <div className="profile__avatar" aria-hidden="true">
+          {profile.avatar_url ? (
+            <img src={profile.avatar_url} alt="" />
+          ) : (
+            profile.display_name.trim().charAt(0).toUpperCase() || '?'
+          )}
         </div>
-        <h1 className="page-title" style={{ fontSize: 24 }}>
-          {profile.display_name}
-          {profile.role === 'vet' && <VetTag />}
-        </h1>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '10px 0 14px' }}>
-          {/* No tier badge: XP is off every user-facing surface until the
-              ledger / ranking display replaces it. Animals helped stays. */}
-          <span className="tier-badge" style={{ background: 'var(--ink-soft)' }}>
-            {t('profile.casesHelped')}: {profile.cases_helped}
-          </span>
+        <div className="profile__id-text">
+          <h2 className="profile__name">
+            {profile.display_name}
+            {profile.role === 'vet' && <VetTag />}
+          </h2>
+          <div className="profile__role">{profile.role === 'vet' ? t('auth.roleVet') : t('profile.roleRescuer')}</div>
         </div>
-        {!isRegistered && (
-          <div style={{ marginTop: 14 }}>
-            <SignInCta />
-          </div>
-        )}
-        {isRegistered && user.id !== profile.id && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-            {profile.role === 'vet' && me?.role === 'user' && (
-              <button className="btn btn--primary" onClick={() => void message()}>
-                💬 {t('dm.messageClinic')}
-              </button>
-            )}
-            <button
-              className="btn btn--ghost"
-              disabled={busy}
-              onClick={() => void toggleBlock()}
-            >
-              🚫 {blocked ? t('settings.unblock') : t('settings.block')}
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* No tier badge: XP is off every user-facing surface until the
+          ledger / ranking display replaces it. Animals helped stays. */}
+      <div className="v2-stats profile__stats">
+        <div className="v2-stat">
+          <div className="v2-stat__value profile__stat--helped">{profile.cases_helped}</div>
+          <div className="v2-stat__label">{t('profile.casesHelped')}</div>
+        </div>
+      </div>
+
+      {!isRegistered && (
+        <div style={{ marginTop: 14 }}>
+          <SignInCta />
+        </div>
+      )}
+      {isRegistered && user.id !== profile.id && (
+        <div className="vet-page__actions">
+          {profile.role === 'vet' && me?.role === 'user' && (
+            <button className="btn btn--primary" onClick={() => void message()}>
+              {t('dm.messageClinic')}
+            </button>
+          )}
+          <button
+            className="btn btn--secondary"
+            aria-pressed={blocked}
+            disabled={busy}
+            onClick={() => void toggleBlock()}
+          >
+            <IconBlock size={18} /> {blocked ? t('settings.unblock') : t('settings.block')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

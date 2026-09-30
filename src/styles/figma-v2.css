@@ -1212,3 +1212,27 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .doc-page .platform-stats { margin: 0; }
 .doc-page .card { background: var(--v2-fill); border: none; box-shadow: none; border-radius: 16px; transform: none; }
 .platform-stats__value { color: var(--brand-text); font-weight: 500; }
+
+/* ==== States: empty, error, loading, 404 ================================== */
+.empty-state {
+  padding: 40px 24px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--v2-ink-2);
+}
+.empty-state .btn { min-width: 200px; }
+.skeleton {
+  background: linear-gradient(90deg, var(--v2-fill) 0%, #fafafa 50%, var(--v2-fill) 100%);
+  background-size: 200% 100%;
+  border-radius: 16px;
+}
+.skeleton--card { height: 160px; margin-bottom: 14px; }
+.fullscreen-msg h1 {
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--v2-ink);
+}
+.fullscreen-msg p { font-size: 13.6px; color: var(--v2-ink-2); }
+.fullscreen-msg .btn { min-width: 220px; }
