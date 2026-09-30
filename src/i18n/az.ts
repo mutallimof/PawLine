@@ -563,4 +563,9 @@ export const az: Dict = {
   'case.arrivalSub': 'Xilasedici heyvanı klinikaya təhvil verdi. Sən də bunun bir hissəsi oldun.',
   'status.inProgress': 'Davam edir',
   'home.nearbyCases': 'Yaxınlıqdakı hadisələr',
+  'case.detailTitle': 'Hadisə',
+  'case.uploadedAgo': 'Yükləndi: {time}',
+  'case.condition': 'Vəziyyət',
+  'case.urgency': 'Təcililik',
+  'case.place': 'Yer',
 };

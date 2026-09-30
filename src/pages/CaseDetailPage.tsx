@@ -40,10 +40,19 @@ import {
   watchCase,
 } from '../lib/api';
 import { CaseLocationMap, EnRouteMap } from '../components/maps';
-import { Avatar, PawTrail, StatusBadge, UrgencyBadge, useToast } from '../components/ui';
+import {
+  AlertsBell,
+  caseTitle,
+  PawTrail,
+  ScreenHeader,
+  statusGroup,
+  statusLabel,
+  urgencyLabel,
+  useToast,
+} from '../components/ui';
 import { ReportButton } from '../components/Report';
 import { CasePhoto } from '../components/CasePhoto';
-import { animalEmoji, IconBack, IconCamera, IconStethoscope } from '../components/Icons';
+import { IconArrowUpRight, IconCamera, IconPin, IconStethoscope } from '../components/Icons';
 import { hasKey, t } from '../i18n';
 import { SafetyAck, hasAcceptedSafety } from '../components/legal';
 import { Paw } from '../components/Ink';
@@ -237,10 +246,8 @@ export default function CaseDetailPage() {
   };
 
   return (
-    <div className="page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <IconBack size={18} /> {t('common.back')}
-      </button>
+    <div className="page case-detail">
+      <ScreenHeader title={t('case.detailTitle')} action={<AlertsBell />} />
 
       {/* ==================================================================
           1. LOCATION — leads, per Group F. The landmark text is the
@@ -256,13 +263,14 @@ export default function CaseDetailPage() {
             common case where they typed nothing, and null when geocoding
             failed or has not been applied yet. */}
         <div className="case-detail__map-pill">
-          📍 {caseData.address_hint || caseData.street_address || t('case.locationUnknown')}
+          <IconPin />
+          <span>{caseData.address_hint || caseData.street_address || t('case.locationUnknown')}</span>
         </div>
         <a
           className="case-detail__map-directions"
           href={`https://www.google.com/maps/search/?api=1&query=${caseData.lat},${caseData.lng}`}
         >
-          🧭 {t('case.getDirections')}
+          <IconArrowUpRight /> {t('case.getDirections')}
         </a>
       </div>
       <div className="case-detail__map-legend">
@@ -281,15 +289,16 @@ export default function CaseDetailPage() {
       {/* ==================================================================
           2. TITLE AND DESCRIPTION
          ================================================================== */}
-      <div style={{ marginBottom: 'var(--space-xl)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>
-            {animalEmoji(caseData.animal)} {t(`animal.${caseData.animal}` as const)}
-          </h1>
-          <StatusBadge status={caseData.status} />
-          <UrgencyBadge level={caseData.urgency} />
+      <div className="case-detail__head">
+        <div className="case-detail__tags">
+          <span className={`v2-tag case-detail__status case-detail__status--${statusGroup(caseData.status)}`}>
+            {statusLabel(caseData.status)}
+          </span>
+          <span className="v2-tag">{t(`animal.${caseData.animal}` as const)}</span>
+          <span className="v2-tag">{urgencyLabel(caseData.urgency)}</span>
         </div>
-        <p className="page-subtitle" style={{ marginBottom: 6 }}>
+        <h2 className="case-detail__title">{caseTitle(caseData)}</h2>
+        <p className="case-detail__meta">
           {t('case.reportedBy', {
             name: caseData.reporter?.display_name ?? caseData.guest_name ?? t('case.guest'),
           })}
@@ -306,7 +315,7 @@ export default function CaseDetailPage() {
       {!finished && (
         <>
           <div className="section-label">{t('case.rescueProgress')}</div>
-          <div className="card" style={{ padding: 'var(--space-2xs) var(--space-xs) var(--space-sm)', marginBottom: 'var(--space-xl)' }}>
+          <div className="case-detail__trail">
             <PawTrail status={caseData.status} />
           </div>
         </>
@@ -457,46 +466,44 @@ export default function CaseDetailPage() {
         </div>
       )}
 
-      {/* People involved */}
-      {caseData.rescuer && (
+      {/* Current rescue — rescuer, destination clinic and (en route) the live
+          map, as one card (Figma "Current rescue"). */}
+      {(caseData.rescuer || caseData.vet) && (
         <>
           <div className="section-label">{t('case.currentRescue')}</div>
-          <Link
-            to={`/user/${caseData.rescuer.id}`}
-            className="list-row"
-            style={{ marginBottom: 'var(--space-xl)' }}
-          >
-            <Avatar name={caseData.rescuer.display_name} url={caseData.rescuer.avatar_url} />
-            <div className="list-row__main">
-              <div className="list-row__title">{caseData.rescuer.display_name}</div>
-              <div className="list-row__sub">{t('status.accepted')}</div>
-              {caseData.vet && (
-                <div className="list-row__sub">{t('case.toClinic', { clinic: caseData.vet.clinic_name })}</div>
-              )}
-            </div>
-          </Link>
-        </>
-      )}
-      {caseData.vet && (
-        <Link to={`/vet/${caseData.vet.id}`} className="list-row">
-          <div className="avatar" style={{ background: 'rgba(63,127,174,.14)', color: 'var(--status-enroute)' }}>+</div>
-          <div className="list-row__main">
-            <div className="list-row__title">{caseData.vet.clinic_name}</div>
-            <div className="list-row__sub">{caseData.vet.address}</div>
+          <div className="case-detail__rescue">
+            {caseData.rescuer && (
+              <Link to={`/user/${caseData.rescuer.id}`} className="case-detail__rescuer">
+                <span className="case-detail__initials" aria-hidden="true">
+                  {caseData.rescuer.display_name.trim().charAt(0).toUpperCase() || '?'}
+                </span>
+                <span className="case-detail__rescuer-main">
+                  <span className="case-detail__rescuer-name">{caseData.rescuer.display_name}</span>
+                  <span className="case-detail__rescuer-sub">{statusLabel(caseData.status)}</span>
+                </span>
+              </Link>
+            )}
+            {caseData.vet && (
+              <Link to={`/vet/${caseData.vet.id}`} className="case-detail__dest">
+                <IconPin />
+                <span>
+                  {t('case.toClinic', { clinic: caseData.vet.clinic_name })}
+                  {caseData.vet.address ? ` · ${caseData.vet.address}` : ''}
+                </span>
+              </Link>
+            )}
+            {(caseData.status === 'en_route' || caseData.status === 'vet_confirmed') && caseData.vet && (
+              <div className="case-detail__track">
+                <EnRouteMap caseData={caseData} />
+                {caseData.rescuer_loc_at && (
+                  <p className="case-detail__track-note">
+                    {t('case.lastKnown')} · {timeAgo(caseData.rescuer_loc_at)}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-        </Link>
-      )}
-
-      {/* En-route view: origin → vet with last known rescuer location */}
-      {(caseData.status === 'en_route' || caseData.status === 'vet_confirmed') && caseData.vet && (
-        <div style={{ margin: '12px 0' }}>
-          <EnRouteMap caseData={caseData} />
-          {caseData.rescuer_loc_at && (
-            <p className="page-subtitle" style={{ marginTop: 6 }}>
-              {t('case.lastKnown')} · {timeAgo(caseData.rescuer_loc_at)}
-            </p>
-          )}
-        </div>
+        </>
       )}
 
       {/* ------------------------------------------------------------------
@@ -647,25 +654,6 @@ export default function CaseDetailPage() {
         />
       </div>
 
-      {/* Event log — hidden once the case is finished (task 4) */}
-      {!finished && <div className="section-label">{t('case.timeline')}</div>}
-      {finished ? null : events.length === 0 ? (
-        <p className="page-subtitle">—</p>
-      ) : (
-        <ol className="case-detail__timeline">
-          {events.map((ev) => (
-            <li key={ev.id} className="case-detail__timeline-item">
-              <div className="case-detail__timeline-time">{timeAgo(ev.created_at)}</div>
-              <div className="case-detail__timeline-text">
-                {/* Machine-generated pipeline events are localized by type;
-                    free-text updates (vet notes etc.) show verbatim. */}
-                {hasKey(`event.${ev.type}`) ? t(`event.${ev.type}` as never) : ev.note}
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
-
       {/* ==================================================================
           4. PHOTO
          ================================================================== */}
@@ -673,7 +661,7 @@ export default function CaseDetailPage() {
         <>
           {reportPhotos.length > 0 && <div className="section-label">{t('report.photos')}</div>}
           {reportPhotos[0] && (
-            <div className="photo-hero" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 12 }}>
+            <div className="photo-hero case-detail__photo">
               {reportPhotos[0].url && !brokenPhotoIds.has(reportPhotos[0].id) ? (
                 <CasePhoto
                   url={reportPhotos[0].url}
@@ -688,6 +676,11 @@ export default function CaseDetailPage() {
                 </div>
               )}
             </div>
+          )}
+          {reportPhotos[0] && (
+            <p className="case-detail__photo-note">
+              {t('case.uploadedAgo', { time: timeAgo(reportPhotos[0].created_at) })}
+            </p>
           )}
           {reportPhotos.length > 1 && (
             <div className="photo-grid" style={{ marginBottom: 12 }}>
@@ -735,16 +728,60 @@ export default function CaseDetailPage() {
         </>
       )}
 
+      {/* Condition card (Figma): the reporter's structured answers. */}
+      <dl className="case-detail__kv">
+        {caseData.injury_type && (
+          <div>
+            <dt>{t('case.condition')}</dt>
+            <dd>{t(`injury.${caseData.injury_type}` as const)}</dd>
+          </div>
+        )}
+        <div>
+          <dt>{t('case.urgency')}</dt>
+          <dd className={`case-detail__kv-urgency--${caseData.urgency}`}>{urgencyLabel(caseData.urgency)}</dd>
+        </div>
+        {caseData.spot_type && (
+          <div>
+            <dt>{t('case.place')}</dt>
+            <dd>{t(`spot.${caseData.spot_type}` as const)}</dd>
+          </div>
+        )}
+      </dl>
+
+      {/* Event log — hidden once the case is finished (task 4) */}
+      {!finished && <h2 className="v2-h2">{t('case.timeline')}</h2>}
+      {finished ? null : events.length === 0 ? (
+        <p className="page-subtitle">—</p>
+      ) : (
+        <ol className="case-detail__timeline">
+          {events.map((ev) => (
+            <li key={ev.id} className="case-detail__timeline-item">
+              <div className="case-detail__timeline-time">{timeAgo(ev.created_at)}</div>
+              <div className="case-detail__timeline-text">
+                {/* Machine-generated pipeline events are localized by type;
+                    free-text updates (vet notes etc.) show verbatim. */}
+                {hasKey(`event.${ev.type}`) ? t(`event.${ev.type}` as never) : ev.note}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+
       {/* ==================================================================
           5. CASE CHAT
          ================================================================== */}
       <div className="case-detail__actions-stack">
         <Link to={`/case/${caseData.id}/chat`} className="btn btn--primary">
-          💬 {t('case.openChat')}
+          {t('case.openChat')}
         </Link>
         {isRegistered && !isRescuer && !isVet && !finished && (
-          <button className={`btn ${watching ? 'btn--ghost' : 'btn--secondary'}`} disabled={busy} onClick={toggleWatch}>
-            {watching ? `✓ ${t('case.watching')}` : `🔔 ${t('case.watch')}`}
+          <button
+            className="btn btn--secondary"
+            aria-pressed={watching}
+            disabled={busy}
+            onClick={toggleWatch}
+          >
+            {watching ? `✓ ${t('case.watching')}` : t('case.watch')}
           </button>
         )}
         {isRegistered && (

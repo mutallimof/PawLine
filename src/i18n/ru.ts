@@ -563,4 +563,9 @@ export const ru: Dict = {
   'case.arrivalSub': 'Спасатель передал животное в клинику. Вы стали частью этого.',
   'status.inProgress': 'В процессе',
   'home.nearbyCases': 'Случаи рядом',
+  'case.detailTitle': 'Детали случая',
+  'case.uploadedAgo': 'Загружено: {time}',
+  'case.condition': 'Состояние',
+  'case.urgency': 'Срочность',
+  'case.place': 'Место',
 };

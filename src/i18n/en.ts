@@ -561,4 +561,9 @@ export const en = {
   'case.arrivalSub': 'The rescuer has handed the animal to the clinic. You were part of this.',
   'status.inProgress': 'In progress',
   'home.nearbyCases': 'Nearby cases',
+  'case.detailTitle': 'Case detail',
+  'case.uploadedAgo': 'Uploaded {time}',
+  'case.condition': 'Condition',
+  'case.urgency': 'Urgency',
+  'case.place': 'Place',
 };
