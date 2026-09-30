@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { createCase, fetchCases, openVetsNear } from '../lib/api';
 import { isNetworkError, queueReport } from '../lib/offlineQueue';
 import { PinDropMap } from '../components/maps';
-import { useToast } from '../components/ui';
+import { ScreenHeader, useToast } from '../components/ui';
 import { DEFAULT_CENTER, distanceKm, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import type { AnimalType, CaseWithDetails, InjuryType, SpotType, UrgencyLevel } from '../lib/types';
@@ -205,7 +205,7 @@ export default function ReportPage() {
   };
 
   return (
-    <div className="page">
+    <div className="page report">
       {/* Proximity warning — advisory only. Neither button skips creating
           this report; "same one" only changes where we navigate after. */}
       {nearbyCase && (
@@ -232,8 +232,8 @@ export default function ReportPage() {
         </div>
       )}
 
-      <h1 className="page-title">{t('report.title')}</h1>
-      <p className="page-subtitle">{t('report.subtitle')}</p>
+      <ScreenHeader title={t('report.title')} />
+      <p className="v2-sub">{t('report.subtitle')}</p>
 
       {!isRegistered && <div className="banner banner--info">{t('report.guestNote')}</div>}
 
@@ -376,17 +376,11 @@ export default function ReportPage() {
       )}
 
       {/* Honest heads-up — never a blocker. The animal must still be found. */}
-
       {noVetsOpen && (
-
         <div className="banner banner--warn" role="status">
-
           {t('report.noVetsOpen')}
-
         </div>
-
       )}
-
 
       <button className="btn btn--primary" onClick={submit} disabled={submitting}>
         {submitting ? t('report.submitting') : t('report.submit')}

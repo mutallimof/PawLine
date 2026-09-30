@@ -1076,3 +1076,62 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .vet-page .vet-hours__label { font-size: 10.5px; font-weight: 500; letter-spacing: 0.05em; color: var(--v2-ink-2); }
 .vet-page .vet-hours__value { justify-content: flex-start; text-align: left; }
 .vet-page .vet-hours__range { font-size: 18px; font-weight: 500; }
+
+/* ==== Report (derived: Sign-in inputs, Case Detail photo + map, tag chips) = */
+.report .field__label {
+  display: block;
+  margin: 18px 0 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--v2-ink);
+}
+.report .field { margin-bottom: 4px; }
+.report .field .field__label { margin-top: 18px; }
+.report .field input,
+.report .field textarea {
+  border: 1px solid var(--v2-border);
+  border-radius: 14px;
+  background: var(--v2-fill);
+  padding: 14px 16px;
+  font-size: 15px;
+  color: var(--v2-ink);
+}
+.report .field input { height: 52px; padding-top: 0; padding-bottom: 0; }
+.report .field textarea { min-height: 110px; }
+.report .page-subtitle { font-size: 12.5px; color: var(--v2-ink-2); }
+.report .chip-row { gap: 8px; }
+.report .chip-row .chip {
+  min-height: 36px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--v2-fill);
+  color: var(--v2-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.report .chip-row .chip.active:not([class*='chip--urgency']) {
+  background: var(--brand-fill);
+  border-color: var(--brand-fill);
+  color: var(--color-text-on-brand);
+}
+.report .photo-grid { gap: 10px; }
+.report .photo-thumb { border-radius: 14px; overflow: hidden; }
+.report .photo-add {
+  border: 1.5px dashed #cfcac4;
+  border-radius: 20px;
+  background: var(--v2-fill);
+  color: var(--v2-ink-2);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.report .map-wrap { border-radius: 22px; overflow: hidden; box-shadow: var(--v2-soft-shadow); }
+.report > .btn--primary { width: 100%; margin-top: 20px; }
+.report .loc-search input {
+  height: 44px;
+  border: 1px solid var(--v2-border);
+  border-radius: 12px;
+  background: var(--v2-fill);
+  font-size: 14px;
+}
