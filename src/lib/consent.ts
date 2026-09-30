@@ -8,7 +8,7 @@
  */
 import type { Profile } from './types';
 
-export const TERMS_VERSION = '2026-09-30';
+export const TERMS_VERSION = '2026-10-01';
 
 export function needsConsent(profile: Pick<Profile, 'terms_accepted_at' | 'terms_version'>): boolean {
   // Before migration 034 is applied, get_my_profile() has no such column at
