@@ -8,6 +8,7 @@
  * all transitions go through the database state-machine RPCs.
  */
 import { supabase } from './supabase';
+import { t } from '../i18n';
 import type {
   AnimalType,
   AppNotification,
@@ -339,10 +340,23 @@ export async function fetchCaseEvents(caseId: string): Promise<CaseEvent[]> {
 
 // --- State machine RPCs (thin wrappers, errors bubble to the UI) -----------
 
+/**
+ * Every server-side ban refusal starts with this prefix — reporting (003/
+ * 005/021), accepting and flagging (007), and the case actions in 033 — so
+ * the app can show one localized banned-account message instead of raw
+ * English server text.
+ */
+const BANNED_PREFIX = 'This account cannot';
+
+/** A readable Error for a failed RPC; ban refusals become error.banned. */
+function rpcError(message: string): Error {
+  return new Error(message.startsWith(BANNED_PREFIX) ? t('error.banned') : message);
+}
+
 /** Call an RPC and throw a readable Error if it failed. */
 async function rpc(fn: string, args: Record<string, unknown>): Promise<void> {
   const { error } = await supabase.rpc(fn, args);
-  if (error) throw new Error(error.message);
+  if (error) throw rpcError(error.message);
 }
 
 export const acceptCase = (caseId: string) => rpc('accept_case', { p_case: caseId });
@@ -1335,7 +1349,7 @@ export async function isUserBlocked(blockerId: string, blockedId: string): Promi
 /** "Animal not here / already helped" — returns the running distinct count. */
 export async function flagNotHere(caseId: string): Promise<number> {
   const { data, error } = await supabase.rpc('flag_not_here', { p_case: caseId });
-  if (error) throw new Error(error.message);
+  if (error) throw rpcError(error.message);
   return (data as number) ?? 0;
 }
 

@@ -594,4 +594,5 @@ export const az: Dict = {
   'vets.accepts': 'Qəbul edir',
   'vets.rating': 'Reytinq',
   'vets.call': 'Klinikaya zəng et',
+  'error.banned': 'Hesabınız dayandırılıb, ona görə bunu edə bilməzsiniz. Səhv olduğunu düşünürsünüzsə, bizimlə əlaqə saxlayın.',
 };

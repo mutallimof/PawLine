@@ -594,4 +594,5 @@ export const tr: Dict = {
   'vets.accepts': 'Kabul ediyor',
   'vets.rating': 'Puan',
   'vets.call': 'Kliniği ara',
+  'error.banned': 'Hesabınız askıya alındığı için bunu yapamazsınız. Bir hata olduğunu düşünüyorsanız bizimle iletişime geçin.',
 };

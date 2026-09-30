@@ -224,7 +224,7 @@ export default function CaseDetailPage() {
       });
       toast(t('rating.thanks'));
     } catch (e) {
-      toast(e instanceof Error ? e.message : t('common.error'));
+      toast(isBanned ? t('error.banned') : e instanceof Error ? e.message : t('common.error'));
     } finally {
       setRatingBusy(false);
     }

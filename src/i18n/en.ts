@@ -592,4 +592,5 @@ export const en = {
   'vets.accepts': 'Accepts',
   'vets.rating': 'Rating',
   'vets.call': 'Call clinic',
+  'error.banned': 'Your account is suspended, so you can’t do this. If you think this is a mistake, contact us.',
 };
