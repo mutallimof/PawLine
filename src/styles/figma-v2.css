@@ -1236,3 +1236,27 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 }
 .fullscreen-msg p { font-size: 13.6px; color: var(--v2-ink-2); }
 .fullscreen-msg .btn { min-width: 220px; }
+
+/* ==== Admin — tokens only (colours, type, radii); layout unchanged ======== */
+.admin .chip-row .chip {
+  border: none;
+  border-radius: 999px;
+  background: var(--v2-fill);
+  color: var(--v2-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.admin .chip-row .chip.active { background: var(--brand-fill); color: var(--color-text-on-brand); }
+.admin .card,
+.admin .impact-stat {
+  background: var(--v2-fill);
+  border: none;
+  border-radius: 16px;
+  box-shadow: none;
+  transform: none;
+}
+.admin .impact-stat__value { color: var(--v2-ink); font-weight: 500; }
+.admin .impact-stat__label { color: var(--v2-ink-2); }
+.admin .list-row { background: var(--v2-fill); border-radius: 16px; box-shadow: none; }
+.admin .section-label { color: var(--v2-ink-2); }

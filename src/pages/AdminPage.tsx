@@ -36,7 +36,7 @@ import {
   fetchPendingVets,
   fetchSponsors,
 } from '../lib/api';
-import { useToast } from '../components/ui';
+import { ScreenHeader, useToast } from '../components/ui';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
 import type { ContentReport, Profile, Sponsor, Vet } from '../lib/types';
@@ -127,8 +127,8 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="page">
-      <h1 className="page-title">{t('admin.title')}</h1>
+    <div className="page admin">
+      <ScreenHeader title={t('admin.title')} fallback="/profile" />
 
       {/* chip-row, not .segmented: six tabs with counts ("Reports (12)") are
           far past what the equal-width, no-wrap segmented track can hold
