@@ -30,18 +30,25 @@
 -- 45-minute auto-revert), watch/unwatch_case and mark_case_chat_read (own
 -- subscriptions/read markers, no case state). Numbered 033: 026 is reserved
 -- for the parked guest-report-race branch.
+--
+-- Wrapped in one transaction: if any statement fails, nothing is applied.
 -- ============================================================================
 
+begin;
+
 -- Is the clinic's owner banned? (vets.id = the owner's profiles.id)
+-- Answers only for clinic owners (the join on vets), so it can't be used to
+-- probe whether an arbitrary user is banned.
 create or replace function public.vet_owner_banned(p_vet uuid)
 returns boolean language sql stable security definer set search_path = public as $$
-  select coalesce((select p.banned from public.profiles p where p.id = p_vet), false);
+  select coalesce((select p.banned from public.profiles p join public.vets v on v.id = p.id where v.id = p_vet), false);
 $$;
 
 revoke all on function public.vet_owner_banned(uuid) from public;
 grant execute on function public.vet_owner_banned(uuid) to anon, authenticated;
 
 -- select_vet — latest definition: migration 010
+-- (033 also rewords 'not verified' → 'not approved' in its approval check.)
 create or replace function public.select_vet(p_case uuid, p_vet uuid)
 returns void language plpgsql security definer set search_path = public as $$
 declare
@@ -57,7 +64,7 @@ begin
   v_clinic := v_vet.clinic_name;
 
   if v_vet.status is distinct from 'approved' then
-    raise exception 'That clinic is not verified.';
+    raise exception 'That clinic is not approved.';
   end if;
   -- 033: a banned owner's clinic can't receive animals.
   if public.vet_owner_banned(p_vet) then
@@ -365,3 +372,5 @@ create policy "rescuer rates a confirmed delivery, once per case"
         and c.status = 'resolved'
     )
   );
+
+commit;
