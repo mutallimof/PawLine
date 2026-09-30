@@ -1,8 +1,9 @@
 /**
  * Minimal reactive i18n layer.
  *
- * Every user-facing string goes through t('key'). Four locales ship:
- * Azerbaijani (default), Turkish, English, Russian (Group H).
+ * Every user-facing string goes through t('key'). Four locales are
+ * translated: Azerbaijani (default), Turkish, English, Russian (Group H).
+ * Only ENABLED_LOCALES are reachable — Russian is hidden for launch.
  *
  * Reactivity: the current locale is module state with a subscriber set.
  * The app shell subscribes via useSyncExternalStore, so switching language
@@ -48,13 +49,35 @@ export const LOCALE_NAMES: Record<LocaleCode, string> = {
   ru: 'RU',
 };
 
+/**
+ * The launch switch: the locales users can see and pick. Every language
+ * picker renders this list, not SUPPORTED_LOCALES. Russian stays fully
+ * translated in SUPPORTED_LOCALES but is hidden for launch — add 'ru' back
+ * here to re-enable it.
+ */
+export const ENABLED_LOCALES: readonly LocaleCode[] = ['az', 'tr', 'en'];
+
+/** Where a known-but-disabled locale (a saved 'ru') lands instead. */
+const DISABLED_FALLBACK: LocaleCode = 'en';
+
 const STORAGE_KEY = 'pawline-locale';
 const DEFAULT_LOCALE: LocaleCode = 'az'; // launch market first
 
+/**
+ * Map a stored/saved locale value to one the UI may show: enabled codes pass
+ * through, supported-but-disabled ones (ru) become English, anything else is
+ * null so the caller keeps its default. Read-only — never rewrites storage
+ * or profiles.locale, so re-enabling a locale restores users' saved choice.
+ */
+export function resolveLocale(v: string | null | undefined): LocaleCode | null {
+  if (!v || !(v in SUPPORTED_LOCALES)) return null;
+  return ENABLED_LOCALES.includes(v as LocaleCode) ? (v as LocaleCode) : DISABLED_FALLBACK;
+}
+
 function readStored(): LocaleCode {
   try {
-    const v = localStorage.getItem(STORAGE_KEY);
-    if (v && v in SUPPORTED_LOCALES) return v as LocaleCode;
+    const v = resolveLocale(localStorage.getItem(STORAGE_KEY));
+    if (v) return v;
   } catch {
     // Private mode / storage disabled — fall through to the default.
   }
@@ -68,7 +91,8 @@ export function getLocale(): LocaleCode {
   return current;
 }
 
-export function setLocale(code: LocaleCode): void {
+export function setLocale(requested: LocaleCode): void {
+  const code = resolveLocale(requested) ?? DEFAULT_LOCALE;
   if (code === current) return;
   current = code;
   try {

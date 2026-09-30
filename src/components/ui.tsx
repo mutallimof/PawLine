@@ -6,7 +6,7 @@ import {
   getLocale,
   LOCALE_NAMES,
   setLocale,
-  SUPPORTED_LOCALES,
+  ENABLED_LOCALES,
   t,
   type LocaleCode,
 } from '../i18n';
@@ -473,14 +473,7 @@ export function PasswordField({
 // Language switcher — works for guests (localStorage) and signed-in users
 // (localStorage + profiles.locale, so the choice follows them across devices).
 //
-// FLAGGED, NOT FIXED (Group H): profiles.locale's CHECK constraint
-// (migration 002) and handle_new_user()'s signup allow-list only permit
-// ('az','tr','en') — not 'ru'. So for a signed-in user choosing Russian,
-// the updateProfile() call below fails silently (already caught) — the
-// local switch still applies for this session/device, but the choice
-// won't survive signing in elsewhere until a migration adds 'ru' to both.
-// That's a schema change; per this group's instructions it's flagged here
-// rather than written as an unapplied migration.
+// Offers ENABLED_LOCALES only (Russian is hidden for launch — see i18n).
 // ---------------------------------------------------------------------------
 
 export function LanguageSwitcher() {
@@ -501,7 +494,7 @@ export function LanguageSwitcher() {
   // any width or in any locale.
   return (
     <div className="chip-row lang-switcher" role="group" aria-label={t('profile.language')}>
-      {(Object.keys(SUPPORTED_LOCALES) as LocaleCode[]).map((code) => (
+      {ENABLED_LOCALES.map((code) => (
         <button
           key={code}
           type="button"
