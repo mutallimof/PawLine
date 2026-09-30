@@ -325,19 +325,19 @@ const ABOUT: LocalizedDoc = {
 const CONTACT: LocalizedDoc = {
   en: { title: 'Contact Us', sections: [
     ['Get in touch', 'For questions, problems, partnership requests, or to report something urgent that the in-app tools can’t handle, email us:'],
-    ['Email', 'fikretmutallimov@gmail.com'],
+    ['Email', 'hello@strayscall.com'],
     ['Partner organizations & clinics', 'If you run an animal-welfare organization or a vet clinic and want to join Stray’s Call, we’d love to hear from you — email the address above with a short introduction.'],
     ['Urgent safety issues', 'Stray’s Call is not an emergency service. For an animal in immediate danger, also contact a local rescue organization or the relevant authorities directly.'],
   ]},
   az: { title: 'Bizimlə əlaqə', sections: [
     ['Əlaqə saxlayın', 'Suallar, problemlər, tərəfdaşlıq müraciətləri və ya təcili bir şey üçün bizə e-poçt göndərin:'],
-    ['E-poçt', 'fikretmutallimov@gmail.com'],
+    ['E-poçt', 'hello@strayscall.com'],
     ['Tərəfdaş təşkilatlar və klinikalar', 'Heyvan rifahı təşkilatı və ya klinika işlədirsinizsə və qoşulmaq istəyirsinizsə, yuxarıdakı ünvana yazın.'],
     ['Təcili təhlükəsizlik məsələləri', 'Stray’s Call təcili yardım xidməti deyil. Təhlükədə olan heyvan üçün yerli təşkilatla və ya orqanlarla birbaşa əlaqə saxlayın.'],
   ]},
   tr: { title: 'Bize Ulaşın', sections: [
     ['İletişime geçin', 'Sorular, sorunlar, ortaklık talepleri veya acil bir şey için bize e-posta gönderin:'],
-    ['E-posta', 'fikretmutallimov@gmail.com'],
+    ['E-posta', 'hello@strayscall.com'],
     ['Ortak kuruluşlar ve klinikler', 'Bir hayvan refahı kuruluşu veya klinik işletiyorsanız ve katılmak istiyorsanız, yukarıdaki adrese yazın.'],
     ['Acil güvenlik sorunları', 'Stray’s Call bir acil durum hizmeti değildir. Tehlikedeki bir hayvan için yerel bir kuruluşla veya yetkililerle doğrudan iletişime geçin.'],
   ]},
