@@ -7,13 +7,14 @@ import { markAllNotificationsRead, markNotificationRead } from '../lib/api';
 import type { AppNotification, NotificationType } from '../lib/types';
 import { t } from '../i18n';
 import { timeAgo } from '../lib/time';
-import { IconStethoscope } from '../components/Icons';
+import { EmptyPaw, IconStethoscope } from '../components/Icons';
+import { ScreenHeader } from '../components/ui';
 
 const TYPE_EMOJI: Record<NotificationType, ReactNode> = {
   case_new_nearby: '🆘',
   case_accepted: '🐾',
   case_dropped: '⚠️',
-  vet_requested: <IconStethoscope size={22} />,
+  vet_requested: <IconStethoscope size={19} />,
   vet_confirmed: '✅',
   vet_declined: '↩️',
   case_en_route: '🚗',
@@ -42,9 +43,9 @@ export default function NotificationsPage() {
   if (!isRegistered) {
     return (
       <div className="page">
-        <h1 className="page-title">{t('alerts.title')}</h1>
+        <ScreenHeader title={t('alerts.title')} />
         <div className="empty-state">
-          <div className="empty-state__icon">🔔</div>
+          <EmptyPaw />
           {t('dm.signIn')}
           <div style={{ marginTop: 16 }}>
             <Link to="/auth" className="btn btn--primary">{t('auth.signIn')}</Link>
@@ -56,43 +57,44 @@ export default function NotificationsPage() {
 
   return (
     <div className="page">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 className="page-title">{t('alerts.title')}</h1>
-        {unread > 0 && (
-          <button
-            className="btn btn--ghost btn--small"
-            onClick={() => void markAllNotificationsRead(user.id).then(reload)}
-          >
+      <ScreenHeader title={t('alerts.title')} />
+      {unread > 0 && (
+        <div className="alerts__tools">
+          <button className="v2-link" onClick={() => void markAllNotificationsRead(user.id).then(reload)}>
             {t('alerts.markAll')}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {loading && <div className="spinner" />}
       {!loading && notifications.length === 0 && (
         <div className="empty-state">
-          <div className="empty-state__icon">🔔</div>
+          <EmptyPaw />
           {t('alerts.empty')}
         </div>
       )}
 
-      <div style={{ marginTop: 10 }}>
-        {notifications.map((n) => (
-          <button
-            key={n.id}
-            className={`list-row${n.read ? '' : ' list-row--unread'}`}
-            onClick={() => void open(n)}
-          >
-            <div className="avatar" aria-hidden>{TYPE_EMOJI[n.type]}</div>
-            <div className="list-row__main">
-              <div className="list-row__title">{n.title}</div>
-              {n.body && <div className="list-row__sub">{n.body}</div>}
-              <div className="list-row__sub">{timeAgo(n.created_at)}</div>
-            </div>
-            {!n.read && <span className="unread-dot" />}
-          </button>
-        ))}
-      </div>
+      {notifications.length > 0 && (
+        <div className="v2-group">
+          {notifications.map((n) => (
+            <button
+              key={n.id}
+              className={`v2-row v2-row--sub alert-row${n.read ? '' : ' alert-row--unread'}`}
+              onClick={() => void open(n)}
+            >
+              <span className="v2-row__icon alert-row__icon" aria-hidden="true">{TYPE_EMOJI[n.type]}</span>
+              <span className="v2-row__main">
+                <span className="v2-row__title">{n.title}</span>
+                {n.body && <span className="v2-row__sub alert-row__body">{n.body}</span>}
+              </span>
+              <span className="msg-row__side">
+                <span className="msg-row__time">{timeAgo(n.created_at)}</span>
+                {!n.read && <span className="msg-row__dot" />}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

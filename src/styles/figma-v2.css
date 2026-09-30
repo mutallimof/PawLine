@@ -1019,3 +1019,10 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 
 .chat-top--dm .screen-header__title { text-transform: none; letter-spacing: 0; font-size: 14px; }
 .chat-top--dm .screen-header__title .vet-tag { vertical-align: -0.15em; }
+
+/* ==== Notifications ======================================================= */
+.alerts__tools { display: flex; justify-content: flex-end; margin: -4px 0 8px; }
+.alert-row { align-items: flex-start; padding-top: 12px; padding-bottom: 12px; }
+.alert-row__icon { background: var(--v2-surface); color: var(--brand-text); font-size: 18px; }
+.alert-row__body { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.alert-row--unread .v2-row__title { font-weight: 600; }
