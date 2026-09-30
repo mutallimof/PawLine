@@ -1,7 +1,7 @@
 # Stray's Call — Privacy Policy
 
 > **Status:** Part C is the policy text, live in the app in English, Azerbaijani and Turkish (`PRIVACY` in `src/components/extras.tsx`, `TERMS_VERSION` 2026-10-01). The AZ and TR translations await review by a native speaker. Not reviewed by legal counsel.
-> **Basis:** every statement below was checked against the code and migrations on `main` at commit `f407367` (migrations 001–038, the `delete-account` Edge Function, captcha tokens on every Supabase auth call). The one open point is in **Part E**.
+> **Basis:** every statement below was checked against the code and migrations on `main` at commit `f407367` (migrations 001–038, the `delete-account` Edge Function, captcha tokens on every Supabase auth call); Sentry configuration re-checked on `039cac9`.
 > **Production (confirmed by the operator):** migrations 036, 037 and 038 and the `delete-account` Edge Function are live; Supabase region `eu-west-3` (Paris, France); Vercel serves static files only (no Vercel Functions); Sentry, Cloudflare Turnstile (Supabase Auth captcha), web push and Google Maps are on.
 > **Target law:** Law of the Republic of Azerbaijan "On Personal Data". Users are in Azerbaijan; the data is stored outside Azerbaijan (§C6).
 
@@ -100,7 +100,7 @@ Since 036, `cases` has a **column-level** read grant to `anon, authenticated`: `
 
 | Data | Where stored | Who can see it | How long kept |
 |---|---|---|---|
-| **Crash/error reports** | Sentry (on in production). `sendDefaultPii: false`, `tracesSampleRate: 0.05`, no session replay (`src/lib/monitoring.ts`). | The operator's Sentry account. | Sentry's standard retention period. |
+| **Crash/error reports** | Sentry (on in production), EU region (Germany). Errors only: `sendDefaultPii: false`; no tracing, session replay or profiling (`src/lib/monitoring.ts`). SDK defaults also send session (release-health) pings. | The operator's Sentry account. | Sentry's standard retention period. |
 
 ---
 
@@ -113,7 +113,7 @@ Since 036, `cases` has a **column-level** read grant to `anon, authenticated`: `
 | **Google Maps Platform** (Maps JavaScript API, Places, Geocoding) | Map views (viewport, IP, browser data); place-search text typed by the user; the exact lat/lng of every report (reverse geocoding); app language. | Maps, place search, street address of a report. | Google (global, incl. the USA). |
 | **Google Sign-In** (via Supabase Auth) | The Google identity; Google returns name, email and profile picture; the app stores name and picture URL [024]. | "Continue with Google". | Google. |
 | **Cloudflare Turnstile** (Supabase Auth captcha, enforced) | Browser and device signals and IP address, when the app creates a guest session (first photo load or guest report) and on sign-up, email sign-in and password reset (`captchaOptions()`, `src/lib/turnstile.ts`). Usually invisible. | Bot protection. | Cloudflare (global). |
-| **Sentry** | Error details: stack traces, page URL (can contain case IDs), browser/OS. `sendDefaultPii: false`. | Finding crashes. | **[TO CONFIRM: Sentry data region — US or EU.]** Kept for Sentry's standard period. |
+| **Sentry** | Error details: stack traces, page URL (can contain case IDs), browser/OS, and breadcrumbs (recent navigations, clicks, console messages, and request URLs — Supabase API URLs can contain record IDs); session start/end pings. `sendDefaultPii: false`. | Finding crashes. | EU (Germany) — organization on `ingest.de.sentry.io`. Kept for Sentry's standard period. |
 | **Web push services** (chosen by the browser: Google FCM, Mozilla, Apple) | The device's push endpoint and an **encrypted** payload (title, excerpt, link), sent by `send-push` via `web-push` with VAPID keys; the push service can't read it. | Notifications when the app is closed. | The browser vendor's service. |
 | **Google Fonts** | — | — | Allowed in the CSP but not used (fonts are self-hosted). No data sent. |
 
@@ -206,6 +206,6 @@ The previous in-app policy (all three languages) said, or omitted:
 
 ## Part E — Remaining [TO CONFIRM]
 
-1. **Sentry data region** — US or EU (Part B). The in-app policy does not name Sentry's region, so it is unaffected.
+None. Sentry's data region is confirmed: EU (Germany).
 
-Also outstanding, not a [TO CONFIRM]: native-speaker review of the Azerbaijani and Turkish translations; legal review has not been done.
+Still outstanding: native-speaker review of the Azerbaijani and Turkish translations; legal review has not been done.

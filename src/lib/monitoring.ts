@@ -6,7 +6,9 @@
  * into VITE_SENTRY_DSN in your deployment env vars. That's the whole setup.
  * The free tier is more than enough for a project this size.
  *
- * Deliberately conservative: low trace sampling, no session replay, no PII.
+ * Deliberately conservative: error reports only — no tracing, no session
+ * replay, no profiling, no PII. The Sentry organization is in the EU region
+ * (ingest.de.sentry.io, Germany); the DSN decides where events go.
  */
 import * as Sentry from '@sentry/react';
 
@@ -17,7 +19,8 @@ export function initErrorMonitoring(): void {
   Sentry.init({
     dsn,
     sendDefaultPii: false,
-    tracesSampleRate: 0.05,
+    // Errors only: no tracesSampleRate (tracing off), no replay or profiling
+    // integrations. The privacy policy relies on this — keep them off.
     // Ignore noise that isn't actionable for a PWA in the field.
     ignoreErrors: [
       'ResizeObserver loop',
