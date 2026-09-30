@@ -535,6 +535,7 @@ export const tr: Dict = {
   'safety.ackFine': 'Devam ederek bu riskleri anladığınızı ve kendi kararınızla hareket ettiğinizi onaylarsınız. Stray’s Call bir koordinasyon aracıdır, kurtarma veya acil servis değildir.',
   'safety.ackConfirm': 'Anladım — devam et',
   'report.captchaFailed': 'İnsan olduğunuz doğrulanamadı. Lütfen tekrar deneyin veya bildirmek için ücretsiz bir hesap oluşturun.',
+  'auth.captchaFailed': 'İnsan olduğunuz doğrulanamadı. Lütfen tekrar deneyin.',
   'report.submitFailed': 'Bildiriminiz gönderilemedi. Lütfen birazdan tekrar deneyin.',
 
   // Vet operating hours (migration 010)

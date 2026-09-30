@@ -46,6 +46,7 @@ import { captureError } from '../lib/monitoring';
 import type { Profile } from '../lib/types';
 import { getLocale, resolveLocale, setLocale } from '../i18n';
 import { TERMS_VERSION } from '../lib/consent';
+import { captchaOptions } from '../lib/turnstile';
 
 interface AuthState {
   user: User | null;
@@ -223,7 +224,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── 3. Auth actions ───────────────────────────────────────────────────────
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: await captchaOptions(),
+    });
     if (error) throw new Error(error.message);
   }, []);
 
@@ -244,6 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
         options: {
+          ...(await captchaOptions()),
           data: {
             first_name: firstName,
             last_name: lastName,

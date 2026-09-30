@@ -14,6 +14,8 @@
  * Setup is one dashboard step each side — see OPERATOR_GUIDE §Turnstile.
  */
 
+import { t } from '../i18n';
+
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
 
@@ -123,4 +125,19 @@ export async function getTurnstileToken(timeoutMs = 12_000): Promise<string> {
       reject(e instanceof Error ? e : new Error('turnstile-render-failed'));
     }
   });
+}
+
+/**
+ * `options` for a Supabase auth call that Auth captcha protects (sign-up,
+ * password sign-in, anonymous sign-in, password reset): `{ captchaToken }`
+ * when Turnstile is configured, else `{}`. Call it right before each auth
+ * call — tokens are single-use. Throws a user-facing message on failure.
+ */
+export async function captchaOptions(): Promise<{ captchaToken?: string }> {
+  if (!turnstileEnabled()) return {};
+  try {
+    return { captchaToken: await getTurnstileToken() };
+  } catch {
+    throw new Error(t('auth.captchaFailed'));
+  }
 }

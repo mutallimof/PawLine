@@ -9,6 +9,7 @@ import { t } from '../i18n';
 import { ConsentChecks } from '../components/legal';
 import { recordTermsAcceptance } from '../lib/api';
 import { TERMS_VERSION } from '../lib/consent';
+import { captchaOptions } from '../lib/turnstile';
 
 // Set right when a vet signs up, consumed on whichever sign-in actually
 // starts their session next — immediately below if email confirmation is
@@ -49,6 +50,7 @@ export default function AuthPage() {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
+        ...(await captchaOptions()),
       });
       if (error) throw new Error(error.message);
       setInfo(t('auth.resetSent'));

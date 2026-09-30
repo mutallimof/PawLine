@@ -31,7 +31,7 @@ import type {
 } from './types';
 import { cleanPhotoFile, uploadCasePhoto } from './photos';
 import { computeDHash } from './phash';
-import { getTurnstileToken, turnstileEnabled } from './turnstile';
+import { captchaOptions, getTurnstileToken, turnstileEnabled } from './turnstile';
 import { reverseGeocode } from './gmaps';
 
 // ---------------------------------------------------------------------------
@@ -127,16 +127,15 @@ let sessionPromise: Promise<void> | null = null;
  * can't sign anything; this is also the enforcement point for "guests need
  * an identity to view photos."
  *
- * Deliberately NO Turnstile here, unlike createCase()'s anonymous sign-in:
- * this fires from ordinary browsing (viewing the feed/map), not report
- * submission, and gating that would put a captcha in front of just looking
- * at the map. Accepted tradeoff (A2 decision 3): createCase()'s own
+ * Sends a Turnstile token when one is configured: with Supabase Auth
+ * captcha on, an anonymous sign-in without one is rejected, which would
+ * stop photos loading for every new visitor. Usually invisible
+ * (interaction-only); if it fails, photos don't load and the rest of the
+ * feed still does (resolvePhotoUrls catches it). createCase()'s own
  * Turnstile branch only fires when `!session.session`, so a session minted
- * here for viewing pre-empts it too — a bot that loads the feed once (which
- * it has to, to find anything to spam-report) already holds a session by
- * the time it reports. The backstops that still apply regardless of how the
- * session was minted are the DB's per-device (4/hr, 15/day) and platform-
- * wide anonymous (40/hr) report-rate limits (003, 005), not Turnstile.
+ * here for viewing covers the report too. The DB's per-device (4/hr,
+ * 15/day) and platform-wide anonymous (40/hr) report-rate limits (003, 005)
+ * still apply regardless.
  *
  * Guarded against concurrent double sign-in: overlapping callers (e.g. the
  * feed and a case-detail page mounting at once) share one in-flight
@@ -147,7 +146,9 @@ async function ensureSession(): Promise<void> {
   sessionPromise = (async () => {
     const { data } = await supabase.auth.getSession();
     if (data.session) return;
-    const { error } = await supabase.auth.signInAnonymously();
+    // Once Supabase Auth captcha is on, an anonymous sign-in without a
+    // token is rejected — photos would stop loading for every new visitor.
+    const { error } = await supabase.auth.signInAnonymously({ options: await captchaOptions() });
     if (error) throw new Error(error.message);
   })().finally(() => {
     sessionPromise = null;
