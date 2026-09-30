@@ -560,5 +560,5 @@ export const ru: Dict = {
 
   // The arrival — Direction A emotional peak (live resolution)
   'case.arrivalTitle': 'В клинике',
-  'case.arrivalSub': 'Спасатель передал животное в клинику.',
+  'case.arrivalSub': 'Спасатель передал животное в клинику. Вы стали частью этого.',
 };

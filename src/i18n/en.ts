@@ -558,5 +558,5 @@ export const en = {
 
   // The arrival — Direction A emotional peak (live resolution)
   'case.arrivalTitle': 'At the clinic',
-  'case.arrivalSub': 'The rescuer has handed the animal to the clinic.',
+  'case.arrivalSub': 'The rescuer has handed the animal to the clinic. You were part of this.',
 };
