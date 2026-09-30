@@ -1,42 +1,66 @@
 /**
- * Own profile: identity, animals helped, my cases, notification
- * preferences, and (for vets) the clinic dashboard entry point.
+ * Own profile (Figma v2 "Profile Page" 95:241): identity, three stats we
+ * actually have, my latest cases and a menu. Language and notification
+ * preferences live in Settings; the platform-wide numbers live on About.
+ * RescueHistoryPage (/profile/history) is the full list behind "View all".
  */
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { updateProfile } from '../lib/api';
-import { disablePush, enablePush, getPushSubscription, pushSupported } from '../lib/push';
 import { supabase } from '../lib/supabase';
-import { Avatar, CaseCard, LanguageSwitcher, PlatformStats, useToast } from '../components/ui';
+import { CaseCard, GroupRow, LanguageSwitcher, ScreenHeader } from '../components/ui';
 import { VetVisibilityNotice } from './vetAndUserPages';
-import { getCurrentPosition } from '../lib/geo';
 import { t } from '../i18n';
-import { EmptyPaw, IconStethoscope, VetTag } from '../components/Icons';
-import type { CaseWithDetails, NewCasePref } from '../lib/types';
+import {
+  EmptyPaw,
+  IconClinic,
+  IconHistory,
+  IconLogOut,
+  IconSettings,
+  IconShield,
+  IconStethoscope,
+  VetTag,
+} from '../components/Icons';
+import { isCaseLive, type CaseWithDetails } from '../lib/types';
 
-export default function ProfilePage() {
-  const { user, isGuest, profile, profileError, retryProfile, signOut, refreshProfile } = useAuth();
-  const [myCases, setMyCases] = useState<CaseWithDetails[]>([]);
-  const [pushOn, setPushOn] = useState(false);
-  const navigate = useNavigate();
-  const toast = useToast();
-
+/**
+ * Cases I reported, rescued or received — the query Profile always used,
+ * now without its 20-row limit so the stats and history are exact.
+ */
+function useMyCases(userId: string | null) {
+  const [cases, setCases] = useState<CaseWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    getPushSubscription().then((sub) => setPushOn(!!sub)).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (!user || isGuest) return; // a guest never reaches the UI this feeds
-    // Cases I reported, rescued or received.
+    if (!userId) return;
     supabase
       .from('cases')
       .select('*, photos:case_photos (*)')
-      .or(`reporter_id.eq.${user.id},rescuer_id.eq.${user.id},vet_id.eq.${user.id}`)
+      .or(`reporter_id.eq.${userId},rescuer_id.eq.${userId},vet_id.eq.${userId}`)
       .order('created_at', { ascending: false })
-      .limit(20)
-      .then(({ data }) => setMyCases((data ?? []) as unknown as CaseWithDetails[]));
-  }, [user, isGuest]);
+      .then(({ data }) => {
+        setCases((data ?? []) as unknown as CaseWithDetails[]);
+        setLoading(false);
+      });
+  }, [userId]);
+  return { cases, loading };
+}
+
+/** Help & legal links — Settings has them for accounts; guests get them here. */
+const LEGAL_LINKS = [
+  ['/about', 'legal.about'],
+  ['/faq', 'legal.faq'],
+  ['/safety', 'legal.safety'],
+  ['/privacy', 'legal.privacy'],
+  ['/terms', 'legal.terms'],
+  ['/guidelines', 'legal.conduct'],
+  ['/contact', 'legal.contact'],
+] as const;
+
+export default function ProfilePage() {
+  const { user, isGuest, profile, profileError, retryProfile, signOut } = useAuth();
+  const account = !!user && !isGuest;
+  const { cases: myCases } = useMyCases(account ? user.id : null);
+  const navigate = useNavigate();
 
   // Auth gate — a real account, not merely a session. `profile` can lag
   // behind the session for a moment (or briefly fail and retry); treating
@@ -46,14 +70,10 @@ export default function ProfilePage() {
   // rather than in the profile-loading path below — otherwise they fall
   // through to a spinner, then a profile-load error, for a profile they were
   // never supposed to have.
-  if (!user || isGuest) {
+  if (!account) {
     return (
       <div className="page">
-        <h1 className="page-title">{t('nav.profile')}</h1>
-        <div className="card" style={{ padding: 14, marginBottom: 14 }}>
-          <div className="section-label" style={{ marginTop: 0 }}>{t('profile.language')}</div>
-          <LanguageSwitcher />
-        </div>
+        <ScreenHeader title={t('nav.profile')} />
         <div className="empty-state">
           <EmptyPaw />
           {t('dm.signIn')}
@@ -61,12 +81,16 @@ export default function ProfilePage() {
             <Link to="/auth" className="btn btn--primary">{t('auth.signIn')}</Link>
           </div>
         </div>
-        <Link
-          to="/privacy"
-          style={{ display: 'block', textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}
-        >
-          {t('privacy.link')}
-        </Link>
+        <div className="v2-label">{t('profile.language')}</div>
+        <div className="v2-group">
+          <div className="v2-group__body"><LanguageSwitcher /></div>
+        </div>
+        <div className="v2-label">{t('settings.legal')}</div>
+        <div className="v2-group">
+          {LEGAL_LINKS.map(([to, key]) => (
+            <GroupRow key={to} to={to} title={t(key)} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -75,7 +99,7 @@ export default function ProfilePage() {
     if (profileError) {
       return (
         <div className="page">
-          <h1 className="page-title">{t('nav.profile')}</h1>
+          <ScreenHeader title={t('nav.profile')} />
           <div className="empty-state">
             <EmptyPaw />
             {t('profile.loadFailed')}
@@ -86,7 +110,7 @@ export default function ProfilePage() {
               couldn't load profile: {profileError}
             </p>
             <div style={{ marginTop: 16 }}>
-              <button className="btn btn--primary" onClick={retryProfile}>
+              <button className="btn btn--secondary" onClick={retryProfile}>
                 {t('common.retry')}
               </button>
             </div>
@@ -96,170 +120,132 @@ export default function ProfilePage() {
     }
     return (
       <div className="page">
-        <h1 className="page-title">{t('nav.profile')}</h1>
+        <ScreenHeader title={t('nav.profile')} />
         <div className="spinner" />
       </div>
     );
   }
 
   const isVet = profile.role === 'vet';
-
-  const setPref = async (pref: NewCasePref) => {
-    try {
-      await updateProfile(profile.id, { new_case_pref: pref });
-      await refreshProfile();
-    } catch (e) {
-      toast(e instanceof Error ? e.message : t('common.error'));
-    }
-  };
-
-  const saveHome = async () => {
-    try {
-      const pos = await getCurrentPosition();
-      await updateProfile(profile.id, { home_lat: pos.lat, home_lng: pos.lng });
-      await refreshProfile();
-      toast(t('profile.homeSet'));
-    } catch (e) {
-      toast(e instanceof Error ? e.message : t('common.error'));
-    }
-  };
+  const activeRescues = myCases.filter(
+    (c) => c.rescuer_id === profile.id && c.status !== 'open' && isCaseLive(c.status)
+  ).length;
+  const reported = myCases.filter((c) => c.reporter_id === profile.id).length;
 
   return (
-    <div className="page">
-      {/* Identity + tier */}
-      <div className="card" style={{ padding: 18, textAlign: 'center', marginBottom: 14 }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-          <Avatar name={profile.display_name} url={profile.avatar_url} />
+    <div className="page profile">
+      <ScreenHeader title={t('nav.profile')} />
+
+      <div className="profile__id">
+        <div className="profile__avatar" aria-hidden="true">
+          {profile.avatar_url ? (
+            <img src={profile.avatar_url} alt="" />
+          ) : (
+            profile.display_name.trim().charAt(0).toUpperCase() || '?'
+          )}
         </div>
-        <h1 className="page-title" style={{ fontSize: 24 }}>
-          {profile.display_name}
-          {profile.role === 'vet' && <VetTag />}
-        </h1>
-        <p className="page-subtitle">
-          {t('profile.memberSince', {
-            date: new Date(profile.created_at).toLocaleDateString(),
-          })}
-        </p>
-        <p className="page-subtitle" style={{ marginTop: 8, marginBottom: 0 }}>
-          {t('profile.casesHelped')}: {profile.cases_helped}
-        </p>
-        {/* XP is still awarded server-side (award_xp, 023) but no longer shown:
-            the display is being rebuilt as a ledger / ranking / prizes
-            system. TierBadge and lib/xp.ts are kept for that. Vets never had
-            XP (023), so the placeholder is for rescuers only. */}
-        {!isVet && <div className="soon-pill">🏆 {t('profile.rewardsSoon')}</div>}
-      </div>
-
-      <PlatformStats />
-
-      {/* Vet entry points */}
-      {profile.role === 'vet' && (
-        <>
-          <VetVisibilityNotice />
-          <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
-            <Link to="/vet-dashboard" className="btn btn--primary">
-              <IconStethoscope size={18} /> {t('profile.vetDashboard')}
-            </Link>
-            <Link to="/vet-setup" className="btn btn--secondary">{t('vetSetup.title')}</Link>
+        <div className="profile__id-text">
+          <h2 className="profile__name">
+            {profile.display_name}
+            {isVet && <VetTag />}
+          </h2>
+          <div className="profile__role">{isVet ? t('auth.roleVet') : t('profile.roleRescuer')}</div>
+          <div className="profile__since">
+            {t('profile.memberSince', { date: new Date(profile.created_at).toLocaleDateString() })}
           </div>
-        </>
-      )}
-
-      {/* Language */}
-      <div className="section-label">{t('profile.language')}</div>
-      <div className="card" style={{ padding: 14, marginBottom: 14 }}>
-        <LanguageSwitcher />
-      </div>
-
-      {/* Notification preferences */}
-      <div className="section-label">{t('profile.settings')}</div>
-      <div className="card" style={{ padding: 14, marginBottom: 14 }}>
-        <p className="page-subtitle">{t('profile.prefHelp')}</p>
-        <div className="segmented">
-          {(['all', 'nearby', 'off'] as NewCasePref[]).map((p) => (
-            <button
-              key={p}
-              className={`segmented__option${profile.new_case_pref === p ? ' active' : ''}`}
-              onClick={() => void setPref(p)}
-            >
-              {t(`profile.pref.${p}` as const)}
-            </button>
-          ))}
-        </div>
-        {profile.new_case_pref === 'nearby' && (
-          <div style={{ marginTop: 12 }}>
-            <p className="page-subtitle">
-              {t('profile.radius', { km: profile.notify_radius_km ?? 5 })}
-            </p>
-            <button className="btn btn--ghost btn--small" onClick={() => void saveHome()}>
-              📍 {t('profile.setHome')}
-            </button>
-          </div>
-        )}
-
-        {/* Web Push: alerts even when the app is closed. */}
-        <div style={{ marginTop: 14 }}>
-          {pushOn && <p className="page-subtitle">{t('push.enabled')}</p>}
-          <button
-            className={`btn ${pushOn ? 'btn--ghost' : 'btn--secondary'} btn--small`}
-            onClick={() => {
-              if (pushOn) {
-                void disablePush().then(() => setPushOn(false));
-              } else if (!pushSupported()) {
-                toast(t('push.unsupported'));
-              } else {
-                void enablePush(profile.id)
-                  .then(() => setPushOn(true))
-                  .catch((e) =>
-                    toast(e instanceof Error && e.message === 'push-denied'
-                      ? t('push.denied')
-                      : t('push.unsupported'))
-                  );
-              }
-            }}
-          >
-            🔔 {pushOn ? t('push.disable') : t('push.enable')}
-          </button>
         </div>
       </div>
 
-      {/* My cases */}
+      <div className="v2-stats profile__stats">
+        <div className="v2-stat">
+          <div className="v2-stat__value profile__stat--helped">{profile.cases_helped}</div>
+          <div className="v2-stat__label">{t('profile.casesHelped')}</div>
+        </div>
+        <div className="v2-stat">
+          <div className="v2-stat__value profile__stat--active">{activeRescues}</div>
+          <div className="v2-stat__label">{t('profile.activeRescues')}</div>
+        </div>
+        <div className="v2-stat">
+          <div className="v2-stat__value profile__stat--reported">{reported}</div>
+          <div className="v2-stat__label">{t('profile.casesReported')}</div>
+        </div>
+      </div>
+
+      {isVet && <VetVisibilityNotice />}
+
       {myCases.length > 0 && (
         <>
-          <div className="section-label">{t('profile.myCases')}</div>
-          {myCases.map((c) => (
+          <div className="profile__section-head">
+            <h2 className="v2-h2">{t('profile.myCases')}</h2>
+            <Link to="/profile/history" className="profile__view-all">{t('profile.viewAll')}</Link>
+          </div>
+          {myCases.slice(0, 2).map((c) => (
             <CaseCard key={c.id} caseData={c} userLocation={null} />
           ))}
         </>
       )}
 
-      <Link to="/settings" className="btn btn--secondary" style={{ marginTop: 8 }}>
-        ⚙️ {t('settings.title')}
-      </Link>
+      <div className="v2-group profile__menu">
+        <GroupRow
+          to="/profile/history"
+          icon={<IconHistory />}
+          title={t('profile.history')}
+          sub={t('profile.historySub')}
+        />
+        {isVet && (
+          <>
+            <GroupRow to="/vet-dashboard" icon={<IconStethoscope />} iconTone="brand" title={t('profile.vetDashboard')} />
+            <GroupRow to="/vet-setup" icon={<IconClinic />} iconTone="brand" title={t('vetSetup.title')} />
+          </>
+        )}
+        {profile.is_admin && (
+          <GroupRow to="/admin" icon={<IconShield />} title={t('admin.title')} />
+        )}
+        <GroupRow
+          to="/settings"
+          icon={<IconSettings />}
+          title={t('settings.title')}
+          sub={t('profile.settingsSub')}
+        />
+        <GroupRow
+          onClick={() => void signOut().then(() => navigate('/'))}
+          icon={<IconLogOut />}
+          iconTone="danger"
+          title={t('auth.signOut')}
+          danger
+        />
+      </div>
+    </div>
+  );
+}
 
-      {profile.is_admin && (
-        <Link to="/admin" className="btn btn--secondary" style={{ marginTop: 8 }}>
-          🛠 {t('admin.title')}
-        </Link>
+/** /profile/history — every case I reported, rescued or received. */
+export function RescueHistoryPage() {
+  const { user, isGuest } = useAuth();
+  const account = !!user && !isGuest;
+  const { cases, loading } = useMyCases(account ? user.id : null);
+
+  return (
+    <div className="page">
+      <ScreenHeader title={t('profile.history')} fallback="/profile" />
+      {!account ? (
+        <div className="empty-state">
+          <EmptyPaw />
+          {t('dm.signIn')}
+          <div style={{ marginTop: 16 }}>
+            <Link to="/auth" className="btn btn--primary">{t('auth.signIn')}</Link>
+          </div>
+        </div>
+      ) : loading ? (
+        <div className="spinner" />
+      ) : cases.length === 0 ? (
+        <div className="empty-state">
+          <EmptyPaw />
+          {t('profile.historyEmpty')}
+        </div>
+      ) : (
+        cases.map((c) => <CaseCard key={c.id} caseData={c} userLocation={null} />)
       )}
-
-      <button
-        className="btn btn--danger"
-        style={{ marginTop: 8 }}
-        onClick={() => void signOut().then(() => navigate('/'))}
-      >
-        {t('auth.signOut')}
-      </button>
-
-      <footer className="app-footer">
-        <Link to="/about">{t('legal.about')}</Link>
-        <Link to="/faq">{t('legal.faq')}</Link>
-        <Link to="/safety">{t('legal.safety')}</Link>
-        <Link to="/guidelines">{t('legal.conduct')}</Link>
-        <Link to="/privacy">{t('legal.privacy')}</Link>
-        <Link to="/terms">{t('legal.terms')}</Link>
-        <Link to="/contact">{t('legal.contact')}</Link>
-      </footer>
     </div>
   );
 }

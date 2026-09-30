@@ -567,4 +567,12 @@ export const en = {
   'case.urgency': 'Urgency',
   'case.place': 'Place',
   'common.today': 'Today',
+  'profile.activeRescues': 'Active rescues',
+  'profile.casesReported': 'Cases reported',
+  'profile.viewAll': 'View all',
+  'profile.history': 'Rescue history',
+  'profile.historySub': 'Your reports and rescues',
+  'profile.settingsSub': 'Notifications, language, location and account',
+  'profile.roleRescuer': 'Community rescuer',
+  'profile.historyEmpty': 'No reports or rescues yet.',
 };

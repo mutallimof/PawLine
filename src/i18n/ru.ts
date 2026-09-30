@@ -569,4 +569,12 @@ export const ru: Dict = {
   'case.urgency': 'Срочность',
   'case.place': 'Место',
   'common.today': 'Сегодня',
+  'profile.activeRescues': 'Активные спасения',
+  'profile.casesReported': 'Сообщено случаев',
+  'profile.viewAll': 'Смотреть все',
+  'profile.history': 'История спасений',
+  'profile.historySub': 'Ваши сообщения и спасения',
+  'profile.settingsSub': 'Уведомления, язык, местоположение и аккаунт',
+  'profile.roleRescuer': 'Волонтёр сообщества',
+  'profile.historyEmpty': 'Пока нет сообщений и спасений.',
 };

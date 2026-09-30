@@ -10,6 +10,7 @@ import { Component, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getLocale, t, type LocaleCode } from '../i18n';
 import { IconBack } from './Icons';
+import { PlatformStats } from './ui';
 import { captureBoundaryError } from '../lib/monitoring';
 
 type Section = [heading: string, body: string | string[]];
@@ -24,7 +25,7 @@ type Doc = { title: string; updated?: string; intro?: string; sections: Section[
  */
 type LocalizedDoc = { en: Doc } & Partial<Record<LocaleCode, Doc>>;
 
-function DocView({ doc }: { doc: LocalizedDoc }) {
+function DocView({ doc, footer }: { doc: LocalizedDoc; footer?: ReactNode }) {
   const navigate = useNavigate();
   const d = doc[getLocale()] ?? doc.en;
   return (
@@ -45,6 +46,7 @@ function DocView({ doc }: { doc: LocalizedDoc }) {
           )}
         </div>
       ))}
+      {footer}
     </div>
   );
 }
@@ -447,7 +449,8 @@ export function SafetyAck({
   );
 }
 export const ConductPage = () => <DocView doc={CONDUCT} />;
-export const AboutPage = () => <DocView doc={ABOUT} />;
+// The platform-wide numbers moved here from Profile (Figma v2).
+export const AboutPage = () => <DocView doc={ABOUT} footer={<PlatformStats />} />;
 export const ContactPage = () => <DocView doc={CONTACT} />;
 export const FaqPage = () => <DocView doc={FAQ} />;
 

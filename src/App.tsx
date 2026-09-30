@@ -35,7 +35,7 @@ import {
   NotFoundPage, ErrorBoundary,
 } from './components/legal';
 import SettingsPage from './pages/SettingsPage';
-import ProfilePage from './pages/ProfilePage';
+import ProfilePage, { RescueHistoryPage } from './pages/ProfilePage';
 import {
   UserProfilePage,
   VetDashboardPage,
@@ -122,6 +122,7 @@ function Shell() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/history" element={<RescueHistoryPage />} />
         <Route path="/user/:id" element={<UserProfilePage />} />
         <Route path="/vet/:id" element={<VetPublicPage />} />
         <Route path="/vet-setup" element={<VetSetupPage />} />

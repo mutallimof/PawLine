@@ -154,6 +154,15 @@ export const IconShield = ({ size }: IconProps) => (
   </svg>
 );
 
+export const IconClinic = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M3 21h18" />
+    <path d="M5 21V8l7-5 7 5v13" />
+    <path d="M12 9v5M9.5 11.5h5" />
+    <path d="M10 21v-3h4v3" />
+  </svg>
+);
+
 export const IconArrowUpRight = ({ size }: IconProps) => (
   <svg {...base(size)}>
     <path d="M7 17 17 7M8 7h9v9" />

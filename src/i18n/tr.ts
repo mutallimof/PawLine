@@ -569,4 +569,12 @@ export const tr: Dict = {
   'case.urgency': 'Aciliyet',
   'case.place': 'Yer',
   'common.today': 'Bugün',
+  'profile.activeRescues': 'Aktif kurtarmalar',
+  'profile.casesReported': 'Bildirilen vakalar',
+  'profile.viewAll': 'Tümünü gör',
+  'profile.history': 'Kurtarma geçmişi',
+  'profile.historySub': 'Bildirimleriniz ve kurtarmalarınız',
+  'profile.settingsSub': 'Bildirimler, dil, konum ve hesap',
+  'profile.roleRescuer': 'Topluluk kurtarıcısı',
+  'profile.historyEmpty': 'Henüz bildirim veya kurtarma yok.',
 };

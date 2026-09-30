@@ -569,4 +569,12 @@ export const az: Dict = {
   'case.urgency': 'Təcililik',
   'case.place': 'Yer',
   'common.today': 'Bu gün',
+  'profile.activeRescues': 'Aktiv xilasetmələr',
+  'profile.casesReported': 'Bildirilən hadisələr',
+  'profile.viewAll': 'Hamısına bax',
+  'profile.history': 'Xilasetmə tarixçəsi',
+  'profile.historySub': 'Bildirişləriniz və xilasetmələriniz',
+  'profile.settingsSub': 'Bildirişlər, dil, məkan və hesab',
+  'profile.roleRescuer': 'İcma xilasedicisi',
+  'profile.historyEmpty': 'Hələ bildiriş və ya xilasetmə yoxdur.',
 };

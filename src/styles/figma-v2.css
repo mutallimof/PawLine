@@ -905,3 +905,34 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   line-height: 1;
 }
 .chat-msg__meta { min-height: 18px; }
+
+/* ==== Profile (Figma 95:241) ============================================== */
+.profile__id { display: flex; align-items: center; gap: 16px; margin: 6px 0 4px; }
+.profile__avatar {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-fill);
+  color: var(--color-text-on-brand);
+  font-size: 32px;
+  font-weight: 500;
+}
+.profile__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile__id-text { min-width: 0; }
+.profile__name { margin: 0; font-size: 22px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; }
+.profile__role { margin-top: 2px; font-size: 13.5px; font-weight: 500; color: var(--brand-text); }
+.profile__since { margin-top: 2px; font-size: 12px; color: var(--v2-ink-2); }
+.profile__stats { margin: 20px 0 8px; }
+.profile__stat--helped { color: var(--v2-open-ink); }
+.profile__stat--active { color: var(--brand-text); }
+.profile__stat--reported { color: #6d55c9; } /* Dull Lavender, darkened to 4.9:1 */
+.profile__section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.profile__view-all { font-size: 13px; font-weight: 500; color: var(--brand-text); text-decoration: none; }
+.profile__menu { margin-top: 16px; }
+.v2-row__title,
+.v2-row__sub { display: block; }
