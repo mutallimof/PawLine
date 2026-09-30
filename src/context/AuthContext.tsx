@@ -44,7 +44,7 @@ import { supabase } from '../lib/supabase';
 import { becomeVet, fetchMyProfile } from '../lib/api';
 import { captureError } from '../lib/monitoring';
 import type { Profile } from '../lib/types';
-import { getLocale, setLocale, SUPPORTED_LOCALES, type LocaleCode } from '../i18n';
+import { getLocale, resolveLocale, setLocale } from '../i18n';
 
 interface AuthState {
   user: User | null;
@@ -185,10 +185,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         setProfile(p);
-        // The profile's saved locale is authoritative once signed in.
-        if (p.locale && p.locale in SUPPORTED_LOCALES) {
-          setLocale(p.locale as LocaleCode);
-        }
+        // The profile's saved locale is authoritative once signed in — but a
+        // saved disabled locale (ru) shows as English. Display only: the
+        // profiles.locale value itself is left as the user saved it.
+        const saved = resolveLocale(p.locale);
+        if (saved) setLocale(saved);
       } catch (e) {
         if (cancelled) return;
         if (attempt < PROFILE_RETRIES) {

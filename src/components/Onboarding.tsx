@@ -9,7 +9,7 @@
  * are sampled from them — see the .onboarding block in index.css.
  */
 import { useState } from 'react';
-import { getLocale, LOCALE_NAMES, setLocale, SUPPORTED_LOCALES, t, type LocaleCode } from '../i18n';
+import { ENABLED_LOCALES, getLocale, LOCALE_NAMES, setLocale, t, type LocaleCode } from '../i18n';
 import { updateProfile } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { PawHeartMark } from './Icons';
@@ -53,7 +53,7 @@ function LanguageSelect() {
       value={getLocale()}
       onChange={(e) => choose(e.target.value as LocaleCode)}
     >
-      {(Object.keys(SUPPORTED_LOCALES) as LocaleCode[]).map((code) => (
+      {ENABLED_LOCALES.map((code) => (
         <option key={code} value={code}>
           {LOCALE_NAMES[code]}
         </option>
