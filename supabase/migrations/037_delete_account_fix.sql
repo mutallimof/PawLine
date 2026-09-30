@@ -24,6 +24,12 @@
 --          cleared, a case_dropped event. Finished ones just lose
 --          rescuer_id. The user's case_rescuer_locations rows (036) are
 --          deleted first.
+--        - Clinics: before the vets row goes, cases at vet_selected /
+--          vet_confirmed / en_route with this vet go back to accepted as
+--          vet_respond's decline branch (007/033) does: vet cleared,
+--          last_progress_at = now(), a vet_declined event. Resolved and
+--          closed cases keep their history; the vets delete clears vet_id
+--          on them (ON DELETE SET NULL), as before.
 --
 -- Requires 036 (case_rescuer_locations), which is applied.
 --   3. Guard: aborts if any foreign key into public.profiles or auth.users
@@ -153,6 +159,21 @@ begin
       select id from public.case_messages where sender_id = uid
     );
   update public.case_messages set sender_id = null where sender_id = uid;
+
+  -- Cases waiting on or heading to this clinic go back to the rescuer exactly
+  -- as vet_respond's decline branch (007/033) does it, with the same
+  -- vet_declined event so the rescuer picks another vet.
+  with declined as (
+    update public.cases
+      set status = 'accepted', vet_id = null, last_progress_at = now()
+      where vet_id = uid
+        and status in ('vet_selected', 'vet_confirmed', 'en_route')
+      returning id
+  )
+  insert into public.case_events (case_id, actor_id, type, note)
+  select id, uid, 'vet_declined'::public.notification_type,
+         'The clinic cannot receive the animal right now — please choose another vet.'
+  from declined;
 
   -- If the user is a vet, remove the clinic (it should not linger verified).
   delete from public.vets where id = uid;
