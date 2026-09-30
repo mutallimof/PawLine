@@ -7,10 +7,9 @@
  * that nothing is sold.
  */
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { fetchSponsors } from '../lib/api';
 import { getLocale, t } from '../i18n';
-import { IconBack } from './Icons';
+import { ScreenHeader } from './ui';
 import type { Sponsor } from '../lib/types';
 
 // ---------------------------------------------------------------------------
@@ -122,19 +121,15 @@ const PRIVACY: Record<string, { title: string; sections: [string, string][] }> =
 };
 
 export function PrivacyPage() {
-  const navigate = useNavigate();
   const content = PRIVACY[getLocale()] ?? PRIVACY.en;
 
   return (
-    <div className="page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <IconBack size={18} /> {t('common.back')}
-      </button>
-      <h1 className="page-title">{content.title}</h1>
+    <div className="page doc-page">
+      <ScreenHeader title={content.title} fallback="/settings" />
       {content.sections.map(([heading, body]) => (
-        <div key={heading} style={{ marginTop: 18 }}>
-          <h3 style={{ fontSize: 17, marginBottom: 6 }}>{heading}</h3>
-          <p style={{ fontSize: 14.5, color: 'var(--ink-soft)' }}>{body}</p>
+        <div key={heading} className="doc-section">
+          <h2>{heading}</h2>
+          <p>{body}</p>
         </div>
       ))}
     </div>

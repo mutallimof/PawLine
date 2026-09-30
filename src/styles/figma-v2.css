@@ -1187,3 +1187,28 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .vet-setup .card { background: var(--v2-fill); border-radius: 16px; box-shadow: none; border: none; transform: none; }
 .vet-setup .card .list-row { background: none; }
 .vet-setup > .btn--primary { width: 100%; }
+
+/* ==== Legal & doc pages ==================================================== */
+.doc-page .doc-updated { margin: 0 0 12px; font-size: 11.5px; color: var(--v2-ink-2); opacity: 1; }
+.doc-page .doc-intro { margin: 0 0 14px; font-size: 13.6px; color: var(--v2-ink-2); line-height: 1.6; }
+.doc-section {
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--v2-fill);
+}
+.doc-page .doc-section h2 {
+  margin: 0 0 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--v2-ink);
+}
+.doc-page .doc-section p,
+.doc-page .doc-section li { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--v2-ink-2); }
+.doc-page .doc-section ul { margin: 0; padding-left: 18px; }
+.doc-page .doc-section li + li { margin-top: 4px; }
+.doc-page .platform-stats { margin: 0; }
+.doc-page .card { background: var(--v2-fill); border: none; box-shadow: none; border-radius: 16px; transform: none; }
+.platform-stats__value { color: var(--brand-text); font-weight: 500; }

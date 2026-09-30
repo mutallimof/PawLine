@@ -7,10 +7,9 @@
  * Also exports the app-wide ErrorBoundary and NotFound page.
  */
 import { Component, type ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getLocale, t, type LocaleCode } from '../i18n';
-import { IconBack } from './Icons';
-import { PlatformStats } from './ui';
+import { PlatformStats, ScreenHeader } from './ui';
 import { captureBoundaryError } from '../lib/monitoring';
 
 type Section = [heading: string, body: string | string[]];
@@ -26,18 +25,14 @@ type Doc = { title: string; updated?: string; intro?: string; sections: Section[
 type LocalizedDoc = { en: Doc } & Partial<Record<LocaleCode, Doc>>;
 
 function DocView({ doc, footer }: { doc: LocalizedDoc; footer?: ReactNode }) {
-  const navigate = useNavigate();
   const d = doc[getLocale()] ?? doc.en;
   return (
     <div className="page doc-page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <IconBack size={18} /> {t('common.back')}
-      </button>
-      <h1 className="page-title">{d.title}</h1>
+      <ScreenHeader title={d.title} fallback="/settings" />
       {d.updated && <p className="doc-updated">{d.updated}</p>}
-      {d.intro && <p>{d.intro}</p>}
+      {d.intro && <p className="doc-intro">{d.intro}</p>}
       {d.sections.map(([heading, body], i) => (
-        <div key={i}>
+        <div key={i} className="doc-section">
           <h2>{heading}</h2>
           {Array.isArray(body) ? (
             <ul>{body.map((li, j) => <li key={j}>{li}</li>)}</ul>
