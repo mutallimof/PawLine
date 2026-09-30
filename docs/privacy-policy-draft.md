@@ -1,8 +1,8 @@
-# Stray's Call — Privacy Policy (final draft for legal review)
+# Stray's Call — Privacy Policy
 
-> **Status:** Part C is the policy text. Its English version is live in the app (`PRIVACY.en` in `src/components/extras.tsx`, `TERMS_VERSION` 2026-10-01); the Azerbaijani and Turkish versions still show the previous policy.
-> **Basis:** every statement below was checked against the code and migrations on `main` at commit `f407367` (migrations 001–038, the `delete-account` Edge Function, captcha tokens on every Supabase auth call). Open points are listed in **Part E** and marked **[TO CONFIRM: …]** where they appear.
-> **Production (confirmed by the operator):** Supabase region `eu-west-3` (Paris, France); Vercel serves static files only (no Vercel Functions); Sentry, Cloudflare Turnstile (Supabase Auth captcha), web push and Google Maps are on.
+> **Status:** Part C is the policy text, live in the app in English, Azerbaijani and Turkish (`PRIVACY` in `src/components/extras.tsx`, `TERMS_VERSION` 2026-10-01). The AZ and TR translations await review by a native speaker. Not reviewed by legal counsel.
+> **Basis:** every statement below was checked against the code and migrations on `main` at commit `f407367` (migrations 001–038, the `delete-account` Edge Function, captcha tokens on every Supabase auth call). The one open point is in **Part E**.
+> **Production (confirmed by the operator):** migrations 036, 037 and 038 and the `delete-account` Edge Function are live; Supabase region `eu-west-3` (Paris, France); Vercel serves static files only (no Vercel Functions); Sentry, Cloudflare Turnstile (Supabase Auth captcha), web push and Google Maps are on.
 > **Target law:** Law of the Republic of Azerbaijan "On Personal Data". Users are in Azerbaijan; the data is stored outside Azerbaijan (§C5).
 
 ---
@@ -100,7 +100,7 @@ Since 036, `cases` has a **column-level** read grant to `anon, authenticated`: `
 
 | Data | Where stored | Who can see it | How long kept |
 |---|---|---|---|
-| **Crash/error reports** | Sentry (on in production). `sendDefaultPii: false`, `tracesSampleRate: 0.05`, no session replay (`src/lib/monitoring.ts`). | The operator's Sentry account. | **[TO CONFIRM: Sentry data region and retention period.]** |
+| **Crash/error reports** | Sentry (on in production). `sendDefaultPii: false`, `tracesSampleRate: 0.05`, no session replay (`src/lib/monitoring.ts`). | The operator's Sentry account. | Sentry's standard retention period. |
 
 ---
 
@@ -109,11 +109,11 @@ Since 036, `cases` has a **column-level** read grant to `anon, authenticated`: `
 | Service | What it receives | Why | Where |
 |---|---|---|---|
 | **Supabase** (database, auth, storage, realtime, Edge Functions) | Everything in Part A except device-only items. | Hosts the whole backend. | `eu-west-3`, Paris, France (AWS). |
-| **Vercel** | Requests for the app's static files (IP address, browser user agent, URL). No Vercel Functions — no app data passes through Vercel. | Serving the web app. | Global edge network. **[TO CONFIRM: request-log retention on the Vercel plan.]** |
+| **Vercel** | Requests for the app's static files (IP address, browser user agent, URL). No Vercel Functions — no app data passes through Vercel. | Serving the web app. | Global edge network. Request logs are kept briefly by Vercel for security (no specific period stated). |
 | **Google Maps Platform** (Maps JavaScript API, Places, Geocoding) | Map views (viewport, IP, browser data); place-search text typed by the user; the exact lat/lng of every report (reverse geocoding); app language. | Maps, place search, street address of a report. | Google (global, incl. the USA). |
 | **Google Sign-In** (via Supabase Auth) | The Google identity; Google returns name, email and profile picture; the app stores name and picture URL [024]. | "Continue with Google". | Google. |
 | **Cloudflare Turnstile** (Supabase Auth captcha, enforced) | Browser and device signals and IP address, when the app creates a guest session (first photo load or guest report) and on sign-up, email sign-in and password reset (`captchaOptions()`, `src/lib/turnstile.ts`). Usually invisible. | Bot protection. | Cloudflare (global). |
-| **Sentry** | Error details: stack traces, page URL (can contain case IDs), browser/OS. `sendDefaultPii: false`. | Finding crashes. | **[TO CONFIRM: region.]** |
+| **Sentry** | Error details: stack traces, page URL (can contain case IDs), browser/OS. `sendDefaultPii: false`. | Finding crashes. | **[TO CONFIRM: Sentry data region — US or EU.]** Kept for Sentry's standard period. |
 | **Web push services** (chosen by the browser: Google FCM, Mozilla, Apple) | The device's push endpoint and an **encrypted** payload (title, excerpt, link), sent by `send-push` via `web-push` with VAPID keys; the push service can't read it. | Notifications when the app is closed. | The browser vendor's service. |
 | **Google Fonts** | — | — | Allowed in the CSP but not used (fonts are self-hosted). No data sent. |
 
@@ -121,11 +121,11 @@ Since 036, `cases` has a **column-level** read grant to `anon, authenticated`: `
 
 ## Part C — Privacy Policy
 
-*(Plain-language text for users. The English version in the app is this text.)*
+*(Plain-language text for users. The in-app policy is this text, in English, Azerbaijani and Turkish.)*
 
 ### C1. Who runs Stray's Call
 
-Stray's Call is run by **Fikrat Mutallimov**, an individual, who is the controller of the personal data described here. Contact: **fikretmutallimov@gmail.com**. [TO CONFIRM with counsel: whether a postal address must be published, and whether a dedicated privacy contact is needed.]
+Stray's Call is run by **Fikrat Mutallimov**, an individual, who is the controller of the personal data described here. Contact by email only: **fikretmutallimov@gmail.com** (no postal address is published).
 
 ### C2. What we collect and why
 
@@ -144,12 +144,14 @@ We use this data only to run the rescue service: publishing reports, alerting ne
 
 ### C3. Legal basis
 
-We process your data on the basis of **your consent**, which you give:
-- when you create an account — the two required boxes "I am 18 or older" and "I agree to the Terms and the Privacy Policy", recorded with the date and version;
+We process your data on the basis of **your consent**, and of **what is necessary to run the service and keep it safe**.
+
+Consent, which you give:
+- when you create an account — the two required boxes "I am 18 or older" and "I agree to the Terms of Service and the Privacy policy", recorded with the date and version;
 - as a guest, on each report (the same two boxes), recorded with the report;
 - for location while transporting an animal, by starting the transport; for push notifications, by turning them on.
 
-[TO CONFIRM with counsel: whether some processing (bot checks, spam prevention, moderation, keeping rescue history after an account is deleted) should rely on another basis under the Law on Personal Data.]
+Necessary to run the service and keep it safe: bot checks, spam limits, moderation, and keeping rescue history in anonymised form after an account is deleted.
 
 ### C4. Who can see what
 
@@ -171,7 +173,7 @@ Also public: your display name, profile picture, role, join date, "animals helpe
 
 ### C5. Where your data is stored
 
-Our database, files and sign-in service are hosted by Supabase in the European Union (Paris, France), outside Azerbaijan. The app's files are delivered by Vercel's global network. Maps, place search and street-address lookups are provided by Google; the bot check by Cloudflare; error reports go to Sentry; push notifications go through your browser's push service. By using Stray's Call you consent to this transfer. [TO CONFIRM with counsel: whether the Law on Personal Data requires additional steps for these cross-border transfers.]
+Our database, files and sign-in service are hosted by Supabase in the European Union (Paris, France), outside Azerbaijan. The app's files are delivered by Vercel's global network; Vercel keeps request logs briefly for security. Maps, place search and street-address lookups are provided by Google, and the bot check by Cloudflare; error reports go to Sentry, which keeps them for its standard period; push notifications go through your browser's push service. Your data is stored in the EU (France) and processed by these providers around the world. By using Stray's Call you consent to this transfer.
 
 ### C6. How long we keep it
 
@@ -193,7 +195,7 @@ Our database, files and sign-in service are hosted by Supabase in the European U
 - **Correct your data:** Settings → Personal information (name, phone); alerts, area and language in Settings.
 - **Delete your account:** Settings → Data & account → **Delete my account**. This permanently removes your sign-in and email, profile, alert settings, notifications, push devices, block list, the content reports you filed, "not here" flags, watched cases, the clinic ratings you left, every direct-message conversation you are in (for both people), and — for clinics — the clinic and its verification document files. Your case-chat messages stay in the case, shown as "Deleted account". Reports you created or rescued stay as rescue history, no longer linked to you. If you were in the middle of a rescue, the case reopens for other rescuers; if your clinic was expecting an animal, the rescuer is asked to choose another clinic.
 - **Withdraw consent:** by deleting your account (for location or push: by stopping the transport or turning push off).
-- For anything else, write to the contact address in C1. [TO CONFIRM with counsel: response time, and the complaint authority in Azerbaijan.]
+- For anything else, write to fikretmutallimov@gmail.com. We'll respond as soon as we can, within any time limit the law sets. You can also complain to the data protection authority in your country.
 
 ### C8. 18+ only
 
@@ -219,7 +221,7 @@ When we change the Terms or this policy materially, we update the version, and e
 
 ## Part D — What changed from the previous live policy
 
-The previous in-app policy (still shown in Azerbaijani and Turkish) said, or omitted:
+The previous in-app policy (all three languages) said, or omitted:
 1. Deleting an account required "contacting the Stray's Call team" — there is in-app **Delete my account** and **Export my data**.
 2. "Direct messages can be read only by the people in the conversation" — **admins can read all DMs** [032].
 3. Email "not public" — true, but admins can see every account's email [030].
@@ -231,10 +233,6 @@ The previous in-app policy (still shown in Azerbaijani and Turkish) said, or omi
 
 ## Part E — Remaining [TO CONFIRM]
 
-1. **Sentry:** data region and retention period (A9, B).
-2. **Vercel:** request-log retention on the current plan (B).
-3. **Operator details:** whether a postal address must be published; whether a dedicated privacy contact is needed (C1).
-4. **Counsel — legal basis:** whether bot checks, spam prevention, moderation and keeping rescue history after deletion need a basis other than consent (C3).
-5. **Counsel — cross-border transfer:** extra steps required for transfers to the EU and to global processors (C5).
-6. **Counsel — rights:** response time and the complaint authority in Azerbaijan (C7).
-7. **Deployment:** the policy describes 036, 037 and 038 and the `delete-account` Edge Function; confirm all are applied/deployed in production before publishing. Photo deletion is deliberately not promised until the cleanup job exists (OPERATOR_GUIDE B12).
+1. **Sentry data region** — US or EU (Part B). The in-app policy does not name Sentry's region, so it is unaffected.
+
+Also outstanding, not a [TO CONFIRM]: native-speaker review of the Azerbaijani and Turkish translations; legal review has not been done.
