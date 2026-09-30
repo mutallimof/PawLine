@@ -477,3 +477,60 @@ AI assistant *before acting*) when:**
 Everything in this app was built so that the safe path is also the lazy
 path: reads are harmless, the dashboards are the tools, and every
 moderation action is reversible. When in doubt, do the reversible thing.
+
+### B12. Data retention (migration 038) and the photo cleanup still to build
+
+**What runs by itself:** pg_cron job `pawline-retention`, daily at 03:17 UTC,
+calls `run_retention(false)`. It deletes case chat 90 days after a case is
+resolved/closed (unpinning first; a message with an **open** content report
+waits for you to resolve or dismiss the report), notifications after 90
+days, and guest sessions older than 30 days with no open report.
+
+**Right after applying 038, before 03:17 UTC:** the first run deletes the
+whole backlog at once. See what it will do first (a dry run deletes nothing):
+```sql
+select public.run_retention();
+```
+Afterwards, check Database → Cron → `pawline-retention` → job history.
+
+**Not built yet: photo files (6 months after resolved/closed).** Storage
+files can't be deleted from SQL, so photos need an Edge Function, planned
+below. Until it exists, photos are kept, and the privacy policy must not
+promise the 6-month period. Build it **before the dry run's
+`case_photos_due` goes above 0** — check that number monthly. (A case
+resolved on launch day comes due six months later; cases already finished
+before launch can come due sooner.)
+
+The plan, when it's time:
+1. **Edge Function `retention-photos`** (`--no-verify-jwt`, checks an
+   `x-retention-secret` header like send-push does). In batches of 500:
+   call `retention_due_photos(500)` → `(id, path)` of photos 6 months past
+   their case's resolve/close; remove those files with the Storage API; then
+   `retention_delete_photo_rows(ids)`. Repeat until nothing is due or ~100 s
+   have passed (the rest waits for the next day). Files first, rows second:
+   if the row delete fails, the next run retries, and removing an
+   already-missing file is harmless. `{"dry_run": true}` returns counts only.
+2. **Migration 039:** the two SQL helpers (service role only, execute
+   revoked from anon/authenticated), `create extension if not exists pg_net`,
+   and pg_cron job `pawline-retention-photos` at 03:37 UTC (after
+   `pawline-retention`). Its `net.http_post` reads the URL and secret from
+   Vault at run time, so neither is stored in plain text in the job.
+3. Remove "photos: counted only" from `run_retention()` and the
+   [TO CONFIRM] note from `docs/privacy-policy-draft.md`.
+
+Manual setup, once it's built:
+1. Apply 039 (SQL Editor).
+2. Generate a long random secret → password manager.
+3. `supabase secrets set RETENTION_SECRET=<secret>`
+4. `supabase functions deploy retention-photos --no-verify-jwt`
+5. Store the URL and secret in Vault (SQL Editor):
+   ```sql
+   select vault.create_secret('https://<project-ref>.supabase.co/functions/v1/retention-photos', 'retention_photos_url');
+   select vault.create_secret('<same secret>', 'retention_secret');
+   ```
+6. Test once by hand with `{"dry_run": true}` via `net.http_post`, then read
+   `select * from net._http_response order by created desc limit 1;` and
+   Edge Functions → retention-photos → Logs.
+7. From then on, check Database → Cron → `pawline-retention-photos` job
+   history. pg_net keeps responses for about 6 hours, so look soon after
+   03:37 UTC if something seems off.
