@@ -255,9 +255,9 @@ const CONDUCT: LocalizedDoc = {
           'Anyone else posting “send money to my account” for a case is almost certainly a scam — report them with the ⚑ button.',
           'Never send money to an individual claiming to be a rescuer or vet without verifying the clinic independently.',
         ]],
-      ['No impersonation', 'Don’t pretend to be a vet, clinic, official, or another person. Approved clinics that change their identity are re-checked automatically.'],
+      ['No impersonation', 'Don’t pretend to be a vet, clinic, official, or another person. Approved clinics that change their identity go back for re-approval automatically.'],
       ['What gets you banned', 'Scams, harassment, impersonation, repeated fake reports, or endangering people or animals. Serious cases are permanent and may be reported to authorities.'],
-      ['Reporting problems', 'Use the ⚑ report button on any case or message. Admins review every report.'],
+      ['Reporting problems', 'Use the ⚑ report button on any case or message. Our team reviews reports.'],
     ],
   },
   az: {
@@ -273,9 +273,9 @@ const CONDUCT: LocalizedDoc = {
           'Hadisə üçün “mənim hesabıma pul göndər” yazan hər kəs demək olar ki, fırıldaqçıdır — ⚑ düyməsi ilə şikayət edin.',
           'Klinikanı müstəqil yoxlamadan heç vaxt fərdə pul göndərməyin.',
         ]],
-      ['Saxtakarlıq yoxdur', 'Baytar, klinika, rəsmi şəxs və ya başqası kimi özünüzü göstərməyin. Kimliyini dəyişən klinikalar avtomatik yenidən yoxlanılır.'],
+      ['Saxtakarlıq yoxdur', 'Baytar, klinika, rəsmi şəxs və ya başqası kimi özünüzü göstərməyin. Kimliyini dəyişən təsdiqlənmiş klinikalar avtomatik olaraq yenidən təsdiqə göndərilir.'],
       ['Nə üçün bloklanırsınız', 'Fırıldaq, təqib, saxtakarlıq, təkrar saxta bildirişlər və ya insanları təhlükəyə atmaq.'],
-      ['Problemləri bildirmək', 'İstənilən hadisə və ya mesajda ⚑ düyməsindən istifadə edin. Adminlər hər şikayəti nəzərdən keçirir.'],
+      ['Problemləri bildirmək', 'İstənilən hadisə və ya mesajda ⚑ düyməsindən istifadə edin. Komandamız şikayətləri nəzərdən keçirir.'],
     ],
   },
   tr: {
@@ -291,9 +291,9 @@ const CONDUCT: LocalizedDoc = {
           'Bir vaka için “hesabıma para gönder” diyen herkes neredeyse kesinlikle dolandırıcıdır — ⚑ ile bildirin.',
           'Kliniği bağımsız olarak doğrulamadan asla bir kişiye para göndermeyin.',
         ]],
-      ['Kimliğe bürünme yok', 'Bir veteriner, klinik, yetkili veya başka biri gibi davranmayın. Kimliğini değiştiren klinikler otomatik olarak yeniden kontrol edilir.'],
+      ['Kimliğe bürünme yok', 'Bir veteriner, klinik, yetkili veya başka biri gibi davranmayın. Kimliğini değiştiren onaylı klinikler otomatik olarak yeniden onaya gönderilir.'],
       ['Sizi ne yasaklatır', 'Dolandırıcılık, taciz, kimliğe bürünme, tekrarlanan sahte bildirimler veya insanları tehlikeye atmak.'],
-      ['Sorunları bildirme', 'Herhangi bir vaka veya mesajda ⚑ düğmesini kullanın. Yöneticiler her bildirimi inceler.'],
+      ['Sorunları bildirme', 'Herhangi bir vaka veya mesajda ⚑ düğmesini kullanın. Ekibimiz bildirimleri inceler.'],
     ],
   },
 };
@@ -352,6 +352,7 @@ const FAQ: LocalizedDoc = {
     ['What happens if nobody helps?', 'After 30 minutes we alert more people nearby; after 24 hours an unclaimed case is archived so the map stays current.'],
     ['Is my location private?', 'Your exact home area is never public. Case locations are public because rescuers need them. See the Privacy Policy.'],
     ['How do I delete my account or data?', 'Settings → Account. You can export all your data or delete your account there.'],
+    ['Are clinic opening hours accurate?', 'Opening hours and 24/7 status are provided by the clinics themselves.'],
   ]},
   az: { title: 'Tez-tez verilən suallar', sections: [
     ['Bildirmək üçün hesab lazımdır?', 'Xeyr. İstənilən şəxs yalnız foto və yerlə heyvan bildirə bilər. Hesab hadisəni izləməyə, xilas etməyə və söhbətə imkan verir.'],
@@ -361,6 +362,7 @@ const FAQ: LocalizedDoc = {
     ['Heç kim kömək etməsə nə olur?', '30 dəqiqədən sonra yaxınlıqdakı daha çox insanı xəbərdar edirik; 24 saatdan sonra sahibsiz hadisə arxivlənir.'],
     ['Yerim məxfidir?', 'Dəqiq ev əraziniz heç vaxt açıq deyil. Hadisə yerləri açıqdır, çünki xilasedicilərə lazımdır. Məxfilik Siyasətinə baxın.'],
     ['Hesabımı və ya məlumatlarımı necə silim?', 'Parametrlər → Hesab. Orada bütün məlumatlarınızı ixrac edə və ya hesabınızı silə bilərsiniz.'],
+    ['Klinikaların iş saatları dəqiqdir?', 'İş saatları və 24/7 statusu klinikaların özləri tərəfindən təqdim olunur.'],
   ]},
   tr: { title: 'Sıkça Sorulan Sorular', sections: [
     ['Bildirmek için hesap gerekir mi?', 'Hayır. Herkes sadece bir fotoğraf ve konumla hayvan bildirebilir. Hesap; vakayı takip etmenizi, kurtarmanızı ve sohbet etmenizi sağlar.'],
@@ -370,6 +372,7 @@ const FAQ: LocalizedDoc = {
     ['Kimse yardım etmezse ne olur?', '30 dakika sonra yakındaki daha fazla kişiyi uyarırız; 24 saat sonra sahipsiz vaka arşivlenir.'],
     ['Konumum gizli mi?', 'Tam ev bölgeniz asla herkese açık değildir. Vaka konumları herkese açıktır çünkü kurtarıcıların ihtiyacı vardır. Gizlilik Politikası’na bakın.'],
     ['Hesabımı veya verilerimi nasıl silerim?', 'Ayarlar → Hesap. Orada tüm verilerinizi dışa aktarabilir veya hesabınızı silebilirsiniz.'],
+    ['Klinik çalışma saatleri doğru mu?', 'Çalışma saatleri ve 7/24 açık bilgisi kliniklerin kendileri tarafından sağlanır.'],
   ]},
 };
 
