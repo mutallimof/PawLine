@@ -1135,3 +1135,55 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   background: var(--v2-fill);
   font-size: 14px;
 }
+
+/* ==== Vet dashboard + clinic setup ======================================== */
+.vet-dash__stats { margin: 4px 0 8px; }
+.vet-dash__n--incoming { color: var(--v2-open-ink); }
+.vet-dash__n--active { color: var(--v2-prog-ink); }
+.vet-dash__n--past { color: var(--brand-text); }
+
+.vet-setup .field__label {
+  display: block;
+  margin: 14px 0 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--v2-ink);
+}
+.vet-setup .field input,
+.vet-setup .field select,
+.vet-setup .field textarea {
+  min-height: 52px;
+  border: 1px solid var(--v2-border);
+  border-radius: 14px;
+  background: var(--v2-fill);
+  font-size: 15px;
+  color: var(--v2-ink);
+}
+.vet-setup .page-subtitle { font-size: 12.5px; color: var(--v2-ink-2); }
+.vet-setup .segmented {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 8px;
+  flex-wrap: wrap;
+  border: none;
+}
+.vet-setup .segmented__option {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--v2-fill);
+  color: var(--v2-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.vet-setup .segmented__option.active {
+  background: var(--brand-fill);
+  color: var(--color-text-on-brand);
+}
+.vet-setup .map-wrap { border-radius: 22px; overflow: hidden; }
+.vet-setup .card { background: var(--v2-fill); border-radius: 16px; box-shadow: none; border: none; transform: none; }
+.vet-setup .card .list-row { background: none; }
+.vet-setup > .btn--primary { width: 100%; }

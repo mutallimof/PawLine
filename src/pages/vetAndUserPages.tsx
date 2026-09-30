@@ -467,9 +467,9 @@ export function VetSetupPage() {
   };
 
   return (
-    <div className="page">
-      <h1 className="page-title">{t('vetSetup.title')}</h1>
-      <p className="page-subtitle">{t('vetSetup.subtitle')}</p>
+    <div className="page vet-setup">
+      <ScreenHeader title={t('vetSetup.title')} fallback="/profile" />
+      <p className="v2-sub">{t('vetSetup.subtitle')}</p>
 
       {vetStatus === 'pending' && <div className="banner banner--warn">{t('vetSetup.pending')}</div>}
       {vetStatus === 'rejected' && <div className="banner banner--warn">{t('vetSetup.rejected')}</div>}
@@ -714,18 +714,33 @@ export function VetDashboardPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title">{t('vetDash.title')}</h1>
+      <ScreenHeader title={t('vetDash.title')} fallback="/profile" />
       <VetVisibilityNotice />
 
-      <div className="section-label">{t('vetDash.incoming')}</div>
-      {incoming.length === 0 && <p className="page-subtitle">{t('vetDash.none')}</p>}
+      <div className="v2-stats vet-dash__stats">
+        <div className="v2-stat">
+          <div className="v2-stat__value vet-dash__n--incoming">{incoming.length}</div>
+          <div className="v2-stat__label">{t('vetDash.incoming')}</div>
+        </div>
+        <div className="v2-stat">
+          <div className="v2-stat__value vet-dash__n--active">{active.length}</div>
+          <div className="v2-stat__label">{t('vetDash.active')}</div>
+        </div>
+        <div className="v2-stat">
+          <div className="v2-stat__value vet-dash__n--past">{past.length}</div>
+          <div className="v2-stat__label">{t('status.resolved')}</div>
+        </div>
+      </div>
+
+      <h2 className="v2-h2">{t('vetDash.incoming')}</h2>
+      {incoming.length === 0 && <p className="v2-sub" style={{ marginTop: 0 }}>{t('vetDash.none')}</p>}
       {incoming.map((c) => (
         <CaseCard key={c.id} caseData={c} userLocation={null} />
       ))}
 
       {active.length > 0 && (
         <>
-          <div className="section-label">{t('vetDash.active')}</div>
+          <h2 className="v2-h2">{t('vetDash.active')}</h2>
           {active.map((c) => (
             <CaseCard key={c.id} caseData={c} userLocation={null} />
           ))}
@@ -734,7 +749,7 @@ export function VetDashboardPage() {
 
       {past.length > 0 && (
         <>
-          <div className="section-label">{t('home.filter.resolved')}</div>
+          <h2 className="v2-h2">{t('status.resolved')}</h2>
           {past.map((c) => (
             <CaseCard key={c.id} caseData={c} userLocation={null} />
           ))}
