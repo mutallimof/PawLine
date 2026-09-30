@@ -589,4 +589,9 @@ export const az: Dict = {
   'settings.groupData': 'Məlumat və hesab',
   'settings.groupHelp': 'Kömək və hüquqi',
   'settings.saved': 'Yadda saxlanıldı',
+  'vets.phone': 'Telefon',
+  'vets.email': 'E-poçt',
+  'vets.accepts': 'Qəbul edir',
+  'vets.rating': 'Reytinq',
+  'vets.call': 'Klinikaya zəng et',
 };

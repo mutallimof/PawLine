@@ -7,17 +7,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchVets, selectVet } from '../lib/api';
 import { useCase } from '../hooks/useRealtime';
-import { useToast } from '../components/ui';
-import { IconBack } from '../components/Icons';
+import { ScreenHeader, useToast, VetCard } from '../components/ui';
+import { EmptyPaw } from '../components/Icons';
 import type { Vet } from '../lib/types';
-import { distanceKm, formatDistance } from '../lib/geo';
+import { distanceKm } from '../lib/geo';
 import { t } from '../i18n';
-import { InkScene } from '../components/Ink';
 
-/** 'HH:MM:SS' → 'HH:MM' (the seconds are noise to a human). */
-function hhmm(t: string): string {
-  return t.slice(0, 5);
-}
 
 export default function VetPickerPage() {
   const { id } = useParams<{ id: string }>();
@@ -83,15 +78,12 @@ export default function VetPickerPage() {
 
   return (
     <div className="page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <IconBack size={18} /> {t('common.back')}
-      </button>
-      <h1 className="page-title">{t('vets.title')}</h1>
-      <p className="page-subtitle">{t('vets.sortedBy')}</p>
+      <ScreenHeader title={t('vets.title')} fallback={id ? `/case/${id}` : '/'} />
+      <p className="v2-sub">{t('vets.sortedBy')}</p>
 
       {sorted.length === 0 && (
         <div className="empty-state">
-          <InkScene kind="search" />
+          <EmptyPaw />
           {t('vets.none')}
         </div>
       )}
@@ -108,59 +100,23 @@ export default function VetPickerPage() {
 
       {sorted.map(({ vet, km }: { vet: Vet; km?: number }) => {
         const openNow = vet.open_now !== false;
-        const atCapacity = openNow && vet.is_open === false;
         return (
-          <div
+          <VetCard
             key={vet.id}
-            className={`list-row${openNow ? '' : ' list-row--muted'}`}
-            style={{ alignItems: 'flex-start' }}
-          >
-            <div
-              className="avatar"
-              style={{ background: 'rgba(63,127,174,.14)', color: 'var(--status-enroute)' }}
-            >
-              +
-            </div>
-            <div className="list-row__main">
-              <div className="list-row__title">
-                {vet.clinic_name}
-                {vet.is_24_7 && <span className="tag tag--always"> {t('vets.always')}</span>}
-              </div>
-              <div className="list-row__sub">
-                {km !== undefined ? `${formatDistance(km)} · ` : ''}
-                {vet.address}
-              </div>
-              {!!vet.rating_count && (
-                <div className="list-row__sub">
-                  ★ {vet.rating_avg?.toFixed(1)} ({vet.rating_count})
-                </div>
-              )}
-              {vet.contact_phone && <div className="list-row__sub">{vet.contact_phone}</div>}
-
-              {!openNow && (
-                <div className="list-row__sub list-row__sub--closed">
-                  {vet.opens_at
-                    ? t('vets.closedUntil').replace('{time}', hhmm(vet.opens_at))
-                    : t('vets.closed')}
-                </div>
-              )}
-              {atCapacity && (
-                <div className="list-row__sub list-row__sub--closed">{t('vets.atCapacity')}</div>
-              )}
-              {openNow && !atCapacity && vet.closes_at && !vet.is_24_7 && (
-                <div className="list-row__sub list-row__sub--open">
-                  {t('vets.openUntil').replace('{time}', hhmm(vet.closes_at))}
-                </div>
-              )}
-            </div>
-            <button
-              className="btn btn--primary btn--small"
-              disabled={busy || !openNow}
-              onClick={() => void pick(vet.id)}
-            >
-              {t('vets.select')}
-            </button>
-          </div>
+            vet={vet}
+            km={km}
+            showPhone
+            muted={!openNow}
+            action={
+              <button
+                className="btn btn--primary btn--small"
+                disabled={busy || !openNow}
+                onClick={() => void pick(vet.id)}
+              >
+                {t('vets.select')}
+              </button>
+            }
+          />
         );
       })}
     </div>

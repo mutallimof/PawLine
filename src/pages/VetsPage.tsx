@@ -9,15 +9,14 @@
  * exactly as before — this is just a browse view.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchVets } from '../lib/api';
 import { CasesMap } from '../components/maps';
-import { IconBack } from '../components/Icons';
+import { EmptyPaw } from '../components/Icons';
+import { ScreenHeader, VetCard } from '../components/ui';
 import { SponsorStrip } from '../components/extras';
-import { distanceKm, formatDistance, getCurrentPosition, type LatLng } from '../lib/geo';
+import { distanceKm, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
-import { InkScene } from '../components/Ink';
 import type { Vet } from '../lib/types';
 
 export default function VetsPage() {
@@ -27,7 +26,6 @@ export default function VetsPage() {
   const [noLocation, setNoLocation] = useState(false);
   const [view, setView] = useState<'list' | 'map'>('list');
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchVets()
@@ -68,23 +66,14 @@ export default function VetsPage() {
 
   return (
     <div className="page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <IconBack size={18} /> {t('common.back')}
-      </button>
-      <h1 className="page-title">{t('vetsBrowse.title')}</h1>
-      <p className="page-subtitle">{t('vetsBrowse.subtitle')}</p>
+      <ScreenHeader title={t('vetsBrowse.title')} />
+      <p className="v2-sub">{t('vetsBrowse.subtitle')}</p>
 
-      <div className="segmented" style={{ marginBottom: 14 }}>
-        <button
-          className={`segmented__option${view === 'list' ? ' active' : ''}`}
-          onClick={() => setView('list')}
-        >
+      <div className="v2-chips" role="group" aria-label={t('vetsBrowse.title')} style={{ marginBottom: 14 }}>
+        <button type="button" className={`v2-chip${view === 'list' ? ' active' : ''}`} aria-pressed={view === 'list'} onClick={() => setView('list')}>
           {t('common.list')}
         </button>
-        <button
-          className={`segmented__option${view === 'map' ? ' active' : ''}`}
-          onClick={() => setView('map')}
-        >
+        <button type="button" className={`v2-chip${view === 'map' ? ' active' : ''}`} aria-pressed={view === 'map'} onClick={() => setView('map')}>
           {t('home.map')}
         </button>
       </div>
@@ -92,7 +81,7 @@ export default function VetsPage() {
       {noLocation && <div className="banner banner--info">{t('vetsBrowse.noLocation')}</div>}
 
       {view === 'map' ? (
-        <div style={{ margin: '0 -16px' }}>
+        <div style={{ margin: '0 calc(-1 * var(--v2-gutter))' }}>
           <CasesMap
             cases={[]}
             vets={vets}
@@ -105,46 +94,12 @@ export default function VetsPage() {
           {loading && <div className="spinner" />}
           {!loading && sorted.length === 0 && (
             <div className="empty-state">
-              <InkScene kind="search" />
+              <EmptyPaw />
               {t('vets.none')}
             </div>
           )}
           {sorted.map(({ vet, km }) => (
-            <Link key={vet.id} to={`/vet/${vet.id}`} className="list-row">
-              <div
-                className="avatar"
-                style={{ background: 'rgba(63,127,174,.14)', color: 'var(--status-enroute)' }}
-              >
-                +
-              </div>
-              <div className="list-row__main">
-                <div className="list-row__title">{vet.clinic_name}</div>
-                <div className="list-row__sub">
-                  {km !== undefined ? `${formatDistance(km)} · ` : ''}
-                  {vet.address}
-                </div>
-                {!!vet.rating_count && (
-                  <div className="list-row__sub">
-                    ★ {vet.rating_avg?.toFixed(1)} ({vet.rating_count})
-                  </div>
-                )}
-                {vet.open_now === false ? (
-                  <div className="list-row__sub list-row__sub--closed">
-                    {vet.opens_at
-                      ? t('vets.closedUntil').replace('{time}', vet.opens_at.slice(0, 5))
-                      : t('vets.closed')}
-                  </div>
-                ) : vet.is_open === false ? (
-                  <div className="list-row__sub list-row__sub--closed">{t('vets.atCapacity')}</div>
-                ) : vet.is_24_7 ? (
-                  <div className="list-row__sub list-row__sub--open">{t('vets.always')}</div>
-                ) : vet.closes_at ? (
-                  <div className="list-row__sub list-row__sub--open">
-                    {t('vets.openUntil').replace('{time}', vet.closes_at.slice(0, 5))}
-                  </div>
-                ) : null}
-              </div>
-            </Link>
+            <VetCard key={vet.id} vet={vet} km={km} to={`/vet/${vet.id}`} />
           ))}
           <SponsorStrip />
         </>

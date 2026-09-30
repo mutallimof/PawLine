@@ -1,7 +1,7 @@
 /** Shared UI building blocks. */
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { isCaseLive, type CaseStatus, type CaseWithDetails, type UrgencyLevel } from '../lib/types';
+import { isCaseLive, type CaseStatus, type CaseWithDetails, type UrgencyLevel, type Vet } from '../lib/types';
 import {
   getLocale,
   LOCALE_NAMES,
@@ -287,6 +287,65 @@ export function CaseCard({
       </div>
     </Link>
   );
+}
+
+/**
+ * Figma v2 no-photo UI card for a clinic: stethoscope tile, name, one hours
+ * badge, distance/address and rating meta, and an optional action (the vet
+ * picker's "Ask to receive"). Links to the clinic page when `to` is given.
+ */
+export function vetHoursBadge(vet: Vet): { tone: StatusGroup; label: string } | null {
+  if (vet.open_now === false) {
+    return {
+      tone: 'closed',
+      label: vet.opens_at ? t('vets.closedUntil').replace('{time}', vet.opens_at.slice(0, 5)) : t('vets.closed'),
+    };
+  }
+  if (vet.is_open === false) return { tone: 'open', label: t('vets.atCapacity') };
+  if (vet.is_24_7) return { tone: 'done', label: t('vets.hours247') };
+  if (vet.closes_at) return { tone: 'done', label: t('vets.openUntil').replace('{time}', vet.closes_at.slice(0, 5)) };
+  return null;
+}
+
+export function VetCard({
+  vet,
+  km,
+  to,
+  showPhone = false,
+  muted = false,
+  action,
+}: {
+  vet: Vet;
+  km?: number;
+  to?: string;
+  showPhone?: boolean;
+  muted?: boolean;
+  action?: ReactNode;
+}) {
+  const badge = vetHoursBadge(vet);
+  const body = (
+    <>
+      <span className="vet-card__tile" aria-hidden="true"><IconStethoscope /></span>
+      <span className="vet-card__body">
+        <span className="v2-card__title">{vet.clinic_name}</span>
+        {badge && <span className={`v2-badge v2-badge--${badge.tone} vet-card__badge`}>{badge.label}</span>}
+        <span className="v2-meta">
+          <IconPin />
+          <span>{km !== undefined ? `${formatDistance(km)} · ` : ''}{vet.address}</span>
+        </span>
+        {!!vet.rating_count && (
+          <span className="v2-meta vet-card__rating">
+            <span aria-hidden="true">★</span>
+            <span>{vet.rating_avg?.toFixed(1)} · {t('vets.ratingCount', { n: vet.rating_count })}</span>
+          </span>
+        )}
+        {showPhone && vet.contact_phone && <span className="v2-meta"><span>{vet.contact_phone}</span></span>}
+        {action && <span className="vet-card__action">{action}</span>}
+      </span>
+    </>
+  );
+  const cls = `v2-card vet-card${muted ? ' vet-card--muted' : ''}`;
+  return to ? <Link to={to} className={cls}>{body}</Link> : <div className={cls}>{body}</div>;
 }
 
 // ---------------------------------------------------------------------------

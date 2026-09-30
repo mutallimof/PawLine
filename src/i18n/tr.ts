@@ -589,4 +589,9 @@ export const tr: Dict = {
   'settings.groupData': 'Veri ve hesap',
   'settings.groupHelp': 'Yardım ve yasal',
   'settings.saved': 'Kaydedildi',
+  'vets.phone': 'Telefon',
+  'vets.email': 'E-posta',
+  'vets.accepts': 'Kabul ediyor',
+  'vets.rating': 'Puan',
+  'vets.call': 'Kliniği ara',
 };

@@ -25,7 +25,7 @@ import {
   upsertVet,
 } from '../lib/api';
 import { useCases } from '../hooks/useRealtime';
-import { Avatar, CaseCard, useToast } from '../components/ui';
+import { Avatar, CaseCard, ScreenHeader, useToast, vetHoursBadge } from '../components/ui';
 import { PinDropMap } from '../components/maps';
 import { IconBack, IconStethoscope, VetTag } from '../components/Icons';
 import { DEFAULT_CENTER, getCurrentPosition, type LatLng } from '../lib/geo';
@@ -233,63 +233,71 @@ export function VetPublicPage() {
     }
   };
 
+  const badge = vetHoursBadge(vet);
   return (
-    <div className="page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <IconBack size={18} /> {t('common.back')}
-      </button>
-      <div className="card" style={{ padding: 18, textAlign: 'center' }}>
-        <div className="vet-page__icon" aria-hidden="true">
-          <IconStethoscope size={42} />
+    <div className="page vet-page">
+      <ScreenHeader title={t('vetsBrowse.title')} fallback="/vets" />
+
+      <div className="vet-page__hero">
+        <div className="vet-page__tile" aria-hidden="true">
+          <IconStethoscope size={30} />
         </div>
-        <h1 className="page-title" style={{ fontSize: 24 }}>{vet.clinic_name}</h1>
-        <p className="page-subtitle">{vet.address}</p>
+        <h2 className="vet-page__name">{vet.clinic_name}</h2>
+        <p className="vet-page__addr">{vet.address}</p>
+        {badge && <span className={`v2-badge v2-badge--${badge.tone}`}>{badge.label}</span>}
+      </div>
+
+      <dl className="case-detail__kv vet-page__kv">
         {vet.contact_phone && (
-          <a href={`tel:${vet.contact_phone}`} style={{ fontWeight: 800, color: 'var(--coral-deep)' }}>
-            {vet.contact_phone}
-          </a>
+          <div>
+            <dt>{t('vets.phone')}</dt>
+            <dd><a href={`tel:${vet.contact_phone}`}>{vet.contact_phone}</a></dd>
+          </div>
         )}
         {vet.contact_email && (
-          <p className="page-subtitle" style={{ marginTop: 4 }}>
-            <a href={`mailto:${vet.contact_email}`}>{vet.contact_email}</a>
-          </p>
+          <div>
+            <dt>{t('vets.email')}</dt>
+            <dd><a href={`mailto:${vet.contact_email}`}>{vet.contact_email}</a></dd>
+          </div>
+        )}
+        {vet.accepted_animals?.length > 0 && (
+          <div>
+            <dt>{t('vets.accepts')}</dt>
+            <dd>{vet.accepted_animals.map((a) => t(`animal.${a}` as const)).join(' · ')}</dd>
+          </div>
         )}
         {/* C2: rating, once the clinic has at least one */}
         {!!vet.rating_count && (
-          <p style={{ fontWeight: 700, margin: '8px 0 0' }}>
-            ★ {vet.rating_avg?.toFixed(1)} · {t('vets.ratingCount', { n: vet.rating_count })}
-          </p>
-        )}
-        {vet.accepted_animals?.length > 0 && (
-          <p className="page-subtitle" style={{ marginTop: 6 }}>
-            {vet.accepted_animals.map((a) => t(`animal.${a}` as const)).join(' · ')}
-          </p>
-        )}
-        {/* No tier badge here: this page is always a clinic, and vets earn no
-            XP (023). The star rating above is a clinic's standing. */}
-        <VetHours vet={vet} />
-        {vet.open_now === false ? (
-          <div className="banner banner--warn">
-            {vet.opens_at
-              ? t('vets.closedUntil').replace('{time}', vet.opens_at.slice(0, 5))
-              : t('vets.closed')}
-          </div>
-        ) : vet.is_open === false ? (
-          <div className="banner banner--warn">{t('vets.atCapacity')}</div>
-        ) : null}
-        {!isRegistered && (
-          <div style={{ marginTop: 14 }}>
-            <SignInCta />
+          <div>
+            <dt>{t('vets.rating')}</dt>
+            <dd>★ {vet.rating_avg?.toFixed(1)} · {t('vets.ratingCount', { n: vet.rating_count })}</dd>
           </div>
         )}
+      </dl>
+
+      {/* No tier badge here: this page is always a clinic, and vets earn no
+          XP (023). The star rating above is a clinic's standing. */}
+      <VetHours vet={vet} />
+
+      <div className="vet-page__actions">
+        {!isRegistered && <SignInCta />}
         {/* Any regular user can start a DM with a clinic; clinics can reply
             but never start one (get_or_create_dm refuses it, 032), so another
             vet isn't offered the button. */}
         {isRegistered && user.id !== vet.id && me?.role !== 'vet' && (
           <button className="btn btn--primary" onClick={() => void message()}>
-            💬 {t('dm.messageClinic')}
+            {t('dm.messageClinic')}
           </button>
         )}
+        {vet.contact_phone && (
+          <a className="btn btn--secondary" href={`tel:${vet.contact_phone}`}>{t('vets.call')}</a>
+        )}
+        <a
+          className="btn btn--secondary"
+          href={`https://www.google.com/maps/search/?api=1&query=${vet.lat},${vet.lng}`}
+        >
+          {t('case.getDirections')}
+        </a>
       </div>
     </div>
   );

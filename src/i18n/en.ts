@@ -587,4 +587,9 @@ export const en = {
   'settings.groupData': 'Data & account',
   'settings.groupHelp': 'Help & legal',
   'settings.saved': 'Saved',
+  'vets.phone': 'Phone',
+  'vets.email': 'Email',
+  'vets.accepts': 'Accepts',
+  'vets.rating': 'Rating',
+  'vets.call': 'Call clinic',
 };

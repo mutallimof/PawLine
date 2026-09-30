@@ -589,4 +589,9 @@ export const ru: Dict = {
   'settings.groupData': 'Данные и аккаунт',
   'settings.groupHelp': 'Помощь и правовая информация',
   'settings.saved': 'Сохранено',
+  'vets.phone': 'Телефон',
+  'vets.email': 'Эл. почта',
+  'vets.accepts': 'Принимает',
+  'vets.rating': 'Рейтинг',
+  'vets.call': 'Позвонить в клинику',
 };
