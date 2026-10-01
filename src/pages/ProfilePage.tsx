@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { withCaseColumns } from '../lib/api';
+import { resolvePhotoUrls, withCaseColumns } from '../lib/api';
 import { CaseCard, GroupRow, LanguageSwitcher, ScreenHeader } from '../components/ui';
 import { VetVisibilityNotice } from './vetAndUserPages';
 import { t } from '../i18n';
@@ -27,7 +27,9 @@ import { isCaseLive, type CaseWithDetails } from '../lib/types';
 
 /**
  * Cases I reported, rescued or received — the query Profile always used,
- * now without its 20-row limit so the stats and history are exact.
+ * now without its 20-row limit so the stats and history are exact. Photo
+ * paths come back unsigned (the bucket is private, 018), so they're signed
+ * the same way the Home feed does it before the cards render.
  */
 function useMyCases(userId: string | null) {
   const [cases, setCases] = useState<CaseWithDetails[]>([]);
@@ -40,8 +42,10 @@ function useMyCases(userId: string | null) {
         .select(`${cols}, photos:case_photos (*)`)
         .or(`reporter_id.eq.${userId},rescuer_id.eq.${userId},vet_id.eq.${userId}`)
         .order('created_at', { ascending: false })
-    ).then(({ data }) => {
-        setCases((data ?? []) as unknown as CaseWithDetails[]);
+    ).then(async ({ data }) => {
+        const list = (data ?? []) as unknown as CaseWithDetails[];
+        await resolvePhotoUrls(list); // never throws; failures become "no photo"
+        setCases(list);
         setLoading(false);
       });
   }, [userId]);

@@ -173,7 +173,7 @@ const SIGNED_URL_TTL_SECONDS = 60 * 60;
  * exact bug this migration's sibling fix (CASE_SELECT's vets embed) was
  * about, and photo signing gets the same posture.
  */
-async function resolvePhotoUrls(cases: CaseWithDetails[]): Promise<void> {
+export async function resolvePhotoUrls(cases: CaseWithDetails[]): Promise<void> {
   const paths = Array.from(
     new Set(cases.flatMap((c) => (c.photos ?? []).map((p) => p.path)))
   );
