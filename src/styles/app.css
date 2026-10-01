@@ -1074,31 +1074,32 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .msg-row__tile {
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--r-pill);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--lav);
-  color: var(--on-anchor);
+  color: var(--text);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
 }
-.msg-row__tile--case { background: var(--surface); font-size: 22px; }
+/* Case chats get a square-ish tile so they read apart from people. */
+.msg-row__tile--case { border-radius: var(--r-sm); background: var(--lav-tint); font-size: 22px; }
 .msg-row__preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.msg-row--unread .v2-row__title { font-weight: 600; }
+.msg-row--unread .v2-row__title { font-weight: 750; }
 .msg-row--unread .msg-row__preview { color: var(--text); }
 .msg-row__side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-.msg-row__time { font-size: 11px; color: var(--text-2); white-space: nowrap; }
+.msg-row__time { font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .msg-row__count {
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: var(--r-pill);
   background: var(--anchor);
   color: var(--on-anchor);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1106,7 +1107,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .msg-row__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--anchor); }
 .icon-btn--on { background: var(--st-open-bg); border-color: var(--st-open-bg); color: var(--text); }
 
-.chat-top--dm .screen-header__title { text-transform: none; letter-spacing: 0; font-size: 14px; }
+.chat-top--dm .screen-header__title { text-transform: none; letter-spacing: -0.01em; font-size: 17px; }
 .chat-top--dm .screen-header__title .vet-tag { vertical-align: -0.15em; }
 
 /* ==== Notifications ======================================================= */
