@@ -125,6 +125,7 @@ export const tr: Dict = {
   'caseChat.placeholder': 'Bir mesaj yazın…',
   'caseChat.signIn': 'Sohbete katılmak için giriş yapın.',
   'caseChat.empty': 'Henüz mesaj yok. Merhaba deyin ve kurtarmayı koordine edin.',
+  'caseChat.update': 'Vaka güncellemesi', // label read out for system cards (case events) in the chat
   'caseChat.pinned': 'Klinik tarafından sabitlendi',
   'caseChat.deletedAccount': 'Silinmiş hesap',
   'caseChat.pin': 'Yukarıya sabitle',
