@@ -510,10 +510,10 @@ select {
      bar and lift are deliberate: this usually carries a clinic's donation
      details and should read as the most important thing on the screen. */
   flex-shrink: 0;
-  padding: 12px 14px;
+  padding: 12px 16px;
   background: var(--lav-tint);
   border-left: 4px solid var(--anchor);
-  border-bottom: 1px solid var(--anchor);
+  border-bottom: 1px solid var(--hair);
   box-shadow: var(--shadow-soft);
 }
 .chat-pinned__label {
@@ -521,9 +521,7 @@ select {
   align-items: center;
   gap: 8px;
   font-size: var(--fs-label);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 700;
   color: var(--text);
   margin-bottom: 4px;
 }
@@ -2739,10 +2737,10 @@ h1, h2 {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 12px;
-  font-size: 13.5px;
-  font-weight: 700;
+  font-size: var(--fs-small);
+  font-weight: 600;
   color: var(--text-2);
-  background: var(--bg);
+  background: var(--surface);
 }
 
 /* The composer's `.chat-composer button` rule makes every button a 44px
@@ -2754,11 +2752,12 @@ h1, h2 {
   min-height: 36px;
   padding: 7px 14px;
   border-radius: 999px;
-  background: var(--lav-tint);
-  border: 1.5px solid var(--anchor);
+  background: transparent;
+  border: none;
+  box-shadow: inset 0 0 0 1.5px var(--anchor);
   color: var(--text);
-  font-size: 13px;
-  font-weight: 800;
+  font-size: var(--fs-label);
+  font-weight: 650;
   white-space: nowrap;
 }
 .chat-composer--closed button.chat-reopen:disabled { opacity: 0.6; background: var(--lav-tint); }
