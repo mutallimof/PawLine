@@ -12,6 +12,7 @@ import { withCaseColumns } from '../lib/api';
 import { CaseCard, GroupRow, LanguageSwitcher, ScreenHeader } from '../components/ui';
 import { VetVisibilityNotice } from './vetAndUserPages';
 import { t } from '../i18n';
+import { formatDate } from '../lib/time';
 import {
   EmptyPaw,
   IconClinic,
@@ -153,7 +154,7 @@ export default function ProfilePage() {
           </h2>
           <div className="profile__role">{isVet ? t('auth.roleVet') : t('profile.roleRescuer')}</div>
           <div className="profile__since">
-            {t('profile.memberSince', { date: new Date(profile.created_at).toLocaleDateString() })}
+            {t('profile.memberSince', { date: formatDate(profile.created_at) })}
           </div>
         </div>
       </div>

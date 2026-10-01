@@ -13,7 +13,8 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { fetchCreatedAtSince } from '../../lib/api';
-import { getLocale, t } from '../../i18n';
+import { t } from '../../i18n';
+import { formatDayMonth } from '../../lib/time';
 
 type Granularity = 'day' | 'week';
 
@@ -57,7 +58,7 @@ function fill(timestamps: string[], g: Granularity): Bucket[] {
 }
 
 function bucketLabel(b: Bucket, g: Granularity): string {
-  const d = b.start.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
+  const d = formatDayMonth(b.start);
   return g === 'week' ? t('admin.chartWeekOf', { date: d }) : d;
 }
 

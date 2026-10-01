@@ -20,8 +20,8 @@ import {
 import { caseTitle, ScreenHeader, statusLabel, useToast } from '../components/ui';
 import { ReportSheet } from '../components/Report';
 import { IconHelp, IconSend, VetTag } from '../components/Icons';
-import { getLocale, t } from '../i18n';
-import { clockTime, dayKey, dayLabel } from '../lib/time';
+import { t } from '../i18n';
+import { clockTime, dayKey, dayLabel, formatDate } from '../lib/time';
 import type { CaseMessage } from '../lib/types';
 
 /**
@@ -342,7 +342,7 @@ export default function CaseChatPage() {
           <span>
             🔒{' '}
             {t(isCaseVet ? 'caseChat.closedByYou' : 'caseChat.closedByClinic', {
-              date: new Date(chatClosedAt).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short', year: 'numeric' }),
+              date: formatDate(chatClosedAt),
             })}
           </span>
           {isCaseVet && (

@@ -26,14 +26,15 @@ import {
   type HiddenMessageRow,
 } from '../../lib/api';
 import { Avatar, useToast } from '../../components/ui';
-import { getLocale, t } from '../../i18n';
+import { t } from '../../i18n';
+import { formatDate } from '../../lib/time';
 import type { ProfileRole, Vet } from '../../lib/types';
 import VetDocumentsList from './VetDocumentsList';
 
 const PAGE = 50;
 
 function joinDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDate(iso);
 }
 
 function VetStatusBadge({ status }: { status: Vet['status'] }) {

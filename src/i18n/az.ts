@@ -584,6 +584,7 @@ export const az: Dict = {
   'case.urgency': 'Təcililik',
   'case.place': 'Yer',
   'common.today': 'Bu gün',
+  'common.yesterday': 'Dünən',
   'profile.activeRescues': 'Aktiv xilasetmələr',
   'profile.casesReported': 'Bildirilən hadisələr',
   'profile.viewAll': 'Hamısına bax',

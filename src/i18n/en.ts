@@ -582,6 +582,7 @@ export const en = {
   'case.urgency': 'Urgency',
   'case.place': 'Place',
   'common.today': 'Today',
+  'common.yesterday': 'Yesterday',
   'profile.activeRescues': 'Active rescues',
   'profile.casesReported': 'Cases reported',
   'profile.viewAll': 'View all',

@@ -584,6 +584,7 @@ export const ru: Dict = {
   'case.urgency': 'Срочность',
   'case.place': 'Место',
   'common.today': 'Сегодня',
+  'common.yesterday': 'Вчера',
   'profile.activeRescues': 'Активные спасения',
   'profile.casesReported': 'Сообщено случаев',
   'profile.viewAll': 'Смотреть все',

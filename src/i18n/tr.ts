@@ -584,6 +584,7 @@ export const tr: Dict = {
   'case.urgency': 'Aciliyet',
   'case.place': 'Yer',
   'common.today': 'Bugün',
+  'common.yesterday': 'Dün',
   'profile.activeRescues': 'Aktif kurtarmalar',
   'profile.casesReported': 'Bildirilen vakalar',
   'profile.viewAll': 'Tümünü gör',

@@ -19,7 +19,7 @@ import {
 } from '../../lib/api';
 import { useToast } from '../../components/ui';
 import { t } from '../../i18n';
-import { clockTime, timeAgo } from '../../lib/time';
+import { clockTime, formatDate, timeAgo } from '../../lib/time';
 import type { DirectMessage, ProfileRole } from '../../lib/types';
 import { VetTag } from '../../components/Icons';
 
@@ -126,7 +126,7 @@ function ThreadView({
           {messages.map((m) => (
             <div key={m.id} className="admin-dm-msg">
               <div className="admin-dm-msg__meta">
-                <strong>{nameOf(m.sender_id)}</strong> · {new Date(m.created_at).toLocaleDateString()} {clockTime(m.created_at)}
+                <strong>{nameOf(m.sender_id)}</strong> · {formatDate(m.created_at)} {clockTime(m.created_at)}
               </div>
               <div className="admin-dm-msg__body">{m.body}</div>
             </div>
