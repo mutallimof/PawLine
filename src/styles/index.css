@@ -6,102 +6,14 @@
    ============================================================================ */
 
 /* ---- 1. Design tokens ---------------------------------------------------- */
-:root {
-  /* Palette — values from the designer's Figma variables (green + lavender).
-     Names kept from the old coral palette so every existing var() reference
-     picks up the new values; "coral" now means "brand", not the hue. */
-  --coral: #02b874;        /* primary — actions, brand (Figma "Royal Green") */
-  /* The brand green is 2.6:1 on white — fine as a fill, too light for text.
-     --brand-text is the same hue darkened to pass AA (4.5:1) on white
-     (6.0), #f4f4f4 (5.5) and the --coral-soft tint (4.95). */
-  --brand-text: #017245;
-  --coral-deep: var(--brand-text); /* green text / labels on light backgrounds */
-  /* Fill for buttons that carry a white/cream label: the lightest green in
-     the brand hue where the label passes AA — #fff 4.8:1, #fff7ea 4.5:1.
-     The bright --coral stays for backgrounds and decorative fills. */
-  --brand-fill: #018353;
-  --coral-soft: rgba(3, 184, 117, 0.2); /* tinted backgrounds (Figma chip fill) */
-  --sand: #ffffff;         /* app background (Figma screens are white) */
-  --card: #ffffff;         /* card surface (Figma "Citrine White") */
-  --ink: #241f1a;          /* primary text (Figma "Zeus") */
-  --ink-soft: rgba(36, 31, 26, 0.55); /* secondary text (Figma "Zeus 55%") */
-  --line: #eaeaea;         /* hairlines and borders (Figma "Border Gray") */
-  --lavender: #9c85e6;     /* accent (Figma "Dull Lavender") */
-  --lavender-soft: rgba(156, 133, 230, 0.16); /* accent tint (Figma "Dull Lavender 16%") */
 
-  /* Status colors — the case pipeline at a glance. */
-  --status-open: #ea4335;        /* needs help — Figma "Cinnabar" (Injured badge) */
-  --status-progress: #e09b26;    /* accepted / vet stages — amber; no Figma equivalent, unchanged */
-  --status-enroute: #4285f4;     /* moving — Figma "Cornflower Blue" (Ongoing badge) */
-  --status-resolved: #02b874;    /* safe — Figma "Royal Green" (Finished badge) */
-
-  /* Urgency colors (migration 022) — a separate ramp from status above, on
-     purpose: urgency and pipeline stage appear side by side on the same
-     card, and reusing --status-* for both would conflate "what stage is
-     this case at" with "how urgent did the reporter say it is". */
-  --urgency-low: #6b9b6e;        /* calm sage green */
-  --urgency-medium: #e0a526;     /* amber */
-  --urgency-high: #e0672c;       /* orange */
-  --urgency-critical: #c22a1f;   /* alarming deep red */
-
-  /* Next urgency scale — defined, not yet used: screens switch from the
-     --urgency-* ramp above when feed / case detail are restyled. Neutral →
-     amber → orange → red, none of it green (green means safe). Per level:
-     solid fill, label colour on the solid, tint, and text-on-tint. Every
-     text pair is ≥ 4.5:1. High and critical differ in hue, lightness and
-     label colour so they can't be confused at a glance. */
-  --color-urgency-low: #71717a;          --color-urgency-low-on: #fff;
-  --color-urgency-low-subtle: #f1f1f2;   --color-urgency-low-strong: #52525b;
-  --color-urgency-medium: #f5a623;       --color-urgency-medium-on: var(--ink);
-  --color-urgency-medium-subtle: #fdf1dc; --color-urgency-medium-strong: #8a5a00;
-  --color-urgency-high: #f76b15;         --color-urgency-high-on: var(--ink);
-  --color-urgency-high-subtle: #feeadd;  --color-urgency-high-strong: #b23e00;
-  --color-urgency-critical: #c8201e;     --color-urgency-critical-on: #fff;
-  --color-urgency-critical-subtle: #fbe3e2; --color-urgency-critical-strong: #a3150f;
-
-  /* Type — one family for everything, as in the design (Figma: Aeonik,
-     substituted with DM Sans — see main.tsx). DM Sans has no Cyrillic, so
-     Russian falls through to Onest (below) rather than the system font. */
-  --font-display: 'DM Sans Variable', 'Onest Cyrillic', system-ui, -apple-system, sans-serif;
-  --font-body: 'DM Sans Variable', 'Onest Cyrillic', system-ui, -apple-system, sans-serif;
-  --fraunces-soft: normal; /* Fraunces-only axes; DM Sans has none of them */
-
-  /* Shape & elevation — rounded, soft, approachable.
-     Shadows are warm INK (90,50,35), never grey — Direction A rule #2. */
-  --radius: 16px;          /* cards, info panels (Figma corner radius/16) */
-  --radius-sm: 14px;       /* buttons, inputs, segmented track (Figma corner radius/14) */
-  --radius-lg: 20px;       /* large cards, photos (Figma corner radius/20) */
-  --shadow: 0 0 13px 0 rgba(0, 0, 0, 0.25);                /* Figma case card */
-  --shadow-soft: 0 14px 26px -20px rgba(36, 31, 26, 0.45); /* Figma raised panel / map */
-  --shadow-lift: 0 30px 60px -25px rgba(36, 31, 26, 0.45); /* Figma top-level sheet */
-  --grad-coral: linear-gradient(135deg, var(--brand-fill) 0%, var(--brand-fill) 100%); /* flat, as in Figma */
-  --depth-card: 0 0 13px 0 rgba(0, 0, 0, 0.25);
-
-  /* Motion — quick, springy, never bouncy-toy. */
-  --t-fast: 150ms cubic-bezier(0.2, 0.8, 0.3, 1);
-  --t-med: 260ms cubic-bezier(0.2, 0.8, 0.3, 1);
-
-  /* Layout */
-  --nav-height: 64px;
-  --page-max: 640px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
 
 /* Cyrillic companion to DM Sans. Only Onest's Cyrillic file is declared (the
    package's own CSS would also pull in and precache its Latin files, which
    DM Sans already covers), and unicode-range limits it to Cyrillic glyphs.
    size-adjust matches Onest's x-height (527) to DM Sans's (504), so Russian
    lowercase sits at the same height as Latin in mixed text. */
-@font-face {
-  font-family: 'Onest Cyrillic';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  src: url('../../node_modules/@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2')
-    format('woff2-variations');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-  size-adjust: 95.6%;
-}
+
 
 /* ---- 2. Base ------------------------------------------------------------- */
 * {
@@ -112,8 +24,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--sand);
-  color: var(--ink);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
@@ -128,7 +40,7 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-weight: 600;
   line-height: 1.15;
   margin: 0;
@@ -166,18 +78,9 @@ select {
 }
 
 :focus-visible {
-  outline: 3px solid rgba(232, 93, 74, 0.5);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
   border-radius: 6px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 /* ---- 3. Layout shell ------------------------------------------------------ */
@@ -195,12 +98,11 @@ select {
 }
 
 .page-title {
-  font-size: 28px;
   margin: 8px 0 4px;
 }
 
 .page-subtitle {
-  color: var(--ink-soft);
+  color: var(--text-2);
   font-size: 14px;
   margin-bottom: 16px;
 }
@@ -209,64 +111,31 @@ select {
 .bottom-nav {
   position: fixed;
   inset-inline: 0;
-  bottom: 0;
-  height: calc(var(--nav-height) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
-  background: var(--card);
-  border-top: 1px solid var(--line);
   display: flex;
-  justify-content: space-around;
   align-items: stretch;
   z-index: 1000;
-  max-width: none;
 }
 
 .bottom-nav__item {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink-soft);
   position: relative;
-}
-
-.bottom-nav__item.active {
-  color: var(--brand-text);
-}
-
-.bottom-nav__item svg {
-  width: 24px;
-  height: 24px;
 }
 
 /* The centre "Report" button pops out of the bar — the app's core action. */
 .bottom-nav__report {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .bottom-nav__report-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--coral);
-  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 16px rgba(232, 93, 74, 0.45);
-  transform: translateY(-14px);
-  transition: transform 0.15s ease;
-}
-
-.bottom-nav__report-btn:active {
-  transform: translateY(-12px) scale(0.95);
 }
 
 .nav-badge {
@@ -277,39 +146,13 @@ select {
   height: 16px;
   padding: 0 4px;
   border-radius: 8px;
-  background: var(--status-open);
-  color: #fff;
+  background: var(--st-ongoing);
+  color: var(--on-anchor);
   font-size: 10px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Group D: top-right bell — mobile only; desktop uses SideNav's own Alerts
-   link instead (hidden below at the same ≥1024px breakpoint). */
-.top-bar {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
-  right: 14px;
-  z-index: 1001;
-}
-.top-bar__bell {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 253, 251, 0.9);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-soft);
-  color: var(--ink);
-}
-.top-bar__bell .nav-badge {
-  top: -3px;
-  right: -3px;
 }
 
 /* ---- 4. Buttons & inputs --------------------------------------------------- */
@@ -318,56 +161,27 @@ select {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-weight: 800;
   font-size: 15px;
-  border-radius: var(--radius-sm);
   padding: 13px 20px;
-  transition: transform 0.1s ease, background 0.15s ease;
   width: 100%;
 }
 
-.btn:active {
-  transform: scale(0.98);
-}
-
-.btn--primary {
-  background: var(--brand-fill);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(232, 93, 74, 0.35);
-}
-
 .btn--primary:disabled {
-  background: #dbc9c2;
+  background: var(--line);
+  color: var(--text-2);
   box-shadow: none;
   cursor: default;
 }
 
-.btn--secondary {
-  background: var(--coral-soft);
-  color: var(--coral-deep);
-}
-
 .btn--ghost {
   background: transparent;
-  color: var(--ink-soft);
+  color: var(--text-2);
   border: 1.5px solid var(--line);
-}
-
-.btn--danger {
-  background: transparent;
-  color: var(--status-open);
-  border: 1.5px solid rgba(217, 58, 43, 0.35);
-}
-
-.btn--success {
-  background: var(--status-resolved);
-  color: #fff;
 }
 
 .btn--small {
   width: auto;
   padding: 8px 14px;
-  font-size: 13px;
 }
 
 .field {
@@ -380,7 +194,7 @@ select {
   font-size: 13px;
   font-weight: 800;
   margin-bottom: 6px;
-  color: var(--ink);
+  color: var(--text);
 }
 
 .field input,
@@ -388,10 +202,10 @@ select {
 .field select {
   width: 100%;
   border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   padding: 12px 14px;
-  background: var(--card);
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .field textarea {
@@ -401,8 +215,8 @@ select {
 
 /* ---- 5. Cards & badges ----------------------------------------------------- */
 .card {
-  background: var(--card);
-  border-radius: var(--radius);
+  background: var(--surface);
+  border-radius: var(--r-card);
   box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
@@ -415,7 +229,7 @@ select {
 .case-card__photo {
   position: relative;
   aspect-ratio: 16 / 10;
-  background: var(--coral-soft);
+  background: var(--lav-tint);
 }
 
 .case-card__photo img {
@@ -442,8 +256,8 @@ select {
   gap: 4px;
   height: 100%;
   min-height: 90px;
-  background: var(--coral-soft);
-  color: var(--ink-soft);
+  background: var(--lav-tint);
+  color: var(--text-2);
   font-size: 12.5px;
   font-weight: 700;
   border-radius: inherit;
@@ -458,7 +272,7 @@ select {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--ink-soft);
+  color: var(--text-2);
   font-size: 12.5px;
   font-weight: 700;
   margin-top: 6px;
@@ -502,7 +316,7 @@ select {
   flex-wrap: wrap;
 }
 .case-card--compact .case-card__meta--sub {
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 .case-card--compact .case-card__desc {
   -webkit-line-clamp: 1;
@@ -523,10 +337,7 @@ select {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: #fff;
-  border-radius: 999px;
+  color: var(--on-anchor);
   padding: 4px 11px;
   text-transform: uppercase;
 }
@@ -535,14 +346,14 @@ select {
   position: absolute;
   top: 10px;
   left: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px rgba(46, 26, 61, 0.25);
 }
 
 .status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-anchor);
 }
 
 .status-dot--pulse {
@@ -565,7 +376,7 @@ select {
    (Home filters, ReportPage pickers, every AdminPage control). */
 .segmented {
   display: flex;
-  background: #f1e4dc;
+  background: var(--surface-2);
   border-radius: 999px;
   padding: 4px;
   gap: 2px;
@@ -578,36 +389,29 @@ select {
   border-radius: 999px;
   font-size: 13.5px;
   font-weight: 800;
-  color: var(--ink-soft);
-  transition: background 0.15s ease, color 0.15s ease;
+  color: var(--text-2);
 }
 
 .segmented__option.active {
-  background: var(--card);
-  color: var(--coral-deep);
+  background: var(--surface);
+  color: var(--text);
   box-shadow: var(--shadow-soft);
-}
-
-.chip-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .chip {
   border: 1.5px solid var(--line);
-  background: var(--card);
+  background: var(--surface);
   border-radius: 999px;
   padding: 9px 16px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 
 .chip.active {
-  border-color: var(--coral);
-  background: var(--coral-soft);
-  color: var(--coral-deep);
+  border-color: var(--anchor);
+  background: var(--lav-tint);
+  color: var(--text);
 }
 
 /* ---- 7. Map ------------------------------------------------------------------ */
@@ -615,10 +419,7 @@ select {
   position: relative;
   height: calc(100dvh - var(--nav-height) - var(--safe-bottom) - 116px);
   min-height: 320px;
-  border-radius: 0 0 var(--radius) var(--radius);
-  overflow: hidden;
 }
-
 
 /* Custom map pins (divIcons) */
 .pin {
@@ -626,8 +427,8 @@ select {
   height: 30px;
   border-radius: 50% 50% 50% 4px;
   transform: rotate(-45deg);
-  border: 2.5px solid #fff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  border: 2.5px solid var(--surface);
+  box-shadow: 0 3px 8px rgba(46, 26, 61, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -639,20 +440,6 @@ select {
   line-height: 1;
 }
 
-.pin--vet {
-  border-radius: 50%;
-  transform: none;
-  background: #fff;
-  border: 2.5px solid var(--status-enroute);
-  color: var(--status-enroute);
-  font-weight: 900;
-  font-size: 15px;
-}
-
-.pin--vet > span {
-  transform: none;
-}
-
 .map-locate-btn {
   position: absolute;
   right: 12px;
@@ -661,12 +448,12 @@ select {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--card);
-  box-shadow: var(--shadow);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--coral-deep);
+  color: var(--text);
 }
 
 /* Report-flow pin: fixed at map centre, drop the map underneath it. */
@@ -678,7 +465,7 @@ select {
   z-index: 500;
   pointer-events: none;
   font-size: 34px;
-  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 4px 4px rgba(46, 26, 61, 0.3));
 }
 
 /* ---- 8. Paw trail — the signature progress element --------------------------- */
@@ -688,7 +475,6 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 8px 6px;
 }
 
 .paw-trail__step {
@@ -700,13 +486,6 @@ select {
   position: relative;
 }
 
-.paw-trail__icon {
-  font-size: 22px;
-  opacity: 0.22;
-  filter: grayscale(1);
-  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-}
-
 .paw-trail__step.done .paw-trail__icon {
   opacity: 1;
   filter: none;
@@ -715,8 +494,6 @@ select {
 .paw-trail__step.current .paw-trail__icon {
   opacity: 1;
   filter: none;
-  transform: scale(1.25);
-  animation: paw-step 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes paw-step {
@@ -729,27 +506,24 @@ select {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--ink-soft);
+  color: var(--text-2);
   text-align: center;
 }
 
 .paw-trail__step.current .paw-trail__label {
-  color: var(--coral-deep);
+  color: var(--text);
 }
 
 .paw-trail__connector {
-  position: absolute;
-  top: 12px;
   left: calc(-50% + 14px);
   width: calc(100% - 28px);
   height: 3px;
   border-radius: 2px;
-  background: var(--line);
 }
 
 .paw-trail__step.done .paw-trail__connector,
 .paw-trail__step.current .paw-trail__connector {
-  background: var(--coral);
+  background: var(--anchor);
 }
 
 /* ---- 9. Chat ------------------------------------------------------------------ */
@@ -759,18 +533,6 @@ select {
   height: 100dvh;
   max-width: var(--page-max);
   margin: 0 auto;
-}
-
-.chat-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--card);
-  border-bottom: 1px solid var(--line);
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
 /* Pinned case message (027). A sibling ABOVE .chat-scroll rather than a
@@ -784,20 +546,20 @@ select {
      details and should read as the most important thing on the screen. */
   flex-shrink: 0;
   padding: 12px 14px;
-  background: var(--coral-soft);
-  border-left: 4px solid var(--coral);
-  border-bottom: 1px solid var(--coral);
+  background: var(--lav-tint);
+  border-left: 4px solid var(--anchor);
+  border-bottom: 1px solid var(--anchor);
   box-shadow: var(--shadow-soft);
 }
 .chat-pinned__label {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-label);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--coral-deep);
+  color: var(--text);
   margin-bottom: 4px;
 }
 .chat-pinned__unpin {
@@ -805,17 +567,17 @@ select {
   flex-shrink: 0;
   min-height: 30px;
   padding: 2px 12px;
-  border: 1px solid var(--coral);
-  border-radius: var(--radius-pill);
-  background: var(--card);
-  font-size: var(--font-size-xs);
+  border: 1px solid var(--anchor);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-size: var(--fs-label);
   font-weight: 800;
-  color: var(--coral-deep);
+  color: var(--text);
 }
 .chat-pinned__body {
-  font-size: var(--font-size-lg);
+  font-size: var(--fs-body);
   font-weight: 600;
-  color: var(--ink);
+  color: var(--text);
   /* Card numbers and amounts are usually typed on their own lines — keep them
      as the clinic wrote them, and let people select the text to copy it. */
   white-space: pre-wrap;
@@ -846,14 +608,14 @@ select {
 .bubble__menu-btn {
   min-width: 34px;
   min-height: 34px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--r-pill);
   font-size: 18px;
   font-weight: 800;
   line-height: 1;
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 .bubble--mine .bubble__menu-btn {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--on-anchor);
 }
 /* Full-screen catcher so a tap anywhere else closes the menu — cheaper and
    less error-prone than attaching and removing a document listener. */
@@ -864,16 +626,15 @@ select {
 }
 .bubble__menu-list {
   position: absolute;
-  right: 0;
   bottom: calc(100% + 6px);
   z-index: 41;
   width: max-content;
   min-width: 190px;
   max-width: min(320px, 72vw);
   padding: 6px;
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   box-shadow: var(--shadow-lift);
   text-align: left;
 }
@@ -897,7 +658,7 @@ select {
   border-radius: 10px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--text);
   text-align: left;
 }
 
@@ -908,11 +669,11 @@ select {
   gap: 10px;
   flex-shrink: 0;
   padding: 10px 14px;
-  background: var(--card);
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
-  font-size: var(--font-size-sm);
+  font-size: var(--fs-label);
   font-weight: 600;
-  color: var(--ink);
+  color: var(--text);
 }
 .chat-pin-hint__dismiss {
   margin-left: auto;
@@ -920,16 +681,15 @@ select {
   min-height: 30px;
   padding: 2px 12px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
-  font-size: var(--font-size-xs);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-label);
   font-weight: 800;
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 
 .chat-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -940,7 +700,7 @@ select {
   padding: 10px 14px;
   border-radius: 18px;
   font-size: 14.5px;
-  background: var(--card);
+  background: var(--surface);
   box-shadow: var(--shadow-soft);
   align-self: flex-start;
   border-bottom-left-radius: 6px;
@@ -949,8 +709,8 @@ select {
 
 .bubble--mine {
   align-self: flex-end;
-  background: var(--brand-fill);
-  color: #fff;
+  background: var(--anchor);
+  color: var(--on-anchor);
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 6px;
 }
@@ -958,7 +718,7 @@ select {
 .bubble__sender {
   font-size: 11.5px;
   font-weight: 800;
-  color: var(--coral-deep);
+  color: var(--text);
   margin-bottom: 2px;
 }
 
@@ -974,7 +734,7 @@ select {
   display: flex;
   gap: 8px;
   padding: 10px 12px calc(10px + var(--safe-bottom));
-  background: var(--card);
+  background: var(--surface);
   border-top: 1px solid var(--line);
 }
 
@@ -983,15 +743,15 @@ select {
   border: 1.5px solid var(--line);
   border-radius: 999px;
   padding: 11px 16px;
-  background: var(--sand);
+  background: var(--bg);
 }
 
 .chat-composer button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--brand-fill);
-  color: #fff;
+  background: var(--anchor);
+  color: var(--on-anchor);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -999,7 +759,8 @@ select {
 }
 
 .chat-composer button:disabled {
-  background: #dbc9c2;
+  background: var(--line);
+  color: var(--text-2);
 }
 
 /* ---- 10. Lists ------------------------------------------------------------------ */
@@ -1008,8 +769,8 @@ select {
   align-items: center;
   gap: 12px;
   padding: 13px 14px;
-  background: var(--card);
-  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border-radius: var(--r-input);
   margin-bottom: 10px;
   box-shadow: var(--shadow-soft);
   width: 100%;
@@ -1031,32 +792,18 @@ select {
 
 .list-row__sub {
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--text-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.list-row--unread .list-row__title,
-.list-row--unread .list-row__sub {
-  color: var(--ink);
-  font-weight: 800;
-}
-
-.unread-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--coral);
-  flex-shrink: 0;
 }
 
 .avatar {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--coral-soft);
-  color: var(--coral-deep);
+  background: var(--lav-tint);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1081,18 +828,10 @@ select {
 /* ---- 11. Misc ---------------------------------------------------------------- */
 .empty-state {
   text-align: center;
-  color: var(--ink-soft);
-  padding: 48px 24px;
-  font-size: 14.5px;
-}
-
-.empty-state__icon {
-  font-size: 44px;
-  margin-bottom: 10px;
 }
 
 .banner {
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   padding: 12px 14px;
   font-size: 14px;
   font-weight: 700;
@@ -1100,18 +839,18 @@ select {
 }
 
 .banner--success {
-  background: rgba(63, 155, 108, 0.12);
-  color: var(--brand-text);
+  background: var(--st-done-bg);
+  color: var(--text);
 }
 
 .banner--info {
-  background: var(--coral-soft);
-  color: var(--coral-deep);
+  background: var(--lav-tint);
+  color: var(--text);
 }
 
 .banner--warn {
-  background: rgba(224, 155, 38, 0.14);
-  color: #a06d10;
+  background: var(--crit-tint);
+  color: var(--crit);
 }
 
 .toast {
@@ -1119,16 +858,13 @@ select {
   left: 50%;
   bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
   transform: translateX(-50%);
-  background: var(--ink);
-  color: #fff;
+  background: var(--text);
+  color: var(--on-anchor);
   padding: 11px 18px;
-  border-radius: 999px;
   font-size: 13.5px;
   font-weight: 700;
   z-index: 2000;
-  box-shadow: var(--shadow);
   max-width: calc(100% - 32px);
-  animation: toast-in 0.25s ease;
 }
 
 @keyframes toast-in {
@@ -1147,15 +883,15 @@ select {
 .photo-grid .photo-add {
   width: 88px;
   height: 88px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   object-fit: cover;
   flex-shrink: 0;
 }
 
 .photo-add {
   border: 2px dashed var(--line);
-  background: var(--card);
-  color: var(--ink-soft);
+  background: var(--surface);
+  color: var(--text-2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1167,7 +903,7 @@ select {
 
 .photo-hero {
   aspect-ratio: 16 / 11;
-  background: var(--coral-soft);
+  background: var(--lav-tint);
   position: relative;
 }
 
@@ -1185,28 +921,14 @@ select {
   padding: 4px 12px;
   font-size: 12.5px;
   font-weight: 800;
-  color: #fff;
-}
-
-.progress-track {
-  height: 8px;
-  border-radius: 4px;
-  background: var(--line);
-  overflow: hidden;
-}
-
-.progress-track__fill {
-  height: 100%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, var(--coral), var(--coral-deep));
-  transition: width 0.4s ease;
+  color: var(--on-anchor);
 }
 
 .spinner {
   width: 26px;
   height: 26px;
   border: 3px solid var(--line);
-  border-top-color: var(--coral);
+  border-top-color: var(--anchor);
   border-radius: 50%;
   margin: 32px auto;
   animation: spin 0.8s linear infinite;
@@ -1220,19 +942,8 @@ select {
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
+  color: var(--text-2);
   margin: 20px 0 10px;
-}
-
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 800;
-  font-size: 14px;
-  color: var(--ink-soft);
-  padding: 8px 0;
 }
 
 /* ---- 12. Fix-pass additions ---------------------------------------------- */
@@ -1246,10 +957,10 @@ select {
 .loc-search input {
   width: 100%;
   border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   padding: 11px 14px;
-  background: var(--card);
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .loc-search__results {
@@ -1257,9 +968,9 @@ select {
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: var(--card);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
+  background: var(--surface);
+  border-radius: var(--r-input);
+  box-shadow: var(--shadow-card);
   z-index: 900;
   overflow: hidden;
   max-height: 220px;
@@ -1280,11 +991,11 @@ select {
 }
 
 .loc-search__result:active {
-  background: var(--coral-soft);
+  background: var(--lav-tint);
 }
 
 .loc-search__result--empty {
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 
 /* Removable photo thumbnails in the report flow */
@@ -1296,7 +1007,7 @@ select {
 .photo-thumb img {
   width: 88px;
   height: 88px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   object-fit: cover;
   display: block;
 }
@@ -1305,11 +1016,9 @@ select {
   position: absolute;
   top: -6px;
   right: -6px;
-  width: 24px;
-  height: 24px;
   border-radius: 50%;
-  background: var(--ink);
-  color: #fff;
+  background: var(--text);
+  color: var(--on-anchor);
   font-size: 14px;
   font-weight: 800;
   line-height: 1;
@@ -1360,13 +1069,6 @@ select {
 }
 
 /* ---- Background: warm, subtly alive ---------------------------------------- */
-body {
-  background:
-    radial-gradient(1100px 500px at 85% -10%, rgba(232, 93, 74, 0.07), transparent 60%),
-    radial-gradient(900px 460px at -10% 30%, rgba(224, 155, 38, 0.05), transparent 55%),
-    var(--sand);
-  background-attachment: fixed;
-}
 
 /* ---- Buttons: gradient primary, honest press feedback ---------------------- */
 .btn {
@@ -1376,16 +1078,10 @@ body {
 .btn:active {
   transform: scale(0.97);
 }
-.btn--primary {
-  background: var(--grad-coral);
-  box-shadow: 0 6px 16px rgba(232, 93, 74, 0.32);
-}
+
 .btn--primary:hover {
   filter: brightness(1.04);
-  box-shadow: 0 8px 22px rgba(232, 93, 74, 0.38);
-}
-.btn--small {
-  min-height: 40px;
+  box-shadow: 0 8px 22px rgba(46, 26, 61, 0.3);
 }
 
 .link-btn {
@@ -1395,7 +1091,7 @@ body {
   font: inherit;
   font-size: 13.5px;
   font-weight: 800;
-  color: var(--coral-deep);
+  color: var(--text);
   cursor: pointer;
 }
 
@@ -1410,8 +1106,8 @@ body {
 .field textarea:focus,
 .loc-search input:focus {
   outline: none;
-  border-color: var(--coral);
-  box-shadow: 0 0 0 3px rgba(232, 93, 74, 0.14);
+  border-color: var(--anchor);
+  box-shadow: var(--shadow-focus);
 }
 
 /* Password field with eye toggle */
@@ -1432,20 +1128,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink-soft);
+  color: var(--text-2);
   border-radius: 50%;
   transition: background var(--t-fast), color var(--t-fast);
 }
 .pw-toggle:hover {
-  background: var(--coral-soft);
-  color: var(--coral-deep);
+  background: var(--lav-tint);
+  color: var(--text);
 }
 
 /* ---- Cards: photo-forward, gently interactive ------------------------------ */
 .card,
 .case-card {
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(238, 221, 212, 0.7);
+  border: 1px solid var(--hair);
   transition: transform var(--t-fast), box-shadow var(--t-fast);
 }
 .case-card:active {
@@ -1454,7 +1149,6 @@ body {
 @media (hover: hover) {
   .case-card:hover {
     transform: translateY(-3px);
-    box-shadow: var(--shadow-lift);
   }
 }
 
@@ -1481,8 +1175,8 @@ body {
 /* ---- Paw trail: the rescue's heartbeat ------------------------------------- */
 .paw-trail {
   position: relative;
-  background: var(--card);
-  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border-radius: var(--r-card);
   padding: 16px 12px 12px;
   box-shadow: var(--shadow-soft);
 }
@@ -1496,23 +1190,17 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, var(--status-resolved), var(--coral));
+  background: linear-gradient(90deg, var(--st-rescued), var(--anchor));
   animation: trail-fill 700ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 .paw-trail__step .paw-trail__icon {
   transition: transform var(--t-med), background var(--t-med);
 }
 .paw-trail__step.current .paw-trail__icon {
-  animation: pulse-ring 2s ease-out infinite;
   transform: scale(1.12);
 }
 
 /* ---- Empty states: soft, alive, never sad ---------------------------------- */
-.empty-state__icon {
-  display: inline-block;
-  animation: float-paw 3.6s ease-in-out infinite;
-  filter: saturate(0.9);
-}
 
 /* ---- Toast ------------------------------------------------------------------ */
 .toast {
@@ -1523,58 +1211,28 @@ body {
 
 /* ---- Bottom nav: floating glass pill (phones) ------------------------------- */
 .bottom-nav {
-  left: 12px;
-  right: 12px;
-  bottom: calc(10px + var(--safe-bottom));
   width: auto;
-  max-width: calc(var(--page-max) - 24px);
   margin: 0 auto;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  background: rgba(255, 253, 251, 0.82);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  box-shadow: 0 10px 32px rgba(90, 50, 35, 0.18);
-  padding: 4px 6px;
 }
 .bottom-nav__item {
-  border-radius: 999px;
   transition: color var(--t-fast), background var(--t-fast);
-  min-width: 56px;
-}
-.bottom-nav__item.active {
-  background: var(--coral-soft);
-}
-.bottom-nav__report-btn {
-  background: var(--grad-coral);
-  box-shadow: 0 8px 20px rgba(232, 93, 74, 0.45), 0 0 0 5px rgba(255, 253, 251, 0.9);
-  transition: transform var(--t-fast), box-shadow var(--t-fast);
-}
-.bottom-nav__report-btn:active {
-  transform: scale(0.92);
-}
-/* Content must clear the floating pill. */
-.page {
-  padding-bottom: calc(var(--nav-height) + 34px + var(--safe-bottom));
 }
 
+.bottom-nav__report-btn {
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+/* Content must clear the floating pill. */
+
 /* ---- Home split layout ------------------------------------------------------ */
-.home-header {
-  padding: 16px 16px 10px;
-}
-.home-map__search {
-  padding: 0 16px;
-}
-.home-feed {
-  padding: 4px 16px;
-}
+
 /* Phones: the toggle picks one pane. */
 .home-layout--map .home-feed { display: none; }
 .home-layout--feed .home-map { display: none; }
 
 /* ---- Maps ------------------------------------------------------------------- */
 .map-wrap {
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-card);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
 }
@@ -1585,15 +1243,15 @@ body {
   text-align: center;
   padding: 24px;
   min-height: 180px;
-  background: var(--coral-soft);
-  border-radius: var(--radius-lg);
-  color: var(--ink-soft);
+  background: var(--lav-tint);
+  border-radius: var(--r-card);
+  color: var(--text-2);
   font-weight: 700;
   font-size: 14px;
 }
 .map-accuracy-hint {
   font-size: 12.5px;
-  color: var(--ink-soft);
+  color: var(--text-2);
   margin: 8px 2px 0;
   font-weight: 600;
 }
@@ -1625,7 +1283,7 @@ body {
     height: 100dvh;
     padding: 26px 18px;
     border-right: 1px solid var(--line);
-    background: rgba(255, 253, 251, 0.6);
+    background: var(--surface);
     backdrop-filter: blur(8px);
   }
   .side-nav__brand {
@@ -1639,13 +1297,13 @@ body {
     width: 30px;
     height: 30px;
     flex-shrink: 0;
-    color: var(--coral-deep);
+    color: var(--text);
   }
   .side-nav__name {
-    font-family: var(--font-display);
+    font-family: var(--font-head);
     font-weight: 700;
     font-size: 24px;
-    color: var(--coral-deep);
+    color: var(--text);
   }
   .side-nav__report {
     margin-bottom: 14px;
@@ -1656,21 +1314,21 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-input);
     font-weight: 800;
     font-size: 15px;
-    color: var(--ink-soft);
+    color: var(--text-2);
     text-decoration: none;
     position: relative;
     transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast);
   }
   .side-nav__item:hover {
-    background: var(--coral-soft);
+    background: var(--lav-tint);
     transform: translateX(2px);
   }
   .side-nav__item.active {
-    background: var(--coral-soft);
-    color: var(--coral-deep);
+    background: var(--lav-tint);
+    color: var(--text);
   }
   .side-nav__item svg {
     width: 21px;
@@ -1679,15 +1337,12 @@ body {
   .side-nav__foot {
     margin-top: auto;
     font-size: 12.5px;
-    color: var(--ink-soft);
+    color: var(--text-2);
     padding: 0 10px;
     opacity: 0.8;
   }
 
   .bottom-nav {
-    display: none;
-  }
-  .top-bar {
     display: none;
   }
   .app-main .page {
@@ -1702,7 +1357,6 @@ body {
   }
   .home-header {
     max-width: none;
-    padding: 22px 28px 12px;
   }
   .home-header .segmented {
     max-width: 420px;
@@ -1722,17 +1376,12 @@ body {
   }
   .home-feed {
     overflow-y: auto;
-    padding: 4px 20px 24px 28px;
   }
   .home-map {
     position: relative;
-    padding: 0 28px 24px 8px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-  }
-  .home-map__search {
-    padding: 0;
   }
   .home-map .map-wrap {
     flex: 1;
@@ -1753,7 +1402,7 @@ body {
   transition: background var(--t-fast);
 }
 .list-row:active {
-  background: var(--coral-soft);
+  background: var(--lav-tint);
 }
 .list-row__title,
 .list-row__sub {
@@ -1794,16 +1443,7 @@ body {
    ============================================================================ */
 
 /* ---- Status color families (tints for card surfaces, solids for rings) ---- */
-:root {
-  /* 50 / 500 / 700 from the Figma badges (tint fill, solid, text-on-tint —
-     Figma uses the solid as the text colour, except done-700: the brand
-     green fails contrast as text, so it takes --brand-text). The 100 steps
-     and the whole prog family have no Figma equivalent and are unchanged. */
-  --open-50: rgba(238, 107, 82, 0.18);  --open-100: #fbd9d4;  --open-500: #ea4335;  --open-700: #ea4335;
-  --prog-50: #fdf3e2;  --prog-100: #fae6c3;  --prog-500: #e09b26;  --prog-700: #9c6a12;
-  --route-50: rgba(39, 72, 232, 0.18);  --route-100: #d5e6f1; --route-500: #4285f4; --route-700: #4285f4;
-  --done-50: rgba(3, 184, 117, 0.2);    --done-100: #d2ebdd;  --done-500: #02b874;  --done-700: var(--brand-text);
-}
+
 
 /* ---- §pins: the case IS the pin --------------------------------------------
    Photo pin = circular photo + status ring + pointer tip. Sizes chosen so a
@@ -1813,9 +1453,9 @@ body {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 3.5px solid var(--open-500);
-  background: var(--card);
-  box-shadow: 0 3px 10px rgba(51, 36, 31, 0.35);
+  border: 3.5px solid var(--st-ongoing);
+  background: var(--surface);
+  box-shadow: 0 3px 10px rgba(46, 26, 61, 0.35);
   cursor: pointer;
   transform: translate(-50%, -100%); /* anchor: pointer tip at latlng */
   transition: transform var(--t-fast);
@@ -1847,14 +1487,14 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  background: var(--coral-soft);
+  background: var(--lav-tint);
   z-index: 1; /* photo covers the tip's top half */
 }
 .pin-photo:hover { transform: translate(-50%, -100%) scale(1.08); }
-.pin-photo--open     { border-color: var(--open-500);  color: var(--open-500); }
-.pin-photo--progress { border-color: var(--prog-500);  color: var(--prog-500); }
-.pin-photo--enroute  { border-color: var(--route-500); color: var(--route-500); }
-.pin-photo--resolved { border-color: var(--done-500);  color: var(--done-500); opacity: 0.78; }
+.pin-photo--open     { border-color: var(--st-ongoing);  color: var(--st-ongoing); }
+.pin-photo--progress { border-color: var(--st-ongoing);  color: var(--st-ongoing); }
+.pin-photo--enroute  { border-color: var(--st-ongoing); color: var(--st-ongoing); }
+.pin-photo--resolved { border-color: var(--st-rescued);  color: var(--st-rescued); opacity: 0.78; }
 .pin-photo--escalated { animation: pulse-ring 1.6s ease-out infinite; }
 .pin-photo__check { /* resolved: small green check badge */
   position: absolute;
@@ -1863,14 +1503,14 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--done-500);
-  color: #fff;
+  background: var(--st-rescued);
+  color: var(--on-anchor);
   font-size: 11px;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #fff;
+  border: 2px solid var(--surface);
   z-index: 2;
 }
 
@@ -1879,17 +1519,17 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2.5px solid #fff;
-  box-shadow: 0 1px 5px rgba(51, 36, 31, 0.4);
+  border: 2.5px solid var(--surface);
+  box-shadow: 0 1px 5px rgba(46, 26, 61, 0.4);
   cursor: pointer;
   transform: translate(-50%, -50%);
   transition: transform var(--t-fast);
 }
 .pin-dot:hover { transform: translate(-50%, -50%) scale(1.35); }
-.pin-dot--open     { background: var(--open-500); }
-.pin-dot--progress { background: var(--prog-500); }
-.pin-dot--enroute  { background: var(--route-500); }
-.pin-dot--resolved { background: var(--done-500); opacity: 0.75; }
+.pin-dot--open     { background: var(--st-ongoing); }
+.pin-dot--progress { background: var(--st-ongoing); }
+.pin-dot--enroute  { background: var(--st-ongoing); }
+.pin-dot--resolved { background: var(--st-rescued); opacity: 0.75; }
 
 /* Cluster bubbles — tinted urgent if any member is open */
 .pin-cluster {
@@ -1897,54 +1537,54 @@ body {
   height: 38px;
   padding: 0 8px;
   border-radius: 999px;
-  background: var(--card);
-  border: 3px solid var(--ink-soft);
-  color: var(--ink);
+  background: var(--surface);
+  border: 3px solid var(--text-2);
+  color: var(--text);
   font-weight: 900;
   font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(51, 36, 31, 0.3);
+  box-shadow: 0 3px 10px rgba(46, 26, 61, 0.3);
   cursor: pointer;
   transform: translate(-50%, -50%);
   transition: transform var(--t-fast);
 }
 .pin-cluster:hover { transform: translate(-50%, -50%) scale(1.08); }
-.pin-cluster--open { border-color: var(--open-500); color: var(--open-700); }
+.pin-cluster--open { border-color: var(--st-ongoing); color: var(--text); }
 
 /* Vet pin — unmistakably different: white rounded square, coral cross */
 .pin-vet {
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: #fff;
-  border: 2.5px solid var(--route-500);
-  color: var(--route-500);
+  background: var(--surface);
+  border: 2.5px solid var(--st-ongoing);
+  color: var(--st-ongoing);
   font-size: 19px;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 9px rgba(51, 36, 31, 0.3);
+  box-shadow: 0 3px 9px rgba(46, 26, 61, 0.3);
   cursor: pointer;
   transform: translate(-50%, -50%);
 }
 .pin-rescuer {
   font-size: 24px;
   transform: translate(-50%, -50%);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 2px 4px rgba(46, 26, 61, 0.35));
 }
 
 /* ---- Wallet-style status-colored case cards --------------------------------
    The card surface itself carries the status family (reference: modern
    banking-app home feeds) — status readable before a single word is. */
 .case-card { border-width: 1.5px; }
-.case-card--open     { background: var(--open-50);  border-color: var(--open-100); }
-.case-card--progress { background: var(--prog-50);  border-color: var(--prog-100); }
-.case-card--enroute  { background: var(--route-50); border-color: var(--route-100); }
-.case-card--resolved { background: var(--done-50);  border-color: var(--done-100); }
-.case-card--escalated { box-shadow: 0 0 0 2px var(--open-100), var(--shadow-soft); }
+.case-card--open     { background: var(--st-open-bg);  border-color: var(--st-open-bg); }
+.case-card--progress { background: var(--st-progress-bg);  border-color: var(--st-progress-bg); }
+.case-card--enroute  { background: var(--st-progress-bg); border-color: var(--st-progress-bg); }
+.case-card--resolved { background: var(--st-done-bg);  border-color: var(--st-done-bg); }
+.case-card--escalated { box-shadow: 0 0 0 2px var(--st-open-bg), var(--shadow-soft); }
 
 .case-card__waiting {
   display: inline-flex;
@@ -1952,7 +1592,7 @@ body {
   gap: 5px;
   font-size: 12px;
   font-weight: 800;
-  color: var(--open-700);
+  color: var(--text);
   margin-top: 6px;
 }
 .case-card__waiting::before {
@@ -1960,7 +1600,7 @@ body {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--open-500);
+  background: var(--st-ongoing);
   animation: pulse-dot 1.6s ease-out infinite;
 }
 
@@ -1970,12 +1610,8 @@ body {
   to   { background-position: 400px 0; }
 }
 .skeleton {
-  border-radius: var(--radius-lg);
-  background: linear-gradient(90deg, #f1e7df 25%, #faf3ee 50%, #f1e7df 75%);
-  background-size: 800px 100%;
   animation: shimmer 1.4s linear infinite;
 }
-.skeleton--card { height: 108px; margin-bottom: 12px; }
 
 /* Group H: map placeholder while the Google Maps JS is still loading — was
    a bare empty div before. .map-wrap is already position:relative. */
@@ -1983,29 +1619,17 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, #f1e7df 25%, #faf3ee 50%, #f1e7df 75%);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--bg) 50%, var(--surface-2) 75%);
   background-size: 800px 100%;
   animation: shimmer 1.4s linear infinite;
 }
 
 /* ---- Resolution celebration (the emotional peak) ----
    Paw prints burst gently from the success banner — once, then calm. */
-@keyframes paw-pop {
-  0%   { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
-  25%  { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.15) rotate(var(--rot)); }
-}
+
 .celebrate { position: relative; overflow: visible; }
-.celebrate .paw-burst {
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  font-size: 20px;
-  pointer-events: none;
-  animation: paw-pop 1.3s cubic-bezier(0.2, 0.8, 0.4, 1) both;
-}
+
 .banner--success.celebrate { animation: page-enter 400ms both; }
-.paw-trail--complete .paw-trail__icon { animation: pulse-ring 1.8s ease-out 2; }
 
 /* ---- Onboarding (first run) ----------------------------------------------
    Built from the design's three splash frames. Those frames are flat bitmaps
@@ -2025,32 +1649,32 @@ body {
   animation: page-enter var(--t-med) both;
 }
 .onboarding--green {
-  --onb-top: #066f5a;           /* sampled — no Figma variable */
-  --onb-hill: #026551;          /* sampled */
-  --onb-ink: #fff;
-  --onb-body: rgba(255, 255, 255, 0.94); /* sampled #f1f4f0 over the green */
-  --onb-cta-bg: #fff;
-  --onb-cta-ink: var(--ink);
+  --onb-top: var(--anchor);           /* sampled — no Figma variable */
+  --onb-hill: #3a2450;          /* sampled */
+  --onb-ink: var(--on-anchor);
+  --onb-body: var(--on-anchor); /* sampled #f1f4f0 over the green */
+  --onb-cta-bg: var(--lemon);
+  --onb-cta-ink: var(--text);
   --onb-title: 41;              /* design px */
   --onb-title-lh: 1.02;
 }
 .onboarding--light {
-  --onb-top: #fff;
-  --onb-hill: #fff;
-  --onb-ink: #015148;           /* sampled deep green — no Figma variable */
-  --onb-body: #003f3c;          /* sampled */
-  --onb-cta-bg: var(--brand-fill);
-  --onb-cta-ink: var(--color-text-on-brand);
+  --onb-top: var(--bg);
+  --onb-hill: var(--bg);
+  --onb-ink: var(--text);           /* sampled deep green — no Figma variable */
+  --onb-body: var(--text-2);          /* sampled */
+  --onb-cta-bg: var(--anchor);
+  --onb-cta-ink: var(--on-anchor);
   --onb-title: 48;
   --onb-title-lh: 1.08;
 }
 .onboarding--lavender {
-  --onb-top: #8979df;           /* sampled — a shade under the --lavender token */
-  --onb-hill: #8272db;          /* sampled */
-  --onb-ink: #fff;
-  --onb-body: #fff;
-  --onb-cta-bg: #fff;
-  --onb-cta-ink: var(--ink);
+  --onb-top: var(--lav);           /* sampled — a shade under the --lavender token */
+  --onb-hill: #a59cd3;          /* sampled */
+  --onb-ink: var(--text);
+  --onb-body: var(--text);
+  --onb-cta-bg: var(--anchor);
+  --onb-cta-ink: var(--text);
   --onb-title: 45;
   --onb-title-lh: 1.03;
 }
@@ -2094,9 +1718,9 @@ body {
   min-height: 36px;
   margin: -4px 0; /* 36px target, but the row keeps the logo's 28px height */
   padding: 0 28px 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.16)
+  border: 1px solid color-mix(in srgb, var(--onb-ink) 35%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--onb-ink) 12%, transparent)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
     no-repeat right 11px center;
   color: inherit;
@@ -2107,10 +1731,10 @@ body {
 }
 .onboarding--light .onboarding__lang {
   border-color: var(--line);
-  background-color: var(--color-bg-surface-alt);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23015148' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-color: var(--surface-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%232E1A3D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-.onboarding__lang option { color: var(--ink); background: var(--card); }
+.onboarding__lang option { color: var(--text); background: var(--surface); }
 
 /* The photo band. Its natural height is the crop's aspect ratio; on short
    screens it shrinks (photo stays whole, bottom-anchored) before the copy
@@ -2144,7 +1768,7 @@ body {
   /* The design's headline runs ~5px past the button's right edge; without
      the same room "with one report." wraps to a third line. */
   margin: 0 calc(-12 * var(--u)) 0 0;
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-size: max(28px, calc(var(--onb-title) * var(--u)));
   font-weight: 700;
   line-height: var(--onb-title-lh);
@@ -2170,7 +1794,7 @@ body {
 .onboarding__cta {
   min-height: max(48px, calc(55 * var(--u)));
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   background: var(--onb-cta-bg);
   color: var(--onb-cta-ink);
   font: inherit;
@@ -2212,7 +1836,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: var(--color-bg-surface-alt);
+    background: var(--surface-2);
   }
   .onboarding__frame {
     flex: none;
@@ -2230,10 +1854,10 @@ body {
    ============================================================================ */
 
 /* Blur-by-default case photos (4e) */
-.case-photo { position: relative; overflow: hidden; border-radius: var(--radius-lg); width: 100%; height: 100%; }
+.case-photo { position: relative; overflow: hidden; border-radius: var(--r-card); width: 100%; height: 100%; }
 /* Grid thumbnails are fixed 88px flex items, not the hero's aspect-ratio box —
    match .photo-grid img's own sizing instead of stretching to 100%. */
-.photo-grid .case-photo { width: 88px; height: 88px; border-radius: var(--radius-sm); flex-shrink: 0; }
+.photo-grid .case-photo { width: 88px; height: 88px; border-radius: var(--r-input); flex-shrink: 0; }
 /* Compact card photo is flush against the card body on its right edge —
    let the card's own overflow:hidden round the outer corners, same as
    .photo-unavailable does for the empty-state fallback in this same slot. */
@@ -2242,7 +1866,7 @@ body {
 .case-photo__reveal {
   position: absolute; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 4px;
-  background: rgba(51, 36, 31, 0.32); color: #fff; text-align: center; padding: 12px;
+  background: rgba(46, 26, 61, 0.32); color: var(--on-anchor); text-align: center; padding: 12px;
   backdrop-filter: blur(2px);
 }
 .case-photo__reveal-icon { font-size: 26px; }
@@ -2256,33 +1880,33 @@ body {
 .case-photo__reveal-title { font-weight: 800; font-size: 13.5px; }
 .case-photo__reveal-cta {
   font-size: 12px; font-weight: 700; opacity: 0.9;
-  border: 1.5px solid rgba(255,255,255,0.6); border-radius: 999px; padding: 3px 12px; margin-top: 4px;
+  border: 1.5px solid rgba(251, 245, 234, 0.6); border-radius: 999px; padding: 3px 12px; margin-top: 4px;
 }
 .case-photo__hide {
   position: absolute; top: 8px; right: 8px; font-size: 11px; font-weight: 800;
-  color: #fff; background: rgba(51,36,31,0.55); border-radius: 999px; padding: 4px 10px;
+  color: var(--on-anchor); background: rgba(46, 26, 61, 0.55); border-radius: 999px; padding: 4px 10px;
   backdrop-filter: blur(4px);
 }
 
 /* Chip rows (structured report fields) */
 .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-row .chip {
-  cursor: pointer; border: 1.5px solid var(--line); background: var(--card);
-  color: var(--ink-soft); font-weight: 700; font-size: 13px;
+  cursor: pointer; border: 1.5px solid var(--line); background: var(--surface);
+  color: var(--text-2); font-weight: 700; font-size: 13px;
   padding: 8px 13px; border-radius: 999px; transition: all var(--t-fast);
 }
 .chip-row .chip.active {
-  background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep);
+  background: var(--lav-tint); border-color: var(--anchor); color: var(--text);
 }
 
 /* Urgency selector chips tint to their own level color when picked, rather
    than the generic coral active state — same colors as .urgency-badge.
    Prefixed with .chip-row to match (not lose to) .chip-row .chip.active
    above on specificity. */
-.chip-row .chip--urgency-low.active { background: #eaf2e9; border-color: var(--urgency-low); color: var(--urgency-low); }
-.chip-row .chip--urgency-medium.active { background: #fbf1de; border-color: var(--urgency-medium); color: #9c7217; }
-.chip-row .chip--urgency-high.active { background: #fbe6da; border-color: var(--urgency-high); color: var(--urgency-high); }
-.chip-row .chip--urgency-critical.active { background: #fadedb; border-color: var(--urgency-critical); color: var(--urgency-critical); }
+.chip-row .chip--urgency-low.active { background: var(--surface-2); border-color: var(--urg-low); color: var(--urg-low); }
+.chip-row .chip--urgency-medium.active { background: var(--surface-2); border-color: var(--urg-medium); color: var(--text); }
+.chip-row .chip--urgency-high.active { background: var(--lav-tint); border-color: var(--urg-high); color: var(--urg-high); }
+.chip-row .chip--urgency-critical.active { background: var(--crit-tint); border-color: var(--urg-critical); color: var(--urg-critical); }
 
 /* Urgency badge — feed card + case detail, same shape as .status-badge
    minus the pulsing dot (urgency isn't "live" the way pipeline status is). */
@@ -2292,28 +1916,18 @@ body {
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.02em;
-  color: #fff;
+  color: var(--on-anchor);
   border-radius: 999px;
   padding: 4px 11px;
   text-transform: uppercase;
 }
 
 /* Legal / long-form doc pages */
-.doc-page h2 { font-family: var(--font-display); font-size: 20px; margin: 22px 0 8px; }
+.doc-page h2 { font-family: var(--font-head); font-size: 20px; margin: 22px 0 8px; }
 .doc-page h3 { font-size: 16px; margin: 16px 0 6px; }
-.doc-page p, .doc-page li { font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; }
+.doc-page p, .doc-page li { font-size: 14.5px; color: var(--text-2); line-height: 1.6; }
 .doc-page ul { padding-left: 20px; margin: 8px 0; }
-.doc-page .doc-updated { font-size: 12.5px; color: var(--ink-soft); opacity: 0.8; margin-bottom: 18px; }
-
-/* Settings groups + footer links */
-.settings-group { margin-bottom: 22px; }
-.settings-group__label {
-  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
-  color: var(--ink-soft); margin: 0 4px 8px;
-}
-.settings-links { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: center; padding: 20px 16px; }
-.settings-links a { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); }
-.danger-zone { border: 1.5px solid var(--open-100); border-radius: var(--radius-lg); padding: 14px; }
+.doc-page .doc-updated {    margin-bottom: 18px; }
 
 /* Full-screen error boundary + 404 */
 .fullscreen-msg {
@@ -2321,18 +1935,10 @@ body {
   justify-content: center; text-align: center; padding: 28px; gap: 14px;
 }
 .fullscreen-msg__icon { font-size: 64px; animation: float-paw 3.6s ease-in-out infinite; }
-.fullscreen-msg h1 { font-family: var(--font-display); font-size: 24px; margin: 0; }
-.fullscreen-msg p { color: var(--ink-soft); max-width: 380px; margin: 0; }
+.fullscreen-msg h1 {   margin: 0; }
+.fullscreen-msg p {  max-width: 380px; margin: 0; }
 
-/* Safety acknowledgment sheet */
-.safety-sheet { position: fixed; inset: 0; z-index: 1800; background: rgba(51,36,31,0.5);
-  display: flex; align-items: flex-end; justify-content: center; padding: 0; backdrop-filter: blur(3px); }
-.safety-sheet__card {
-  background: var(--card); border-radius: 24px 24px 0 0; padding: 26px 22px calc(22px + var(--safe-bottom));
-  max-width: 640px; width: 100%; animation: sheet-up var(--t-med) both; max-height: 88dvh; overflow-y: auto;
-}
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.safety-sheet__icon { font-size: 40px; text-align: center; }
 
 /* ============================================================================
    16. PRE-LAUNCH — modal sheet (safety ack), settings danger zone tweaks
@@ -2341,7 +1947,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 3000;
-  background: rgba(51, 36, 31, 0.5);
+  background: var(--scrim);
   backdrop-filter: blur(3px);
   display: flex;
   align-items: flex-end;
@@ -2352,16 +1958,16 @@ body {
   .modal-overlay { align-items: center; }
 }
 .modal-sheet {
-  background: var(--card);
+  background: var(--surface);
   width: 100%;
   max-width: 460px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-radius: var(--r-card) var(--r-card) 0 0;
   padding: 26px 22px calc(22px + var(--safe-bottom));
   box-shadow: var(--shadow-lift);
   animation: sheet-up var(--t-med) both;
 }
 @media (min-width: 640px) {
-  .modal-sheet { border-radius: var(--radius-lg); }
+  .modal-sheet { border-radius: var(--r-card); }
 }
 @keyframes sheet-up {
   from { transform: translateY(24px); opacity: 0.6; }
@@ -2369,13 +1975,13 @@ body {
 }
 .modal-sheet__icon { font-size: 44px; text-align: center; }
 .modal-sheet__title {
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-size: 22px;
   text-align: center;
   margin: 8px 0 6px;
 }
 .modal-sheet__intro {
-  color: var(--ink-soft);
+  color: var(--text-2);
   font-size: 14.5px;
   text-align: center;
   margin: 0 0 14px;
@@ -2384,7 +1990,7 @@ body {
 .modal-sheet .btn { width: 100%; }
 .modal-sheet__fineprint {
   font-size: 12.5px;
-  color: var(--ink-soft);
+  color: var(--text-2);
   line-height: 1.5;
   margin: 6px 0 16px;
 }
@@ -2396,29 +2002,11 @@ body {
   font-size: 14.5px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: var(--ink);
-}
-
-/* Settings footer links in the bottom nav area for signed-out users */
-.app-footer {
-  padding: 20px 16px calc(20px + var(--safe-bottom));
-  text-align: center;
-  border-top: 1px solid var(--line);
-  margin-top: 24px;
-}
-.app-footer a {
-  color: var(--ink-soft);
-  font-size: 12.5px;
-  font-weight: 700;
-  margin: 0 8px;
-  white-space: nowrap;
-  line-height: 2;
+  color: var(--text);
 }
 
 /* ---- Vet operating hours (migration 010) ---- */
-.list-row--muted { opacity: 0.62; }
-.list-row__sub--closed { color: var(--open-700); font-weight: 700; }
-.list-row__sub--open   { color: var(--done-700); font-weight: 700; }
+
 .tag {
   display: inline-block;
   font-size: 11px;
@@ -2428,7 +2016,7 @@ body {
   vertical-align: middle;
   margin-left: 6px;
 }
-.tag--always { background: var(--done-100); color: var(--done-700); }
+.tag--always { background: var(--st-done-bg); color: var(--text); }
 
 /* ============================================================================
    17. "THE HAND THAT HELPS" — Direction A soul layer
@@ -2438,27 +2026,15 @@ body {
    Appended last so it wins over the flat baseline it replaces.
    ============================================================================ */
 
-:root {
-  /* Warmer neutrals — no pure white anywhere (Headspace principle). The old
-     --card was near-white; nudge everything a few degrees toward paper. */
-  --paper: #ffffff;          /* surface — Figma "Citrine White" */
-  --ink-line: #241f1a;       /* ink for hand-drawn marks — Figma "Zeus" */
 
-  /* Figma elevation: one soft offset shadow per step, no layered warm haze. */
-  --shadow-ink: 0 14px 26px -20px rgba(36, 31, 26, 0.45);
-  --shadow-ink-lift: 0 30px 60px -25px rgba(36, 31, 26, 0.45);
-
-  /* Figma backgrounds are flat — no radial wash. */
-  --wash: none;
-}
 
 /* Paper grain — a barely-there tactile texture on the app background. This is
    the "human fingerprint" the research kept naming; kept at ~3% so it reads as
    warmth, never noise. Pure CSS (inline SVG data URI), no asset to load. */
 body {
-  background-color: var(--sand);
+  background-color: var(--bg);
   background-image:
-    var(--wash),
+    none,
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   background-attachment: fixed, fixed, fixed;
 }
@@ -2468,15 +2044,15 @@ body {
 .page-title,
 .modal-sheet__title,
 .side-nav__name {
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-weight: 600;
   letter-spacing: -0.015em;
 }
 .page-title { font-optical-sizing: auto; }
 
 /* ---- The ink marks ---- */
-.ink { color: var(--ink-line); display: inline-block; vertical-align: middle; }
-.ink-scene { color: var(--ink-line); opacity: 0.9; }
+.ink { color: var(--text); display: inline-block; vertical-align: middle; }
+.ink-scene { color: var(--text); opacity: 0.9; }
 
 /* Draw-on: the paw appears as if being inked, once. */
 @keyframes ink-draw-in {
@@ -2492,7 +2068,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: var(--coral-deep);
+  color: var(--text);
 }
 @keyframes print-in {
   from { opacity: 0; transform: translateY(6px) scale(0.7); }
@@ -2505,39 +2081,35 @@ body {
 .list-row,
 .paw-trail,
 .modal-sheet {
-  background: var(--paper);
-  box-shadow: var(--shadow-ink);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 @media (hover: hover) {
-  .case-card:hover { box-shadow: var(--shadow-ink-lift); }
+  .case-card:hover { box-shadow: var(--shadow-lift); }
 }
 
 /* Buttons: keep the coral gradient but give it inked depth + a warmer press. */
-.btn--primary {
-  box-shadow: 0 2px 4px rgba(194, 64, 47, 0.24), 0 8px 18px rgba(232, 93, 74, 0.28);
-}
-.btn--primary:active { box-shadow: 0 1px 2px rgba(194, 64, 47, 0.3); }
 
 /* Empty states now host an ink scene; center and warm it. */
 .empty-state .ink-scene { display: block; margin: 0 auto 6px; }
-.empty-state__icon.ink-scene { animation: none; } /* scenes don't bob like emoji did */
+ /* scenes don't bob like emoji did */
 /* Stethoscope after a vet's name — scales with the name's font size. */
 .vet-tag {
   display: inline-flex;
   margin-left: 0.3em;
   vertical-align: -0.125em;
-  color: var(--brand-text);
+  color: var(--text);
 }
 .vet-tag svg { width: 1em; height: 1em; }
-.vet-page__icon { display: flex; justify-content: center; color: var(--brand-text); }
-.app-loading__mark { width: 44px; height: 44px; color: var(--brand-text); }
+
+.app-loading__mark { width: 44px; height: 44px; color: var(--text); }
 .empty-paw {
   display: grid;
   place-items: center;
   margin: 0 auto 14px;
   border-radius: 50%;
-  background: var(--lavender-soft);
-  color: var(--lavender);
+  background: var(--lav-tint);
+  color: var(--lav);
 }
 
 /* Section headings pick up a hint of the display face for authored feel. */
@@ -2559,15 +2131,10 @@ body {
   .case-card { animation: none; }
 }
 
-
-/* Resolution celebration in Direction A: inked paws bloom upward in the
-   'safe' green — the emotional peak, drawn by hand rather than typed emoji. */
-.paw-burst .ink { color: var(--status-resolved); }
 .banner--success.celebrate {
-  background: linear-gradient(180deg, #eafaf0 0%, #dff3e6 100%);
-  border: 1px solid #c4e9d1;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--sky) 100%);
+  border: 1px solid var(--sky);
 }
-
 
 /* ---- impact-* stat tiles: still used by AdminPage's Stats tab (the
    /impact page these were originally built for is gone — folded into
@@ -2592,51 +2159,48 @@ body {
   gap: 6px;
   min-width: 0;
   padding: 14px;
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   box-shadow: var(--shadow-soft);
 }
 .impact-stat--hero {
   grid-column: 1 / -1;
   padding: 18px 16px;
-  background: var(--coral-soft);
-  border-color: #f6cfc6;
+  background: var(--lav-tint);
+  border-color: var(--line);
 }
 .impact-stat__label {
   order: -1; /* label above the number, like the growth charts' titles */
   font-size: 12.5px;
   font-weight: 700;
   line-height: 1.3;
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 .impact-stat__value--big {
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-weight: 900;   /* the heavy end — Direction A's punch */
-  font-variation-settings: 'opsz' 40, 'SOFT' 30, 'WONK' 1;
   font-size: clamp(56px, 18vw, 82px);
   line-height: 0.9;
-  color: var(--brand-text);
+  color: var(--text);
   letter-spacing: -0.03em;
 }
 .impact-stat__value {
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-weight: 900;
-  font-variation-settings: var(--fraunces-soft);
   font-size: 28px;
   line-height: 1;
-  color: var(--ink);
+  color: var(--text);
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 /* Restates the hero's type over the base rule just above (same specificity,
    later wins — hence the doubled class). */
 .impact-stat__value.impact-stat__value--big {
-  font-variation-settings: 'opsz' 40, 'SOFT' 30, 'WONK' 1;
   font-size: clamp(44px, 14vw, 64px);
   line-height: 0.9;
   letter-spacing: -0.03em;
-  color: var(--brand-text);
+  color: var(--text);
 }
 
 /* ---- Platform stats (ProfilePage) — the three /impact headline numbers,
@@ -2650,21 +2214,16 @@ body {
   text-align: center;
 }
 .platform-stats__value {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-variation-settings: var(--fraunces-soft);
+  font-family: var(--font-head);
   font-size: clamp(20px, 6vw, 28px);
   line-height: 1.1;
-  color: var(--brand-text);
 }
 .platform-stats__label {
   font-size: 11px;
   font-weight: 700;
-  color: var(--ink-soft);
+  color: var(--text-2);
   margin-top: 2px;
 }
-
-
 
 /* ============================================================================
    17. DESIGN SOUL LAYER — Direction A: "The Hand That Helps"
@@ -2681,7 +2240,6 @@ body {
 .fullscreen-msg h1,
 .doc-page h1,
 h1, h2 {
-  font-variation-settings: var(--fraunces-soft);
   letter-spacing: -0.015em;
 }
 .page-title {
@@ -2692,48 +2250,12 @@ h1, h2 {
 
 /* The italic is the app's quiet, reassuring voice — used deliberately. */
 .voice-quiet {
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-style: italic;
   font-weight: 500;
-  color: var(--coral-deep);
-  font-variation-settings: 'opsz' 28, 'SOFT' 80, 'WONK' 1;
+  color: var(--text);
 }
 
-/* ---- Paper grain: every large warm surface gets a faint tooth ------------- */
-/* A tiny inline SVG noise, tiled — 2-3% so it reads as paper, not static. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.35  0 0 0 0 0.20  0 0 0 0 0.14  0 0 0 0.028 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-#root { position: relative; z-index: 1; } /* content sits above the grain */
-
-/* ---- The wobbly card: hand-placed, never machine-perfect ----------------- */
-/* Uneven radii + a hair of rotation. Applied broadly but subtly. */
-.card,
-.case-card {
-  border-radius: 24px 17px 26px 15px;
-  box-shadow: var(--depth-card);
-}
-.case-card:nth-child(2n) { transform: rotate(0.35deg); }
-.case-card:nth-child(3n) { transform: rotate(-0.4deg); }
-.case-card:nth-child(2n):active,
-.case-card:nth-child(3n):active { transform: rotate(0deg) scale(0.985); }
-
-/* ---- Buttons as inked stamps: press = soft squash ------------------------ */
-.btn--primary {
-  border-radius: 20px 15px 22px 14px;
-  box-shadow: 0 5px 0 rgba(120, 40, 26, 0.35), 0 8px 18px rgba(232, 93, 74, 0.30);
-  transition: transform var(--t-fast), box-shadow var(--t-fast);
-}
-.btn--primary:active {
-  transform: translateY(3px) scale(0.99);
-  box-shadow: 0 2px 0 rgba(120, 40, 26, 0.35), 0 4px 10px rgba(232, 93, 74, 0.3);
-}
 
 /* ---- Ink-draw motion: strokes DRAW in, they never merely fade ------------ */
 @keyframes ink-draw {
@@ -2755,34 +2277,16 @@ body::before {
 
 /* ---- The arrival headline — the single most important line in the app ---- */
 .arrival-title {
-  font-family: var(--font-display);
+  font-family: var(--font-head);
   font-weight: 900;
-  font-variation-settings: 'opsz' 40, 'SOFT' 40, 'WONK' 1;
   font-size: clamp(40px, 12vw, 56px);
   line-height: 0.98;
   letter-spacing: -0.02em;
-  color: var(--ink);
+  color: var(--text);
   text-align: center;
 }
 
 /* ---- Impact page: from lifeless to the showcase -------------------------- */
-.impact-hero-stat {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-variation-settings: 'opsz' 40, 'SOFT' 30, 'WONK' 1;
-  font-size: clamp(56px, 18vw, 84px);
-  line-height: 0.9;
-  color: var(--brand-text);
-  letter-spacing: -0.03em;
-}
-.impact-stat-num {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-variation-settings: var(--fraunces-soft);
-  font-size: clamp(36px, 11vw, 48px);
-  color: var(--ink);
-  line-height: 1;
-}
 
 /* Respect reduced motion — collapse the ink theatre. */
 @media (prefers-reduced-motion: reduce) {
@@ -2795,7 +2299,7 @@ body::before {
   text-align: center;
   padding: 44px 16px 30px;
   margin-bottom: 14px;
-  background: radial-gradient(120% 90% at 50% 0%, var(--coral-soft) 0%, transparent 62%);
+  background: radial-gradient(120% 90% at 50% 0%, var(--lav-tint) 0%, transparent 62%);
   border-radius: 26px 20px 28px 18px;
   overflow: visible;
 }
@@ -2804,7 +2308,7 @@ body::before {
 .paw-bloom {
   position: absolute;
   top: 30px; left: 0; right: 0; height: 0;
-  color: var(--coral);
+  color: var(--anchor);
 }
 .paw-bloom span { top: 0; }
 
@@ -2817,46 +2321,7 @@ body::before {
    Values with NO equivalent token are called out below rather than hardcoded
    as a bare px/hex — see the PR description for the full list.
    ============================================================================ */
-:root {
-  --color-brand: var(--coral);
-  --color-brand-strong: var(--coral-deep);
-  --color-brand-subtle: var(--coral-soft);
-  --color-bg-app: var(--sand);
-  --color-bg-surface: var(--paper);
-  --color-bg-surface-alt: #f4f4f4; /* Figma "Bridal Heath" — inputs, secondary buttons, segmented track */
-  --color-border-default: var(--line);
-  --color-border-hairline: rgba(36, 31, 26, 0.08); /* Figma "Zeus 8%" */
-  --color-text-primary: var(--ink);
-  --color-text-secondary: var(--ink-soft);
-  --color-text-on-brand: #fff7ea; /* Figma "Serenade" — text on green fills */
-  --color-focus-ring: rgba(2, 184, 116, 0.4); /* brand at the old ring's alpha — Figma has no focus spec */
 
-  --space-2xs: 4px;
-  --space-xs: 8px;
-  --space-sm: 12px;
-  --space-md: 16px;
-  --space-lg: 20px;
-  --space-xl: 24px;
-  --space-2xl: 32px;
-
-  /* --radius-sm (12px) and --radius-lg (24px) above already match the
-     design-tokens doc's names and values exactly — reused as-is. */
-  --radius-md: var(--radius);
-  --radius-pill: 999px;
-
-  --font-family-display: var(--font-display);
-  --font-family-body: var(--font-body);
-  --font-size-xs: 11px;
-  --font-size-sm: 12px;
-  --font-size-base: 14px;
-  --font-size-lg: 16px;
-  --font-size-xl: 22px;   /* Figma Semantic/Heading 1 */
-  --font-size-3xl: 26px;  /* Figma sign-in hero */
-
-  --shadow-md: var(--shadow-ink);
-  --shadow-lg: var(--shadow-ink-lift);
-  --shadow-focus: 0 0 0 3px rgba(2, 184, 116, 0.4);
-}
 
 .auth-page {
   display: flex;
@@ -2873,15 +2338,15 @@ body::before {
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-sm);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-hairline);
+  background: var(--surface);
+  border: 1px solid var(--hair);
   /* Design calls for a 36px corner radius; the largest token is
      --radius-lg (24px) — flagged, using the closest token instead of a
      hardcoded 36px. */
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-card);
   /* Design's card shadow is a large near-black-tinted drop shadow with no
      equivalent token; --shadow-lg is the closest elevation step. */
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lift);
   padding: var(--space-2xl) var(--space-xl);
 }
 
@@ -2899,35 +2364,35 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-brand);
-  border-radius: var(--radius-md);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  border-radius: var(--r-card);
+  color: var(--on-anchor);
 }
 .auth-card__logo svg { width: 24px; height: 24px; }
 
 .auth-card__wordmark {
-  font-family: var(--font-family-display);
+  font-family: var(--font-head);
   font-weight: 600;
-  font-size: var(--font-size-xl);
-  color: var(--color-text-primary);
+  font-size: var(--fs-h2);
+  color: var(--text);
 }
 
 .auth-card__tagline {
   margin: 0;
   text-align: center;
-  font-family: var(--font-family-display);
+  font-family: var(--font-head);
   font-weight: 600;
-  font-size: var(--font-size-3xl);
+  font-size: var(--fs-h1);
   line-height: 1.15;
-  color: var(--color-text-primary);
+  color: var(--text);
 }
 
 .auth-card__tabs.segmented {
-  background: var(--color-bg-surface-alt);
-  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border-radius: var(--r-card);
 }
 .auth-card__tabs .segmented__option {
-  font-size: var(--font-size-base);
+  font-size: var(--fs-small);
   font-weight: 700;
   /* Two options only, so the branded tab track stays — but its labels may
      WRAP rather than ellipsise. "Veterinary clinic" / "Baytar klinikası" /
@@ -2940,9 +2405,9 @@ body::before {
   overflow-wrap: anywhere;
 }
 .auth-card__tabs .segmented__option.active {
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
-  box-shadow: var(--shadow-md);
+  background: var(--anchor);
+  color: var(--on-anchor);
+  box-shadow: var(--shadow-soft);
 }
 
 .auth-card__row {
@@ -2957,82 +2422,70 @@ body::before {
   margin-bottom: 0; /* .auth-card's own gap controls spacing instead */
 }
 .auth-card .field__label {
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
+  font-size: var(--fs-small);
+  color: var(--text);
 }
 .auth-card .field input,
 .auth-card .pw-wrap input {
   min-height: 50px;
   padding: var(--space-sm) var(--space-md);
-  background: var(--color-bg-surface-alt);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-lg);
-  color: var(--color-text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  font-size: var(--fs-body);
+  color: var(--text);
 }
 .auth-card .field input:focus-visible,
 .auth-card .pw-wrap input:focus-visible {
   outline: none;
-  border-color: var(--color-brand);
+  border-color: var(--anchor);
   box-shadow: var(--shadow-focus);
 }
 .auth-card .pw-toggle {
-  color: var(--color-text-secondary);
+  color: var(--text-2);
 }
 
 .auth-card__forgot {
   align-self: flex-end;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+  color: var(--text-2);
 }
 
 .auth-card .btn--primary.auth-card__cta {
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lift);
 }
 
 .auth-card__divider {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  color: var(--text-2);
+  font-size: var(--fs-label);
 }
 .auth-card__divider::before,
 .auth-card__divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--color-border-hairline);
+  background: var(--hair);
 }
 
 .auth-card .btn--ghost.auth-card__google {
-  border-radius: var(--radius-md);
-}
-
-.auth-card__terms {
-  margin: 0;
-  text-align: center;
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
-  color: var(--color-text-secondary);
-}
-.auth-card__terms a {
-  color: var(--color-text-primary);
-  text-decoration: underline;
+  border-radius: var(--r-card);
 }
 
 .auth-card__switch {
   align-self: center;
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
+  font-size: var(--fs-small);
+  color: var(--text-2);
 }
 
 .auth-card__guest,
 .auth-card__legal {
   align-self: center;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+  color: var(--text-2);
 }
 .auth-card__guest {
   text-decoration: underline; /* matches the design's "Continue as guest" */
@@ -3057,7 +2510,7 @@ body::before {
   width: 140px;
   min-width: 140px;
   height: 140px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
   align-self: center;
 }
 .home-feed .case-card--compact .case-card__body {
@@ -3068,30 +2521,18 @@ body::before {
   -webkit-line-clamp: 2;
 }
 .home-feed .case-card--compact .case-card__meta {
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-label);
 }
 
 /* "3 vet clinics nearby" banner */
 .home-vet-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-md) var(--space-sm);
   margin-top: var(--space-sm);
-  background: var(--color-brand-subtle);
-  border-radius: var(--radius-md);
-  text-decoration: none;
 }
 .home-vet-banner__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
   flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  background: var(--color-brand);
-  color: var(--color-text-on-brand);
 }
 .home-vet-banner__text {
   flex: 1;
@@ -3100,18 +2541,9 @@ body::before {
   flex-direction: column;
   gap: 2px;
 }
-.home-vet-banner__title {
-  font-size: var(--font-size-base);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-.home-vet-banner__sub {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
+
 .home-vet-banner__chevron {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-lg);
+  font-size: var(--fs-body);
   flex-shrink: 0;
 }
 
@@ -3127,15 +2559,10 @@ body::before {
 /* ---- Map card ---- */
 .case-detail__map-card {
   position: relative;
-  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  margin-bottom: var(--space-sm);
 }
 .case-detail__map-pill {
   position: absolute;
-  left: var(--space-sm);
-  bottom: var(--space-sm);
   display: flex;
   align-items: center;
   gap: var(--space-2xs);
@@ -3144,49 +2571,36 @@ body::before {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: var(--color-bg-surface);
-  border-radius: var(--radius-pill);
+  border-radius: var(--r-pill);
   /* Was --font-size-sm (12px) with no border or shadow: near-white pill on a
      light map, so the landmark text had nothing separating it from the tiles
      underneath and read as barely there. The colour was never the problem
      (--ink on --paper is ~13:1) — the size and the lack of an edge were. */
-  font-size: var(--font-size-base);
+  font-size: var(--fs-small);
   font-weight: 700;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-hairline);
+  border: 1px solid var(--hair);
   box-shadow: var(--shadow-soft);
 }
 .case-detail__map-directions {
   position: absolute;
-  right: var(--space-sm);
-  top: var(--space-sm);
   display: flex;
   align-items: center;
-  gap: var(--space-2xs);
   padding: var(--space-2xs) var(--space-sm);
-  background: var(--color-bg-surface);
-  border-radius: var(--radius-pill);
+  border-radius: var(--r-pill);
   /* Same treatment as the landmark pill opposite it, so the two overlay
      controls stay a matched pair. */
-  font-size: var(--font-size-base);
   font-weight: 700;
-  color: var(--color-brand-strong);
   text-decoration: none;
-  border: 1px solid var(--color-border-hairline);
+  border: 1px solid var(--hair);
   box-shadow: var(--shadow-soft);
 }
 .case-detail__map-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-md);
-  margin-bottom: var(--space-xl);
 }
 .case-detail__map-legend-item {
   display: flex;
   align-items: center;
-  gap: var(--space-2xs);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
 }
 .case-detail__map-legend-dot {
   width: 8px;
@@ -3194,16 +2608,10 @@ body::before {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.case-detail__map-legend-dot--case { background: var(--status-open); }
-.case-detail__map-legend-dot--vet { background: var(--status-enroute); }
 
 /* ---- Description quote ---- */
 .case-detail__quote {
   margin: 0;
-  padding-left: var(--space-sm);
-  border-left: 3px solid var(--color-brand);
-  font-size: var(--font-size-lg);
-  color: var(--color-text-primary);
 }
 
 /* ---- Timeline (event log) ---- */
@@ -3216,15 +2624,9 @@ body::before {
 .case-detail__timeline::before {
   content: '';
   position: absolute;
-  left: 5px;
-  top: var(--space-sm);
-  bottom: var(--space-sm);
-  width: 2px;
-  background: var(--color-border-default);
 }
 .case-detail__timeline-item {
   position: relative;
-  padding-bottom: var(--space-md);
 }
 .case-detail__timeline-item:last-child {
   padding-bottom: 0;
@@ -3232,30 +2634,13 @@ body::before {
 .case-detail__timeline-item::before {
   content: '';
   position: absolute;
-  left: calc(-1 * var(--space-lg) + 1px);
-  top: 3px;
-  width: 11px;
-  height: 11px;
   border-radius: 50%;
-  background: var(--color-brand);
-  border: 2px solid var(--color-bg-surface);
-}
-.case-detail__timeline-time {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-.case-detail__timeline-text {
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
 }
 
 /* ---- Bottom button stack ---- */
 .case-detail__actions-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
 }
 .case-detail__report-link {
   display: flex;
@@ -3274,18 +2659,18 @@ body::before {
   height: 30px;
   border-radius: 50%;
   font-size: 14px;
-  background: var(--color-bg-surface-alt);
-  border: 1px solid var(--color-border-default);
-  color: var(--color-text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-2);
   opacity: 1;
   filter: none;
   transition: background var(--t-fast), border-color var(--t-fast), width var(--t-fast), height var(--t-fast), box-shadow var(--t-fast);
 }
 .paw-trail__step.done .paw-trail__icon,
 .paw-trail__step.current .paw-trail__icon {
-  background: var(--color-brand);
-  border-color: var(--color-brand);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  border-color: var(--anchor);
+  color: var(--on-anchor);
 }
 .paw-trail__step.current .paw-trail__icon {
   width: 34px;
@@ -3296,7 +2681,6 @@ body::before {
 .paw-trail__connector {
   top: 15px;
 }
-
 
 /* ============================================================================
    21. ADMIN — Users tab (migration 030) and growth charts
@@ -3309,17 +2693,17 @@ body::before {
   letter-spacing: 0.02em;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--sand);
+  background: var(--bg);
   border: 1px solid var(--line);
-  color: var(--ink-soft);
+  color: var(--text-2);
   white-space: nowrap;
   flex-shrink: 0;
 }
-.admin-badge--banned { background: #fadedb; border-color: #f0b7b0; color: #a3261b; }
-.admin-badge--admin { background: var(--coral-soft); border-color: var(--coral); color: var(--coral-deep); }
-.admin-badge--approved { background: #e3f1e9; border-color: #b5d9c4; color: #2c7550; }
-.admin-badge--pending { background: #fbf1de; border-color: #ecd49f; color: #8a6414; }
-.admin-badge--rejected { background: #fadedb; border-color: #f0b7b0; color: #a3261b; }
+.admin-badge--banned { background: var(--crit-tint); border-color: var(--crit-tint); color: var(--crit); }
+.admin-badge--admin { background: var(--lav-tint); border-color: var(--anchor); color: var(--text); }
+.admin-badge--approved { background: var(--sky); border-color: var(--sky); color: var(--text); }
+.admin-badge--pending { background: var(--lav-tint); border-color: var(--lav-tint); color: var(--text); }
+.admin-badge--rejected { background: var(--crit-tint); border-color: var(--crit-tint); color: var(--crit); }
 .admin-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 
 .admin-sort {
@@ -3344,7 +2728,7 @@ body::before {
   gap: 2px 10px;
   margin-top: 4px;
   font-size: 12.5px;
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 
 .admin-user-head {
@@ -3364,13 +2748,13 @@ body::before {
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* values line up even when a label wraps */
-  background: var(--sand);
-  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border-radius: var(--r-input);
   padding: 8px 10px;
 }
 .admin-facts__wide { grid-column: 1 / -1; }
-.admin-facts dt { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
-.admin-facts dd { margin: 2px 0 0; font-size: 17px; font-weight: 800; color: var(--ink); }
+.admin-facts dt { font-size: 11.5px; font-weight: 700; color: var(--text-2); }
+.admin-facts dd { margin: 2px 0 0; font-size: 17px; font-weight: 800; color: var(--text); }
 @media (max-width: 380px) {
   .admin-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -3402,9 +2786,9 @@ body::before {
   flex-wrap: wrap;
   margin-bottom: 10px;
 }
-.admin-chart__title { font-size: 14px; font-weight: 800; color: var(--ink); }
-.admin-chart__readout { font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-.admin-chart__readout strong { color: var(--ink); font-size: 14px; }
+.admin-chart__title { font-size: 14px; font-weight: 800; color: var(--text); }
+.admin-chart__readout { font-size: 12.5px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.admin-chart__readout strong { color: var(--text); font-size: 14px; }
 .admin-chart__plot {
   position: relative;
   display: flex;
@@ -3421,7 +2805,7 @@ body::before {
   left: 0;
   font-size: 10.5px;
   line-height: 1;
-  color: var(--ink-soft);
+  color: var(--text-2);
   font-variant-numeric: tabular-nums;
 }
 .admin-chart__col {
@@ -3431,22 +2815,22 @@ body::before {
   align-items: flex-end;
   border-radius: 4px 4px 0 0;
 }
-.admin-chart__col:focus-visible { outline: 2px solid var(--coral-deep); outline-offset: 1px; }
+.admin-chart__col:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
 .admin-chart__bar {
   display: block;
   width: 100%;
-  background: var(--coral);
+  background: var(--anchor);
   border-radius: 4px 4px 0 0;
   transition: background var(--t-fast);
 }
-.admin-chart__col.active .admin-chart__bar { background: var(--coral-deep); }
-.admin-chart__col.active { background: var(--coral-soft); }
+.admin-chart__col.active .admin-chart__bar { background: var(--text); }
+.admin-chart__col.active { background: var(--lav-tint); }
 .admin-chart__axis {
   display: flex;
   justify-content: space-between;
   margin-top: 6px;
   font-size: 11px;
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 
 /* ---- Vet public page: opening hours (VetHours) ------------------------------ */
@@ -3454,16 +2838,16 @@ body::before {
   margin: 12px auto 10px;
   padding: 10px 14px;
   max-width: 320px;
-  background: var(--sand);
+  background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-input);
 }
 .vet-hours__label {
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--ink-soft);
+  color: var(--text-2);
 }
 .vet-hours__value {
   display: flex;
@@ -3476,26 +2860,15 @@ body::before {
 .vet-hours__range {
   font-size: 18px;
   font-weight: 800;
-  color: var(--ink);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
-.vet-hours__note { font-size: 13.5px; color: var(--ink-soft); }
-.vet-hours__open { font-size: 13px; font-weight: 800; color: var(--brand-text); }
-.vet-hours__tz { margin-top: 4px; font-size: 12px; color: var(--ink-soft); }
+.vet-hours__note { font-size: 13.5px; color: var(--text-2); }
+.vet-hours__open { font-size: 13px; font-weight: 800; color: var(--text); }
+.vet-hours__tz { margin-top: 4px; font-size: 12px; color: var(--text-2); }
 .vet-hours .tag { font-size: 13px; padding: 3px 10px; }
 
 /* ---- Own profile: placeholder where the XP / tier block was ---------------- */
-.soon-pill {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  border: 1px dashed var(--line);
-  background: var(--sand);
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--ink-soft);
-}
 
 /* ---- Closed chats (migration 032): composer replaced by a notice ----------- */
 .chat-composer--closed {
@@ -3505,21 +2878,10 @@ body::before {
   gap: 8px 12px;
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--ink-soft);
-  background: var(--sand);
+  color: var(--text-2);
+  background: var(--bg);
 }
-.chat-header__action {
-  flex-shrink: 0;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1.5px solid var(--line);
-  background: var(--card);
-  font-size: 12.5px;
-  font-weight: 800;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-.chat-header__action:disabled { opacity: 0.6; }
+
 /* The composer's `.chat-composer button` rule makes every button a 44px
    coral circle (the send button) — undo that for the Reopen pill. Same
    specificity, declared later, so it wins. */
@@ -3529,14 +2891,14 @@ body::before {
   min-height: 36px;
   padding: 7px 14px;
   border-radius: 999px;
-  background: var(--coral-soft);
-  border: 1.5px solid var(--coral);
-  color: var(--coral-deep);
+  background: var(--lav-tint);
+  border: 1.5px solid var(--anchor);
+  color: var(--text);
   font-size: 13px;
   font-weight: 800;
   white-space: nowrap;
 }
-.chat-composer--closed button.chat-reopen:disabled { opacity: 0.6; background: var(--coral-soft); }
+.chat-composer--closed button.chat-reopen:disabled { opacity: 0.6; background: var(--lav-tint); }
 
 /* ---- Admin → DMs oversight ------------------------------------------------- */
 .admin-dm-row__who {
@@ -3545,12 +2907,12 @@ body::before {
   align-items: center;
   gap: 2px 6px;
   font-weight: 800;
-  color: var(--ink);
+  color: var(--text);
 }
-.admin-dm-row__arrow { color: var(--ink-soft); font-weight: 700; }
+.admin-dm-row__arrow { color: var(--text-2); font-weight: 700; }
 .admin-dm-log { padding: 4px 14px; }
 .admin-dm-msg { padding: 10px 0; border-top: 1px solid var(--line); }
 .admin-dm-msg:first-child { border-top: none; }
-.admin-dm-msg__meta { font-size: 12px; color: var(--ink-soft); margin-bottom: 3px; }
-.admin-dm-msg__meta strong { color: var(--ink); }
+.admin-dm-msg__meta { font-size: 12px; color: var(--text-2); margin-bottom: 3px; }
+.admin-dm-msg__meta strong { color: var(--text); }
 .admin-dm-msg__body { font-size: 14.5px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }

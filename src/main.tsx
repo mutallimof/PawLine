@@ -3,18 +3,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 
-// Self-hosted font (bundled + precached — no runtime Google Fonts request,
-// so typography works offline and on slow connections).
-// DM Sans stands in for the design's Aeonik (commercial, not web-licensed)
-// and is the only family — headings and body alike, as in the design.
-// wght.css is the variable-weight build: one file per subset covers every
-// weight the app uses. Both subsets load because Azerbaijani/Turkish split
-// across them — ə Ə ğ İ ş live in latin-ext, ç ö ü ı in latin — verified
-// at the glyph level (the schwa is what broke the fonts before Noto).
-import '@fontsource-variable/dm-sans/wght.css';
-
+// Tokens first: they declare the self-hosted fonts (Geologica for headings,
+// Onest for body — Latin, Latin-ext and Cyrillic subsets only, bundled and
+// precached, so type works offline) and every colour/shape/type token the
+// stylesheets below read.
+import './styles/tokens.css';
 import './styles/index.css';
-import './styles/figma-v2.css';
+import './styles/app.css';
 import App from './App';
 import { initErrorMonitoring } from './lib/monitoring';
 

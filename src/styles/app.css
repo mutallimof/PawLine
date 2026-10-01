@@ -1,215 +1,225 @@
 /* ============================================================================
-   Figma v2 — "Soul & Foundation" (file 3AVKv7DrY3dm22Pnaav6JY).
-   Loaded after index.css so it has the final say over the older passes
-   (ink/wobble, first Figma tokens). Values come from the Home Screen V2 and
-   Case Detail frames; screens without a frame reuse these same pieces.
+   Stray's Call v3 — components and screens (C1 "Plum & Sky").
+   ----------------------------------------------------------------------------
+   Loaded after index.css (base, layout, older screen rules) and reads only
+   tokens.css. Shared components come first; screens follow, one section
+   each. Began as the Figma v2 pass (figma-v2.css); v3 replaces its colours,
+   type and shapes rather than layering on top.
 
-   Contrast: Figma's secondary text (Zeus 55%) and its badge inks are below
-   AA at these sizes, so v2 uses Figma's own Soya Bean #6B6053 for secondary
-   text and darker shades of each badge hue. Fills under text keep the AA
-   --brand-fill; the bright --coral green stays for non-text accents.
+   Rules: soft tints never fill buttons or carry text; the anchor carries
+   text, primary buttons and the nav; red means Critical or destructive only.
    ========================================================================== */
 
-:root {
-  --v2-surface: #ffffff;
-  --v2-fill: #f4f4f4;            /* Bridal Heath — chips, inputs, icon buttons */
-  --v2-border: #eaeaea;          /* Border Gray */
-  --v2-ink: #241f1a;             /* Zeus */
-  --v2-ink-2: #6b6053;           /* Soya Bean — AA secondary text */
-  --v2-quote: #574f45;           /* Fuscous Gray */
-  --v2-lav: #9c85e6;             /* Dull Lavender */
-  --v2-lav-16: rgba(156, 133, 230, 0.16);
-  --v2-lav-14: rgba(156, 133, 230, 0.14);
-  --v2-card-shadow: 0 0 13px rgba(0, 0, 0, 0.25);
-  --v2-soft-shadow: 0 14px 26px -20px rgba(36, 31, 26, 0.45);
-  --v2-gutter: 20px;
+body { background: var(--bg); }
 
-  /* Status groups (one vocabulary across chips, badges and the trail). */
-  --v2-open-bg: #fce4e0;   --v2-open-ink: #be362b;   /* Burnt Sienna 18% / Cinnabar, AA */
-  --v2-prog-bg: #d8defb;   --v2-prog-ink: #3060b0;   /* Royal Blue 18% / Cornflower, AA */
-  --v2-done-bg: #cdf1e3;   --v2-done-ink: var(--brand-text);
-  --v2-closed-bg: var(--v2-fill); --v2-closed-ink: var(--v2-ink-2);
-}
-
-body { background: var(--v2-surface); }
-body::before { display: none; } /* paper grain — Figma screens are flat white */
+h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 
 .page {
-  padding-left: var(--v2-gutter);
-  padding-right: var(--v2-gutter);
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }
 
-/* ---- Screen header: 40×40 icon button · centred uppercase title · action -- */
+/* ---- Screen header: icon button · centred title · action ------------------ */
 .screen-header {
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 44px 1fr 44px;
   align-items: center;
   gap: 12px;
-  padding: 6px 0 14px;
+  padding: 6px 0 16px;
 }
 .screen-header__title {
   margin: 0;
   text-align: center;
-  font-family: var(--font-body);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--v2-ink);
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  color: var(--text);
   overflow-wrap: anywhere;
 }
 .screen-header__title::after { content: none; }
 
 .icon-btn {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  background: var(--v2-fill);
-  border: 1px solid var(--v2-border);
-  color: var(--v2-ink);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--text);
   text-decoration: none;
   flex-shrink: 0;
 }
-.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn svg { width: 20px; height: 20px; }
 .icon-btn:active { transform: scale(0.95); }
 .icon-btn__dot {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 7px;
-  height: 7px;
+  top: 10px;
+  right: 11px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--coral);
-  border: 1px solid var(--v2-fill);
+  background: var(--crit);
+  box-shadow: 0 0 0 2px var(--surface);
 }
 
-/* ---- Section label (uppercase 11 / +0.66) ------------------------------- */
+/* ---- Section headings --------------------------------------------------- */
 .section-label,
 .v2-label {
-  margin: 20px 0 8px;
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--v2-ink-2);
+  margin: 22px 0 10px;
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: -0.005em;
+  color: var(--text);
 }
 .v2-h2 {
-  margin: 20px 0 10px;
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--v2-ink);
+  margin: 22px 0 10px;
+  font-family: var(--font-head);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--text);
 }
 
 /* ---- Buttons ------------------------------------------------------------ */
 .btn {
-  border-radius: 14px;
-  font-weight: 500;
+  border-radius: var(--r-btn);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 650;
+  line-height: 20px;
 }
 .btn--primary {
   min-height: 52px;
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
-  font-size: 15.5px;
+  background: var(--anchor);
+  color: var(--on-anchor);
   border: none;
-  box-shadow: 0 10px 20px -10px rgba(3, 184, 117, 0.6);
+  box-shadow: 0 10px 20px -12px rgba(46, 26, 61, 0.45);
 }
-.btn--primary:hover { background: var(--brand-fill); }
+.btn--primary:hover { background: var(--anchor); }
 .btn--primary:active {
   transform: scale(0.99);
-  box-shadow: 0 6px 14px -10px rgba(3, 184, 117, 0.6);
+  box-shadow: 0 6px 14px -10px rgba(46, 26, 61, 0.45);
 }
+/* Secondary = outline in the anchor — soft colours never fill a button. */
 .btn--secondary {
-  min-height: 48px;
-  background: var(--v2-fill);
-  border: 1px solid var(--v2-border);
-  color: var(--v2-ink);
-  font-size: 14px;
-  box-shadow: none;
+  min-height: 52px;
+  background: transparent;
+  border: none;
+  box-shadow: inset 0 0 0 1.5px var(--anchor);
+  color: var(--text);
 }
-.btn--small { min-height: 36px; border-radius: 11px; font-size: 13px; }
-.link-btn--v2,
+.btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.btn--small { min-height: 40px; border-radius: var(--r-sm); font-size: var(--fs-small); }
 .v2-link {
   background: none;
   border: none;
   padding: 2px 6px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--v2-ink-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--text);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
   cursor: pointer;
 }
 
-/* ---- Chips (filter row) -------------------------------------------------- */
+/* ---- Chips (filters, tabs) -------------------------------------------------- */
 .v2-chips {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   padding: 2px 0;
-  margin: 0 calc(-1 * var(--v2-gutter));
-  padding-inline: var(--v2-gutter);
+  margin: 0 calc(-1 * var(--gutter));
+  padding-inline: var(--gutter);
   scrollbar-width: none;
 }
 .v2-chips::-webkit-scrollbar { display: none; }
 .v2-chip {
   flex-shrink: 0;
-  padding: 10px 16px 11px;
-  border-radius: 999px;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
   border: none;
-  background: var(--v2-fill);
-  color: var(--v2-ink-2);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: 18px;
   white-space: nowrap;
   cursor: pointer;
 }
+/* Active = lavender tint with plum text (7.2:1) — a tint, not a fill colour
+   for text. */
 .v2-chip.active,
 .v2-chip[aria-pressed='true'] {
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--lav);
+  box-shadow: none;
+  color: var(--text);
 }
+.v2-chip:disabled { opacity: 0.5; cursor: default; }
 
-/* Small tag chip (Case Detail): 28 tall, 11.5px. */
+/* Small tag chip (Case Detail). */
 .v2-tag {
   display: inline-flex;
   align-items: center;
-  height: 28px;
+  gap: 6px;
+  min-height: 30px;
   padding: 0 12px;
-  border-radius: 999px;
-  background: var(--v2-fill);
-  color: var(--v2-ink-2);
-  font-size: 11.5px;
-  font-weight: 500;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-label);
+  font-weight: 600;
   white-space: nowrap;
 }
 
-/* ---- Status badge (one vocabulary) --------------------------------------- */
+/* ---- Status badge: tint + icon + label, so it reads without colour --------
+   Ongoing (Needs rescue / In progress) = lavender · Rescued = sky ·
+   Unclaimed = lemon (never "warning") · Critical = red, on top of any status.
+   Clinic hours reuse --open / --closed for "Open now" / "Closed". */
 .v2-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4.5px 9px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 1.1;
+  gap: 5px;
+  padding: 5px 10px 5px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 16px;
   white-space: nowrap;
+  color: var(--text);
 }
-.v2-badge--open    { background: var(--v2-open-bg);   color: var(--v2-open-ink); }
-.v2-badge--progress { background: var(--v2-prog-bg);  color: var(--v2-prog-ink); }
-.v2-badge--done    { background: var(--v2-done-bg);   color: var(--v2-done-ink); }
-.v2-badge--closed  { background: var(--v2-closed-bg); color: var(--v2-closed-ink); }
+.v2-badge svg { width: 14px; height: 14px; flex-shrink: 0; }
+.v2-badge--open     { background: var(--st-open-bg); }
+.v2-badge--progress { background: var(--st-progress-bg); }
+.v2-badge--done     { background: var(--st-done-bg); }
+.v2-badge--closed   { background: var(--st-closed-bg); }
+.v2-badge--urgency-critical { background: var(--crit-tint); color: var(--crit); }
+/* High is strong but calm: an anchor outline, no colour of its own. */
+.v2-badge--urgency-high {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--anchor);
+  color: var(--text);
+}
 
 /* ---- Grouped card with rows (Settings, Profile menu, lists) -------------- */
 .v2-group {
-  background: var(--v2-fill);
-  border-radius: 16px;
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: inset 0 0 0 1px var(--hair);
   overflow: hidden;
   margin-bottom: 20px;
 }
@@ -217,138 +227,140 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 46px;
-  padding: 10px 14px;
+  min-height: 56px;
+  padding: 10px 16px;
   width: 100%;
   background: none;
   border: none;
   text-align: left;
-  color: var(--v2-ink);
+  color: var(--text);
   text-decoration: none;
   font: inherit;
   cursor: pointer;
 }
-.v2-row + .v2-row { border-top: 1px solid var(--v2-border); }
-.v2-row--sub { min-height: 65px; }
-.v2-row:active { background: rgba(36, 31, 26, 0.04); }
+.v2-row + .v2-row { border-top: 1px solid var(--hair); }
+.v2-row--sub { min-height: 68px; }
+.v2-row:active { background: rgba(46, 26, 61, 0.05); }
 .v2-row__icon {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: var(--v2-lav-16);
-  color: var(--v2-lav);
+  background: var(--lav-tint);
+  color: var(--text);
 }
-.v2-row__icon svg { width: 19px; height: 19px; }
-.v2-row__icon--danger { background: var(--v2-open-bg); color: var(--v2-open-ink); }
-.v2-row__icon--brand { background: var(--v2-done-bg); color: var(--brand-text); }
+.v2-row__icon svg { width: 20px; height: 20px; }
+.v2-row__icon--danger { background: var(--crit-tint); color: var(--crit); }
+.v2-row__icon--brand { background: var(--st-done-bg); color: var(--text); }
 .v2-row__main { flex: 1; min-width: 0; }
 .v2-row__title {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.25;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
 }
 .v2-row__sub {
   margin-top: 2px;
-  font-size: 11.5px;
-  color: var(--v2-ink-2);
-  line-height: 1.3;
+  font-size: var(--fs-label);
+  color: var(--text-2);
+  line-height: 18px;
 }
 .v2-row__value {
-  font-size: 13px;
-  color: var(--v2-ink-2);
+  font-size: var(--fs-small);
+  color: var(--text-2);
   white-space: nowrap;
 }
-.v2-row__chev { color: var(--v2-ink-2); flex-shrink: 0; display: flex; }
-.v2-row__chev svg { width: 16px; height: 16px; }
-.v2-row--danger .v2-row__title { color: var(--v2-open-ink); }
-.v2-group__body { padding: 14px; }
+.v2-row__chev { color: var(--text-2); flex-shrink: 0; display: flex; }
+.v2-row__chev svg { width: 18px; height: 18px; }
+.v2-row--danger .v2-row__title { color: var(--crit); }
+.v2-group__body { padding: 16px; }
 
-/* ---- UI card (348×160, photo left) --------------------------------------- */
+/* ---- Case card: large, rounded, photo on top ------------------------------ */
 .v2-card {
   display: flex;
-  gap: 12px;
-  align-items: stretch;
-  min-height: 160px;
-  padding: 10px;
-  margin-bottom: 14px;
-  background: var(--v2-surface);
-  border-radius: 16px;
-  box-shadow: var(--v2-card-shadow);
-  color: var(--v2-ink);
+  flex-direction: column;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card), inset 0 0 0 1px var(--hair);
+  color: var(--text);
   text-decoration: none;
+  overflow: hidden;
   transform: none;
   animation: none;
   border: none;
 }
 .v2-card:active { transform: scale(0.99); }
+/* Critical: red outline + red chip, on top of any status. */
+.v2-card--critical { box-shadow: var(--shadow-card), inset 0 0 0 2px var(--crit); }
 .v2-card__photo {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 220px;
   flex-shrink: 0;
-  align-self: center;
-  border-radius: 14px;
   overflow: hidden;
-  background: linear-gradient(148deg, #f0876f 0%, #d8503f 100%);
+  background: var(--lav-tint);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
+  font-size: 52px;
 }
-.v2-card__photo--empty { background: var(--v2-lav-16); }
+.v2-card--critical .v2-card__photo { margin: 2px 2px 0; width: calc(100% - 4px); border-radius: 22px 22px 0 0; }
+.v2-card__photo--empty { background: var(--lav-tint); }
 .v2-card__photo img,
 .v2-card__photo .case-photo,
 .v2-card__photo .case-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 14px;
 }
 .v2-card__body {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 2px 4px;
+  gap: 6px;
+  padding: 14px 16px 16px;
 }
 .v2-card__badges { display: flex; flex-wrap: wrap; gap: 6px; }
 .v2-card__title {
-  margin: 4px 0 0;
-  font-size: 16px;
-  font-weight: 500;
+  margin: 6px 0 0;
+  font-family: var(--font-head);
+  font-size: var(--fs-h3);
+  font-weight: 650;
   letter-spacing: -0.01em;
-  line-height: 1.2;
+  line-height: 24px;
 }
 .v2-card__desc {
   margin: 0;
-  font-size: 12px;
-  color: var(--v2-ink-2);
-  line-height: 1.3;
+  font-size: var(--fs-small);
+  color: var(--text-2);
+  line-height: 20px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .v2-card__meta {
-  margin-top: auto;
+  margin-top: 4px;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 4px 14px;
 }
 .v2-meta {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
-  color: var(--v2-ink-2);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--text-2);
   min-width: 0;
 }
-.v2-meta svg { width: 12px; height: 12px; color: var(--v2-lav); flex-shrink: 0; }
+.v2-meta svg { width: 15px; height: 15px; color: var(--text-2); flex-shrink: 0; }
 .v2-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---- Stats row (3 equal columns) ------------------------------------------ */
@@ -362,72 +374,82 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   text-align: center;
   padding: 0 6px;
 }
-.v2-stat + .v2-stat { border-left: 1px solid var(--v2-border); }
-.v2-stat__value { font-size: 26px; font-weight: 500; line-height: 1.1; }
-.v2-stat__label { margin-top: 4px; font-size: 11px; color: var(--v2-ink-2); line-height: 1.25; }
+.v2-stat + .v2-stat { border-left: 1px solid var(--line); }
+.v2-stat__value { font-family: var(--font-head); font-size: var(--fs-h1); font-weight: 750; line-height: 32px; }
+.v2-stat__label { margin-top: 2px; font-size: var(--fs-label); color: var(--text-2); line-height: 16px; }
 
-/* ---- Bottom nav (Figma: white bar, raised square +) ------------------------ */
+/* ---- Bottom nav: a floating plum bar (phones) ------------------------------- */
 .bottom-nav {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-width: none;
-  border-radius: 0;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + var(--safe-bottom));
+  max-width: 560px;
+  margin: 0 auto;
+  height: 68px;
+  padding: 0 6px;
   border: none;
-  border-top: 1px solid var(--v2-border);
-  background: var(--v2-surface);
+  border-radius: 26px;
+  background: var(--anchor);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  box-shadow: none;
-  padding: 0 10px var(--safe-bottom);
-  height: calc(62px + var(--safe-bottom));
-  justify-content: center;
-  gap: 14px;
+  box-shadow: var(--shadow-lift);
+  justify-content: space-around;
+  align-items: center;
+  gap: 2px;
 }
 .bottom-nav__item {
-  flex: 0 0 56px;
+  flex: 0 1 68px;
   min-width: 56px;
+  min-height: 52px;
   gap: 3px;
-  border-radius: 0;
-  font-size: 10.5px;
-  font-weight: 500;
-  color: var(--v2-ink-2);
+  padding: 6px 4px;
+  border-radius: 18px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 14px;
+  color: var(--on-anchor-2);
   background: none;
+  text-align: center;
 }
 .bottom-nav__item.active {
-  background: none;
-  color: var(--brand-text);
+  background: var(--lav);
+  color: var(--text);
 }
-.bottom-nav__item svg { width: 21px; height: 21px; }
-.bottom-nav__report { flex: 0 0 52px; }
+.bottom-nav__item svg { width: 22px; height: 22px; }
+.bottom-nav__report { flex: 0 0 60px; }
+/* Report: a raised cream disc ringed in plum — the app's core action. */
 .bottom-nav__report-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  border: 4px solid var(--v2-surface);
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
-  box-shadow: 0 10px 20px -8px rgba(3, 184, 117, 0.71);
-  transform: translateY(-18px);
+  width: 54px;
+  height: 54px;
+  border-radius: var(--r-pill);
+  border: 4px solid var(--anchor);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 10px 20px -8px rgba(46, 26, 61, 0.45);
+  transform: translateY(-20px);
 }
-.bottom-nav__report-btn:active { transform: translateY(-18px) scale(0.94); }
+.bottom-nav__report-btn:active { transform: translateY(-20px) scale(0.94); }
 .bottom-nav__report-btn svg { width: 24px; height: 24px; }
 .page {
-  padding-bottom: calc(62px + var(--safe-bottom) + 28px);
+  padding-bottom: calc(68px + 12px + var(--safe-bottom) + 28px);
 }
 
 @media (min-width: 1024px) {
   .icon-btn--mobile { display: none; }
   .page { padding-bottom: 40px; }
+
+  /* Desktop sidebar: cream column, plum type, lavender active row. */
+  .side-nav { background: var(--surface); border-right: 1px solid var(--hair); backdrop-filter: none; }
+  .side-nav__mark { width: 36px; height: 36px; }
+  .side-nav__name { font-family: var(--font-head); font-size: 21px; font-weight: 800; letter-spacing: -0.015em; }
+  .side-nav__item { font-weight: 600; font-size: 15px; border-radius: var(--r-btn); color: var(--text-2); }
+  .side-nav__item:hover { background: var(--surface-2); transform: none; }
+  .side-nav__item.active { background: var(--lav); color: var(--text); }
+  .side-nav__foot { font-size: var(--fs-label); opacity: 1; }
 }
 
-/* Urgency only surfaces on cards when it's high/critical — same solid
-   urgency tokens as before (AA with white text). */
-.v2-badge--urgency-high     { background: #c2410c; color: #fff; } /* --urgency-high is 3.3:1 under white */
-.v2-badge--urgency-critical { background: var(--urgency-critical); color: #fff; }
-
 /* ==== Home (Figma "Home Screen V2" 95:2) ================================== */
-.home-header { padding: 30px var(--v2-gutter) 8px; }
+.home-header { padding: 30px var(--gutter) 8px; }
 .home-top {
   display: flex;
   align-items: center;
@@ -438,15 +460,15 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--v2-ink);
+  color: var(--text);
   text-decoration: none;
 }
 .home-brand__tile {
   width: 38px;
   height: 38px;
   border-radius: 12px;
-  background: var(--coral);
-  color: #fff7ea;
+  background: var(--anchor);
+  color: var(--on-anchor);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -461,7 +483,7 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .home-sub {
   margin: 10px 0 10px;
   font-size: 13.6px;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
 }
 .home-chips { padding-top: 8px; padding-bottom: 2px; margin-bottom: 10px; }
 
@@ -472,22 +494,22 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   padding: 16px 14px 12px;
   margin: 0 0 10px;
   border-radius: 16px;
-  background: var(--v2-lav-16);
+  background: var(--lav-tint);
   border: none;
   box-shadow: none;
-  color: var(--v2-ink);
+  color: var(--text);
   text-decoration: none;
 }
 .home-vet-banner__icon {
   width: 38px;
   height: 38px;
   border-radius: 11px;
-  background: var(--v2-lav);
-  color: #fff7ea;
+  background: var(--lav);
+  color: var(--on-anchor);
 }
-.home-vet-banner__title { font-size: 13.5px; font-weight: 500; color: var(--v2-ink); }
-.home-vet-banner__sub { font-size: 11.4px; color: var(--v2-ink-2); }
-.home-vet-banner__chevron { color: var(--v2-lav); display: flex; }
+.home-vet-banner__title { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.home-vet-banner__sub { font-size: 11.4px; color: var(--text-2); }
+.home-vet-banner__chevron { color: var(--lav); display: flex; }
 .home-vet-banner__chevron svg { width: 16px; height: 16px; }
 
 .home-tools {
@@ -503,7 +525,7 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   padding: 0 14px 0 38px;
   border: none;
   border-radius: 11px;
-  background: var(--v2-fill) no-repeat 14px 50% / 16px
+  background: var(--surface-2) no-repeat 14px 50% / 16px
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23241F1A' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
   font-size: 13px;
   box-shadow: none;
@@ -517,8 +539,8 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   padding: 0 14px;
   border: none;
   border-radius: 11px;
-  background: var(--v2-fill);
-  color: var(--v2-ink);
+  background: var(--surface-2);
+  color: var(--text);
   font: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -529,14 +551,14 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .home-tools__filter { margin-left: auto; }
 .home-tools__btn.active,
 .home-tools__btn[aria-pressed='true'] {
-  background: var(--v2-done-bg);
-  color: var(--brand-text);
+  background: var(--st-done-bg);
+  color: var(--text);
 }
 .home-filters { margin: 10px 0 0; }
 .home-filters .v2-label:first-child { margin-top: 0; }
-.home-filters__note { margin: 8px 0 0; font-size: 12px; color: var(--v2-ink-2); }
+.home-filters__note { margin: 8px 0 0; font-size: 12px; color: var(--text-2); }
 .v2-chips--wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
-.v2-chip--light { background: var(--v2-surface); padding: 8px 14px 9px; }
+.v2-chip--light { background: var(--surface); padding: 8px 14px 9px; }
 .v2-chip:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .home-h1 {
@@ -546,10 +568,10 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  color: var(--v2-ink);
+  color: var(--text);
 }
-.home-feed { padding: 0 var(--v2-gutter); }
-.home-map { padding: 0 var(--v2-gutter); }
+.home-feed { padding: 0 var(--gutter); }
+.home-map { padding: 0 var(--gutter); }
 
 @media (min-width: 1024px) {
   .home-header { padding: 22px 28px 8px; }
@@ -564,7 +586,7 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   background: transparent;
   padding: 0 12px;
 }
-.home-tools__search:not(:empty) + .home-view-toggle[aria-pressed='true'] { color: var(--brand-text); }
+.home-tools__search:not(:empty) + .home-view-toggle[aria-pressed='true'] { color: var(--text); }
 .home-tools .loc-search input { padding-right: 44px; }
 @media (min-width: 1024px) {
   .home-tools .home-view-toggle { display: none; }
@@ -578,8 +600,8 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .case-detail { padding-top: 22px; }
 .case-detail__map-card {
   border-radius: 22px;
-  background: linear-gradient(158.7deg, rgba(239, 235, 251, 0.97) 0%, rgba(205, 241, 227, 0.42) 100%);
-  box-shadow: var(--v2-soft-shadow);
+  background: linear-gradient(158deg, var(--lav-tint) 0%, var(--surface) 100%);
+  box-shadow: var(--shadow-soft);
   margin-bottom: 12px;
 }
 .case-detail__map-pill,
@@ -591,23 +613,23 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   font-weight: 500;
   gap: 6px;
 }
-.case-detail__map-pill { background: rgba(255, 250, 240, 0.92); color: var(--v2-ink); left: 13px; bottom: 12px; }
-.case-detail__map-pill svg { width: 13px; height: 13px; color: var(--v2-open-ink); flex-shrink: 0; }
+.case-detail__map-pill { background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--text); left: 13px; bottom: 12px; }
+.case-detail__map-pill svg { width: 13px; height: 13px; color: var(--text); flex-shrink: 0; }
 .case-detail__map-pill span { overflow: hidden; text-overflow: ellipsis; }
-.case-detail__map-directions { background: rgba(255, 250, 240, 0.9); color: var(--brand-text); font-size: 11.5px; gap: 4px; top: 13px; right: 13px; }
+.case-detail__map-directions { background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--text); font-size: 11.5px; gap: 4px; top: 13px; right: 13px; }
 .case-detail__map-directions svg { width: 12px; height: 12px; }
 .case-detail__map-legend { gap: 16px; margin-bottom: 12px; }
-.case-detail__map-legend-item { font-size: 11.5px; color: var(--v2-ink-2); gap: 6px; }
-.case-detail__map-legend-dot--case { background: #ea4335; }
-.case-detail__map-legend-dot--vet { background: var(--coral); }
+.case-detail__map-legend-item { font-size: 11.5px; color: var(--text-2); gap: 6px; }
+.case-detail__map-legend-dot--case { background: var(--anchor); }
+.case-detail__map-legend-dot--vet { background: var(--anchor); }
 
 .case-detail__head { margin-bottom: 12px; }
 .case-detail__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .case-detail__status { border: 1px solid currentColor; padding: 0 13px; }
-.case-detail__status--open { background: var(--v2-open-bg); color: var(--v2-open-ink); }
-.case-detail__status--progress { background: var(--v2-prog-bg); color: var(--v2-prog-ink); }
-.case-detail__status--done { background: var(--v2-done-bg); color: var(--v2-done-ink); }
-.case-detail__status--closed { background: var(--v2-closed-bg); color: var(--v2-closed-ink); }
+.case-detail__status--open { background: var(--st-open-bg); color: var(--text); }
+.case-detail__status--progress { background: var(--st-progress-bg); color: var(--text); }
+.case-detail__status--done { background: var(--st-done-bg); color: var(--text); }
+.case-detail__status--closed { background: var(--st-closed-bg); color: var(--text); }
 .case-detail__title {
   margin: 6px 0 10px;
   font-size: 22px;
@@ -615,13 +637,13 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   line-height: 1.2;
   letter-spacing: -0.01em;
 }
-.case-detail__meta { margin: 0 0 12px; font-size: 15px; color: var(--v2-ink-2); letter-spacing: -0.01em; }
+.case-detail__meta { margin: 0 0 12px; font-size: 15px; color: var(--text-2); letter-spacing: -0.01em; }
 .case-detail__quote {
   padding-left: 12px;
-  border-left: 3px solid var(--v2-lav);
+  border-left: 3px solid var(--lav);
   font-size: 13px;
   line-height: 1.61;
-  color: var(--v2-quote);
+  color: var(--text-2);
 }
 
 /* Rescue progress — same steps/logic, Figma circles and track */
@@ -635,15 +657,15 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .case-detail__trail .paw-trail__icon {
   width: 30px;
   height: 30px;
-  background: var(--v2-fill);
-  border: 1px solid var(--v2-border);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   filter: grayscale(1);
   opacity: 0.7;
 }
 .case-detail__trail .paw-trail__step.done .paw-trail__icon,
 .case-detail__trail .paw-trail__step.current .paw-trail__icon {
-  background: var(--coral);
-  border-color: var(--coral);
+  background: var(--anchor);
+  border-color: var(--anchor);
   filter: none;
   opacity: 1;
 }
@@ -652,19 +674,19 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   height: 34px;
   transform: none;
   animation: none;
-  box-shadow: 0 0 0 6px rgba(24, 177, 132, 0.13);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--lav) 45%, transparent);
 }
 .case-detail__trail .paw-trail__label {
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
 }
-.case-detail__trail .paw-trail__step.current .paw-trail__label { color: var(--v2-ink); }
-.case-detail__trail .paw-trail__connector { height: 3px; border-radius: 2px; background: var(--v2-fill); }
+.case-detail__trail .paw-trail__step.current .paw-trail__label { color: var(--text); }
+.case-detail__trail .paw-trail__connector { height: 3px; border-radius: 2px; background: var(--surface-2); }
 .case-detail__trail .paw-trail__step.done .paw-trail__connector::after,
-.case-detail__trail .paw-trail__step.current .paw-trail__connector::after { background: var(--coral); }
+.case-detail__trail .paw-trail__step.current .paw-trail__connector::after { background: var(--anchor); }
 
 /* Current rescue card */
 .case-detail__rescue {
@@ -673,18 +695,18 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   gap: 12px;
   padding: 14px;
   margin-bottom: 14px;
-  background: var(--v2-fill);
-  border: 1px solid var(--v2-border);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 20px;
-  box-shadow: var(--v2-soft-shadow);
+  box-shadow: var(--shadow-soft);
 }
-.case-detail__rescuer { display: flex; align-items: center; gap: 12px; color: var(--v2-ink); text-decoration: none; }
+.case-detail__rescuer { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
 .case-detail__initials {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: var(--v2-lav);
-  color: #fff7ea;
+  background: var(--lav);
+  color: var(--on-anchor);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -694,22 +716,22 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 }
 .case-detail__rescuer-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .case-detail__rescuer-name { font-size: 14.5px; font-weight: 500; }
-.case-detail__rescuer-sub { font-size: 12px; color: var(--v2-ink-2); }
+.case-detail__rescuer-sub { font-size: 12px; color: var(--text-2); }
 .case-detail__dest {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12.5px;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
   text-decoration: none;
 }
-.case-detail__dest svg { width: 13px; height: 13px; color: var(--v2-open-ink); flex-shrink: 0; }
+.case-detail__dest svg { width: 13px; height: 13px; color: var(--text); flex-shrink: 0; }
 .case-detail__track .map-wrap { border-radius: 13px; overflow: hidden; }
-.case-detail__track-note { margin: 6px 0 0; font-size: 11.5px; color: var(--v2-ink-2); }
+.case-detail__track-note { margin: 6px 0 0; font-size: 11.5px; color: var(--text-2); }
 
 /* Photo evidence */
 .case-detail__photo { border-radius: 20px; overflow: hidden; margin-bottom: 8px; }
-.case-detail__photo-note { margin: 0 0 16px; font-size: 11.5px; color: var(--v2-ink-2); }
+.case-detail__photo-note { margin: 0 0 16px; font-size: 11.5px; color: var(--text-2); }
 
 /* Condition card */
 .case-detail__kv {
@@ -719,7 +741,7 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   margin: 0 0 8px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: var(--v2-lav-14);
+  background: var(--lav-tint);
 }
 .case-detail__kv > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .case-detail__kv dt {
@@ -727,15 +749,15 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
 }
-.case-detail__kv dd { margin: 0; font-size: 13px; font-weight: 500; text-align: right; color: var(--v2-ink); }
+.case-detail__kv dd { margin: 0; font-size: 13px; font-weight: 500; text-align: right; color: var(--text); }
 .case-detail__kv-urgency--high,
-.case-detail__kv-urgency--critical { color: var(--v2-open-ink) !important; }
+.case-detail__kv-urgency--critical { color: var(--text) !important; }
 
 /* Case updates timeline */
 .case-detail__timeline { padding-left: 22px; margin-bottom: 8px; }
-.case-detail__timeline::before { left: 6px; top: 10px; bottom: 4px; width: 2px; background: var(--v2-border); }
+.case-detail__timeline::before { left: 6px; top: 10px; bottom: 4px; width: 2px; background: var(--line); }
 .case-detail__timeline-item { padding-bottom: 18px; }
 .case-detail__timeline-item::before {
   left: -22px;
@@ -743,19 +765,19 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   width: 15px;
   height: 15px;
   box-sizing: border-box;
-  background: var(--coral);
-  border: 2px solid var(--v2-surface);
+  background: var(--anchor);
+  border: 2px solid var(--surface);
 }
-.case-detail__timeline-item:last-child::before { background: #ea4335; }
-.case-detail__timeline-time { font-size: 12.5px; font-weight: 500; color: var(--v2-ink); }
-.case-detail__timeline-text { font-size: 12.5px; color: var(--v2-ink-2); }
+.case-detail__timeline-item:last-child::before { background: var(--anchor); }
+.case-detail__timeline-time { font-size: 12.5px; font-weight: 500; color: var(--text); }
+.case-detail__timeline-text { font-size: 12.5px; color: var(--text-2); }
 
 /* Bottom actions */
 .case-detail__actions-stack { gap: 10px; margin-top: 20px; }
 .case-detail__actions-stack .btn--secondary[aria-pressed='true'] {
-  background: var(--v2-done-bg);
-  border-color: var(--v2-done-bg);
-  color: var(--brand-text);
+  background: var(--st-done-bg);
+  border-color: var(--st-done-bg);
+  color: var(--text);
 }
 .case-detail__report-link button {
   min-height: 0;
@@ -765,30 +787,30 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   box-shadow: none;
   font-size: 12.5px;
   font-weight: 500;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 .btn--danger {
   min-height: 48px;
-  background: var(--v2-open-bg);
-  border: 1px solid var(--v2-open-bg);
-  color: var(--v2-open-ink);
+  background: var(--st-open-bg);
+  border: 1px solid var(--st-open-bg);
+  color: var(--text);
   box-shadow: none;
 }
 .btn--success {
   min-height: 52px;
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  color: var(--on-anchor);
   border: none;
 }
 
 /* ==== Case Chat (Figma 73:284) ============================================ */
 .chat-page {
   padding-bottom: calc(62px + var(--safe-bottom));
-  background: var(--v2-surface);
+  background: var(--surface);
 }
-.chat-top { padding: 22px var(--v2-gutter) 10px; border-bottom: 1px solid var(--v2-border); }
+.chat-top { padding: 22px var(--gutter) 10px; border-bottom: 1px solid var(--line); }
 .chat-top .screen-header { padding-top: 0; padding-bottom: 12px; }
 .chat-context {
   display: flex;
@@ -797,38 +819,38 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   min-height: 66px;
   padding: 12px 14px;
   border-radius: 14px;
-  background: var(--v2-lav-14);
+  background: var(--lav-tint);
 }
 .chat-context__main { flex: 1; min-width: 0; }
-.chat-context__title { font-size: 13.5px; font-weight: 500; color: var(--v2-ink); }
-.chat-context__sub { margin-top: 2px; font-size: 11.5px; color: var(--v2-ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-context__title { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.chat-context__sub { margin-top: 2px; font-size: 11.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-context__action {
   flex-shrink: 0;
   height: 32px;
   padding: 0 12px;
-  border: 1px solid var(--v2-border);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: var(--v2-surface);
+  background: var(--surface);
   font: inherit;
   font-size: 12px;
   font-weight: 500;
-  color: var(--v2-ink);
+  color: var(--text);
   cursor: pointer;
 }
-.chat-scroll { padding: 12px var(--v2-gutter) 16px; background: var(--v2-surface); }
+.chat-scroll { padding: 12px var(--gutter) 16px; background: var(--surface); }
 .chat-note {
   margin: 0 0 6px;
   font-size: 11.5px;
   line-height: 1.45;
   text-align: center;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
 }
 .chat-day {
   margin: 14px 0 6px;
   text-align: center;
   font-size: 11px;
   font-weight: 500;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
 }
 .chat-msg { display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px; }
 .chat-msg--mine { align-items: flex-end; }
@@ -838,22 +860,22 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   gap: 6px;
   margin: 0 4px 4px;
   font-size: 11.5px;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
 }
-.chat-msg__who { font-weight: 500; color: var(--v2-ink); text-decoration: none; }
-.chat-msg--mine .chat-msg__who { color: var(--brand-text); }
-.chat-msg__meta .bubble__time { display: inline; margin: 0; font-size: 11px; color: var(--v2-ink-2); }
+.chat-msg__who { font-weight: 500; color: var(--text); text-decoration: none; }
+.chat-msg--mine .chat-msg__who { color: var(--text); }
+.chat-msg__meta .bubble__time { display: inline; margin: 0; font-size: 11px; color: var(--text-2); }
 .chat-msg__block { background: none; border: none; padding: 0; font-size: 11px; cursor: pointer; opacity: 0.7; }
 .chat-msg__meta .bubble__menu { position: relative; }
-.chat-msg__meta .bubble__menu-btn { color: var(--v2-ink-2); }
+.chat-msg__meta .bubble__menu-btn { color: var(--text-2); }
 .chat-msg .bubble {
   max-width: 282px;
   margin: 0;
   padding: 10px 14px;
   border-radius: 16px;
   border-top-left-radius: 4px;
-  background: var(--v2-fill);
-  color: var(--v2-ink);
+  background: var(--surface-2);
+  color: var(--text);
   box-shadow: none;
   font-size: 13.5px;
   line-height: 1.4;
@@ -862,15 +884,15 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 .chat-msg .bubble--mine {
   border-top-left-radius: 16px;
   border-top-right-radius: 4px;
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  color: var(--on-anchor);
 }
 .chat-page .chat-composer {
   gap: 10px;
   min-height: 67px;
-  padding: 14px var(--v2-gutter);
-  background: var(--v2-surface);
-  border-top: 1px solid var(--v2-border);
+  padding: 14px var(--gutter);
+  background: var(--surface);
+  border-top: 1px solid var(--line);
   align-items: center;
 }
 .chat-page .chat-composer input {
@@ -878,7 +900,7 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   padding: 0 14px;
   border: none;
   border-radius: 12px;
-  background: var(--v2-fill);
+  background: var(--surface-2);
   font-size: 13.5px;
 }
 .chat-page .chat-composer .chat-composer__send {
@@ -886,13 +908,13 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   height: 40px;
   flex-shrink: 0;
   border-radius: 12px;
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  color: var(--on-anchor);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.chat-page .chat-composer .chat-composer__send:disabled { background: var(--v2-fill); color: var(--v2-ink-2); }
+.chat-page .chat-composer .chat-composer__send:disabled { background: var(--surface-2); color: var(--text-2); }
 @media (min-width: 1024px) {
   .chat-page { padding-bottom: 0; }
 }
@@ -917,22 +939,22 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  color: var(--on-anchor);
   font-size: 32px;
   font-weight: 500;
 }
 .profile__avatar img { width: 100%; height: 100%; object-fit: cover; }
 .profile__id-text { min-width: 0; }
 .profile__name { margin: 0; font-size: 22px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; }
-.profile__role { margin-top: 2px; font-size: 13.5px; font-weight: 500; color: var(--brand-text); }
-.profile__since { margin-top: 2px; font-size: 12px; color: var(--v2-ink-2); }
+.profile__role { margin-top: 2px; font-size: 13.5px; font-weight: 500; color: var(--text); }
+.profile__since { margin-top: 2px; font-size: 12px; color: var(--text-2); }
 .profile__stats { margin: 20px 0 8px; }
-.profile__stat--helped { color: var(--v2-open-ink); }
-.profile__stat--active { color: var(--brand-text); }
-.profile__stat--reported { color: #6d55c9; } /* Dull Lavender, darkened to 4.9:1 */
+.profile__stat--helped { color: var(--text); }
+.profile__stat--active { color: var(--text); }
+.profile__stat--reported { color: var(--text); } /* Dull Lavender, darkened to 4.9:1 */
 .profile__section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.profile__view-all { font-size: 13px; font-weight: 500; color: var(--brand-text); text-decoration: none; }
+.profile__view-all { font-size: 13px; font-weight: 500; color: var(--text); text-decoration: none; }
 .profile__menu { margin-top: 16px; }
 .v2-row__title,
 .v2-row__sub { display: block; }
@@ -940,29 +962,29 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 /* ==== Settings (Figma 97:4) =============================================== */
 .settings .v2-label:first-of-type { margin-top: 4px; }
 .settings .v2-group { margin-bottom: 8px; }
-.settings__help { margin: 0 0 12px; font-size: 13px; color: var(--v2-ink-2); line-height: 1.45; }
-.settings__check { color: var(--brand-text); display: flex; }
+.settings__help { margin: 0 0 12px; font-size: 13px; color: var(--text-2); line-height: 1.45; }
+.settings__check { color: var(--text); display: flex; }
 .settings__form { display: grid; gap: 14px; }
 .v2-field { display: grid; gap: 6px; }
-.v2-field__label { font-size: 13px; font-weight: 500; color: var(--v2-ink); }
+.v2-field__label { font-size: 13px; font-weight: 500; color: var(--text); }
 .v2-field input {
   height: 48px;
   padding: 0 16px;
-  border: 1px solid var(--v2-border);
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: var(--v2-surface);
+  background: var(--surface);
   font: inherit;
   font-size: 15px;
-  color: var(--v2-ink);
+  color: var(--text);
 }
-.v2-field input:focus { outline: 2px solid var(--color-focus-ring); outline-offset: 1px; }
+.v2-field input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
 .v2-switch {
   position: relative;
   width: 44px;
   height: 26px;
   flex-shrink: 0;
   border-radius: 999px;
-  background: #cfcac4;
+  background: var(--control-off);
   transition: background var(--t-fast);
 }
 .v2-switch::after {
@@ -973,11 +995,11 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(46, 26, 61, 0.25);
   transition: transform var(--t-fast);
 }
-.v2-switch.on { background: var(--brand-fill); }
+.v2-switch.on { background: var(--anchor); }
 .v2-switch.on::after { transform: translateX(18px); }
 
 /* ==== Messages list + DM thread =========================================== */
@@ -990,32 +1012,32 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--v2-lav);
-  color: #fff7ea;
+  background: var(--lav);
+  color: var(--on-anchor);
   font-size: 15px;
   font-weight: 500;
 }
-.msg-row__tile--case { background: var(--v2-surface); font-size: 22px; }
+.msg-row__tile--case { background: var(--surface); font-size: 22px; }
 .msg-row__preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .msg-row--unread .v2-row__title { font-weight: 600; }
-.msg-row--unread .msg-row__preview { color: var(--v2-ink); }
+.msg-row--unread .msg-row__preview { color: var(--text); }
 .msg-row__side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-.msg-row__time { font-size: 11px; color: var(--v2-ink-2); white-space: nowrap; }
+.msg-row__time { font-size: 11px; color: var(--text-2); white-space: nowrap; }
 .msg-row__count {
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
   border-radius: 999px;
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  color: var(--on-anchor);
   font-size: 11px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.msg-row__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--coral); }
-.icon-btn--on { background: var(--v2-open-bg); border-color: var(--v2-open-bg); color: var(--v2-open-ink); }
+.msg-row__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--anchor); }
+.icon-btn--on { background: var(--st-open-bg); border-color: var(--st-open-bg); color: var(--text); }
 
 .chat-top--dm .screen-header__title { text-transform: none; letter-spacing: 0; font-size: 14px; }
 .chat-top--dm .screen-header__title .vet-tag { vertical-align: -0.15em; }
@@ -1023,12 +1045,12 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
 /* ==== Notifications ======================================================= */
 .alerts__tools { display: flex; justify-content: flex-end; margin: -4px 0 8px; }
 .alert-row { align-items: flex-start; padding-top: 12px; padding-bottom: 12px; }
-.alert-row__icon { background: var(--v2-surface); color: var(--brand-text); font-size: 18px; }
+.alert-row__icon { background: var(--surface); color: var(--text); font-size: 18px; }
 .alert-row__body { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .alert-row--unread .v2-row__title { font-weight: 600; }
 
 /* ==== Vets: list, picker, clinic page ===================================== */
-.v2-sub { margin: -4px 0 14px; font-size: 13.6px; color: var(--v2-ink-2); }
+.v2-sub { margin: -4px 0 14px; font-size: 13.6px; color: var(--text-2); }
 .vet-card { min-height: 0; padding: 14px; gap: 14px; }
 .vet-card__tile {
   width: 44px;
@@ -1038,14 +1060,14 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--v2-lav-16);
-  color: #6d55c9;
+  background: var(--lav-tint);
+  color: var(--text);
 }
 .vet-card__tile svg { width: 22px; height: 22px; }
 .vet-card__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .vet-card__body .v2-card__title { margin: 0; }
 .vet-card__badge { align-self: flex-start; }
-.vet-card__rating span:first-child { color: #b5762f; }
+.vet-card__rating span:first-child { color: var(--text); }
 .vet-card__action { display: flex; justify-content: flex-end; margin-top: 4px; }
 .vet-card--muted { opacity: 0.62; }
 
@@ -1057,23 +1079,23 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--v2-lav-16);
-  color: #6d55c9;
+  background: var(--lav-tint);
+  color: var(--text);
   margin-bottom: 6px;
 }
 .vet-page__name { margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
-.vet-page__addr { margin: 0 0 4px; font-size: 13.6px; color: var(--v2-ink-2); }
-.vet-page__kv dd a { color: var(--brand-text); text-decoration: none; }
+.vet-page__addr { margin: 0 0 4px; font-size: 13.6px; color: var(--text-2); }
+.vet-page__kv dd a { color: var(--text); text-decoration: none; }
 .vet-page .vet-hours {
   margin: 12px 0 0;
   padding: 14px 16px;
   border-radius: 16px;
-  background: var(--v2-fill);
+  background: var(--surface-2);
   text-align: left;
 }
 .vet-page__actions { display: grid; gap: 10px; margin-top: 20px; }
 .vet-page .vet-hours { width: 100%; max-width: none; box-sizing: border-box; border: none; box-shadow: none; }
-.vet-page .vet-hours__label { font-size: 10.5px; font-weight: 500; letter-spacing: 0.05em; color: var(--v2-ink-2); }
+.vet-page .vet-hours__label { font-size: 10.5px; font-weight: 500; letter-spacing: 0.05em; color: var(--text-2); }
 .vet-page .vet-hours__value { justify-content: flex-start; text-align: left; }
 .vet-page .vet-hours__range { font-size: 18px; font-weight: 500; }
 
@@ -1083,83 +1105,83 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   margin: 18px 0 8px;
   font-size: 13.5px;
   font-weight: 500;
-  color: var(--v2-ink);
+  color: var(--text);
 }
 .report .field { margin-bottom: 4px; }
 .report .field .field__label { margin-top: 18px; }
 .report .field input,
 .report .field textarea {
-  border: 1px solid var(--v2-border);
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: var(--v2-fill);
+  background: var(--surface-2);
   padding: 14px 16px;
   font-size: 15px;
-  color: var(--v2-ink);
+  color: var(--text);
 }
 .report .field input { height: 52px; padding-top: 0; padding-bottom: 0; }
 .report .field textarea { min-height: 110px; }
-.report .page-subtitle { font-size: 12.5px; color: var(--v2-ink-2); }
+.report .page-subtitle { font-size: 12.5px; color: var(--text-2); }
 .report .chip-row { gap: 8px; }
 .report .chip-row .chip {
   min-height: 36px;
   padding: 8px 14px;
   border: 1px solid transparent;
   border-radius: 999px;
-  background: var(--v2-fill);
-  color: var(--v2-ink-2);
+  background: var(--surface-2);
+  color: var(--text-2);
   font-size: 13px;
   font-weight: 500;
   box-shadow: none;
 }
 .report .chip-row .chip.active:not([class*='chip--urgency']) {
-  background: var(--brand-fill);
-  border-color: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  border-color: var(--anchor);
+  color: var(--on-anchor);
 }
 .report .photo-grid { gap: 10px; }
 .report .photo-thumb { border-radius: 14px; overflow: hidden; }
 .report .photo-add {
-  border: 1.5px dashed #cfcac4;
+  border: 1.5px dashed var(--control-off);
   border-radius: 20px;
-  background: var(--v2-fill);
-  color: var(--v2-ink-2);
+  background: var(--surface-2);
+  color: var(--text-2);
   font-size: 12.5px;
   font-weight: 500;
 }
-.report .map-wrap { border-radius: 22px; overflow: hidden; box-shadow: var(--v2-soft-shadow); }
+.report .map-wrap { border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-soft); }
 .report > .btn--primary { width: 100%; margin-top: 20px; }
 .report .loc-search input {
   height: 44px;
-  border: 1px solid var(--v2-border);
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--v2-fill);
+  background: var(--surface-2);
   font-size: 14px;
 }
 
 /* ==== Vet dashboard + clinic setup ======================================== */
 .vet-dash__stats { margin: 4px 0 8px; }
-.vet-dash__n--incoming { color: var(--v2-open-ink); }
-.vet-dash__n--active { color: var(--v2-prog-ink); }
-.vet-dash__n--past { color: var(--brand-text); }
+.vet-dash__n--incoming { color: var(--text); }
+.vet-dash__n--active { color: var(--text); }
+.vet-dash__n--past { color: var(--text); }
 
 .vet-setup .field__label {
   display: block;
   margin: 14px 0 8px;
   font-size: 13.5px;
   font-weight: 500;
-  color: var(--v2-ink);
+  color: var(--text);
 }
 .vet-setup .field input,
 .vet-setup .field select,
 .vet-setup .field textarea {
   min-height: 52px;
-  border: 1px solid var(--v2-border);
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: var(--v2-fill);
+  background: var(--surface-2);
   font-size: 15px;
-  color: var(--v2-ink);
+  color: var(--text);
 }
-.vet-setup .page-subtitle { font-size: 12.5px; color: var(--v2-ink-2); }
+.vet-setup .page-subtitle { font-size: 12.5px; color: var(--text-2); }
 .vet-setup .segmented {
   background: none;
   box-shadow: none;
@@ -1173,29 +1195,29 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   min-height: 36px;
   padding: 8px 16px;
   border-radius: 999px;
-  background: var(--v2-fill);
-  color: var(--v2-ink-2);
+  background: var(--surface-2);
+  color: var(--text-2);
   font-size: 13px;
   font-weight: 500;
   box-shadow: none;
 }
 .vet-setup .segmented__option.active {
-  background: var(--brand-fill);
-  color: var(--color-text-on-brand);
+  background: var(--anchor);
+  color: var(--on-anchor);
 }
 .vet-setup .map-wrap { border-radius: 22px; overflow: hidden; }
-.vet-setup .card { background: var(--v2-fill); border-radius: 16px; box-shadow: none; border: none; transform: none; }
+.vet-setup .card { background: var(--surface-2); border-radius: 16px; box-shadow: none; border: none; transform: none; }
 .vet-setup .card .list-row { background: none; }
 .vet-setup > .btn--primary { width: 100%; }
 
 /* ==== Legal & doc pages ==================================================== */
-.doc-page .doc-updated { margin: 0 0 12px; font-size: 11.5px; color: var(--v2-ink-2); opacity: 1; }
-.doc-page .doc-intro { margin: 0 0 14px; font-size: 13.6px; color: var(--v2-ink-2); line-height: 1.6; }
+.doc-page .doc-updated { margin: 0 0 12px; font-size: 11.5px; color: var(--text-2); opacity: 1; }
+.doc-page .doc-intro { margin: 0 0 14px; font-size: 13.6px; color: var(--text-2); line-height: 1.6; }
 .doc-section {
   margin-bottom: 12px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: var(--v2-fill);
+  background: var(--surface-2);
 }
 .doc-page .doc-section h2 {
   margin: 0 0 6px;
@@ -1203,28 +1225,28 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   font-size: 15px;
   font-weight: 500;
   letter-spacing: -0.01em;
-  color: var(--v2-ink);
+  color: var(--text);
 }
 .doc-page .doc-section p,
-.doc-page .doc-section li { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--v2-ink-2); }
+.doc-page .doc-section li { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
 .doc-page .doc-section ul { margin: 0; padding-left: 18px; }
 .doc-page .doc-section li + li { margin-top: 4px; }
 .doc-page .doc-section p + ul,
 .doc-page .doc-section ul + p { margin-top: 6px; }
 .doc-page .platform-stats { margin: 0; }
-.doc-page .card { background: var(--v2-fill); border: none; box-shadow: none; border-radius: 16px; transform: none; }
-.platform-stats__value { color: var(--brand-text); font-weight: 500; }
+.doc-page .card { background: var(--surface-2); border: none; box-shadow: none; border-radius: 16px; transform: none; }
+.platform-stats__value { color: var(--text); font-weight: 500; }
 
 /* ==== States: empty, error, loading, 404 ================================== */
 .empty-state {
   padding: 40px 24px;
   font-size: 13.5px;
   line-height: 1.5;
-  color: var(--v2-ink-2);
+  color: var(--text-2);
 }
 .empty-state .btn { min-width: 200px; }
 .skeleton {
-  background: linear-gradient(90deg, var(--v2-fill) 0%, #fafafa 50%, var(--v2-fill) 100%);
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--bg) 50%, var(--surface-2) 100%);
   background-size: 200% 100%;
   border-radius: 16px;
 }
@@ -1234,34 +1256,34 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   font-size: 22px;
   font-weight: 500;
   letter-spacing: -0.01em;
-  color: var(--v2-ink);
+  color: var(--text);
 }
-.fullscreen-msg p { font-size: 13.6px; color: var(--v2-ink-2); }
+.fullscreen-msg p { font-size: 13.6px; color: var(--text-2); }
 .fullscreen-msg .btn { min-width: 220px; }
 
 /* ==== Admin — tokens only (colours, type, radii); layout unchanged ======== */
 .admin .chip-row .chip {
   border: none;
   border-radius: 999px;
-  background: var(--v2-fill);
-  color: var(--v2-ink-2);
+  background: var(--surface-2);
+  color: var(--text-2);
   font-size: 13px;
   font-weight: 500;
   box-shadow: none;
 }
-.admin .chip-row .chip.active { background: var(--brand-fill); color: var(--color-text-on-brand); }
+.admin .chip-row .chip.active { background: var(--anchor); color: var(--on-anchor); }
 .admin .card,
 .admin .impact-stat {
-  background: var(--v2-fill);
+  background: var(--surface-2);
   border: none;
   border-radius: 16px;
   box-shadow: none;
   transform: none;
 }
-.admin .impact-stat__value { color: var(--v2-ink); font-weight: 500; }
-.admin .impact-stat__label { color: var(--v2-ink-2); }
-.admin .list-row { background: var(--v2-fill); border-radius: 16px; box-shadow: none; }
-.admin .section-label { color: var(--v2-ink-2); }
+.admin .impact-stat__value { color: var(--text); font-weight: 500; }
+.admin .impact-stat__label { color: var(--text-2); }
+.admin .list-row { background: var(--surface-2); border-radius: 16px; box-shadow: none; }
+.admin .section-label { color: var(--text-2); }
 
 /* ==== Consent (034) ======================================================== */
 .consent-checks { display: grid; gap: 10px; margin: 14px 0 16px; text-align: left; }
@@ -1271,7 +1293,7 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   gap: 10px;
   font-size: 13.5px;
   line-height: 1.4;
-  color: var(--v2-ink);
+  color: var(--text);
   cursor: pointer;
 }
 .consent-check input {
@@ -1279,6 +1301,6 @@ body::before { display: none; } /* paper grain — Figma screens are flat white 
   height: 20px;
   margin: 0;
   flex-shrink: 0;
-  accent-color: var(--brand-fill);
+  accent-color: var(--anchor);
 }
-.consent-check a { color: var(--brand-text); font-weight: 500; }
+.consent-check a { color: var(--text); font-weight: 500; }
