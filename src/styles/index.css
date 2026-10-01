@@ -2236,13 +2236,11 @@ h1, h2 {
 .paw-bloom span { top: 0; }
 
 /* ============================================================================
-   18. SIGN-IN SCREEN — docs/DESIGN_TOKENS.md tokens (design/sign-in)
+   18. SIGN-IN SCREEN (v3)
    ----------------------------------------------------------------------------
-   Semantic token names from the design-tokens doc, added here as aliases to
-   the existing custom properties above — additive only, nothing else in this
-   file changes meaning. Scoped to .auth-card so no other screen is affected.
-   Values with NO equivalent token are called out below rather than hardcoded
-   as a bare px/hex — see the PR description for the full list.
+   A white card on the cream page, everything read from tokens.css. Scoped
+   to .auth-card so Settings / Reset password, which reuse .field/.pw-wrap,
+   keep the shared field styles.
    ============================================================================ */
 
 .auth-page {
@@ -2262,12 +2260,7 @@ h1, h2 {
   gap: var(--space-sm);
   background: var(--surface);
   border: 1px solid var(--hair);
-  /* Design calls for a 36px corner radius; the largest token is
-     --radius-lg (24px) — flagged, using the closest token instead of a
-     hardcoded 36px. */
-  border-radius: var(--r-card);
-  /* Design's card shadow is a large near-black-tinted drop shadow with no
-     equivalent token; --shadow-lg is the closest elevation step. */
+  border-radius: var(--r-sheet);
   box-shadow: var(--shadow-lift);
   padding: var(--space-2xl) var(--space-xl);
 }
@@ -2289,7 +2282,8 @@ h1, h2 {
 
 .auth-card__wordmark {
   font-family: var(--font-head);
-  font-weight: 600;
+  font-weight: 800;
+  letter-spacing: -0.015em;
   font-size: var(--fs-h2);
   color: var(--text);
 }
@@ -2298,19 +2292,22 @@ h1, h2 {
   margin: 0;
   text-align: center;
   font-family: var(--font-head);
-  font-weight: 600;
+  font-weight: 750;
   font-size: var(--fs-h1);
-  line-height: 1.15;
+  line-height: 32px;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
   color: var(--text);
 }
 
 .auth-card__tabs.segmented {
   background: var(--surface-2);
-  border-radius: var(--r-card);
+  border-radius: var(--r-pill);
 }
 .auth-card__tabs .segmented__option {
   font-size: var(--fs-small);
-  font-weight: 700;
+  font-weight: 650;
+  border-radius: var(--r-pill);
   /* Two options only, so the branded tab track stays — but its labels may
      WRAP rather than ellipsise. "Veterinary clinic" / "Baytar klinikası" /
      "Сообщество" all overran half the card at 320px, and no shortening of
@@ -2340,15 +2337,16 @@ h1, h2 {
 }
 .auth-card .field__label {
   font-size: var(--fs-small);
+  font-weight: 650;
   color: var(--text);
 }
 .auth-card .field input,
 .auth-card .pw-wrap input {
-  min-height: 50px;
+  min-height: 52px;
   padding: var(--space-sm) var(--space-md);
   background: var(--surface-2);
   border: 1px solid var(--line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-input);
   font-size: var(--fs-body);
   color: var(--text);
 }
@@ -2369,8 +2367,7 @@ h1, h2 {
 }
 
 .auth-card .btn--primary.auth-card__cta {
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow-lift);
+  border-radius: var(--r-btn);
 }
 
 .auth-card__divider {
@@ -2389,7 +2386,10 @@ h1, h2 {
 }
 
 .auth-card .btn--ghost.auth-card__google {
-  border-radius: var(--r-card);
+  min-height: 52px;
+  border-radius: var(--r-btn);
+  box-shadow: inset 0 0 0 1.5px var(--anchor);
+  color: var(--text);
 }
 
 .auth-card__switch {
