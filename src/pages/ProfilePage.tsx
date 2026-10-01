@@ -92,6 +92,9 @@ export default function ProfilePage() {
         <div className="v2-group">
           <div className="v2-group__body"><LanguageSwitcher /></div>
         </div>
+        <div className="v2-group">
+          <GroupRow to="/settings/sensitive" title={t('sensitive.title')} />
+        </div>
         <div className="v2-label">{t('settings.legal')}</div>
         <div className="v2-group">
           {LEGAL_LINKS.map(([to, key]) => (
