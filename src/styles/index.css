@@ -7,13 +7,11 @@
 
 /* ---- 1. Design tokens ---------------------------------------------------- */
 
-
 /* Cyrillic companion to DM Sans. Only Onest's Cyrillic file is declared (the
    package's own CSS would also pull in and precache its Latin files, which
    DM Sans already covers), and unicode-range limits it to Cyrillic glyphs.
    size-adjust matches Onest's x-height (527) to DM Sans's (504), so Russian
    lowercase sits at the same height as Latin in mixed text. */
-
 
 /* ---- 2. Base ------------------------------------------------------------- */
 * {
@@ -332,34 +330,6 @@ select {
   vertical-align: bottom;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--on-anchor);
-  padding: 4px 11px;
-  text-transform: uppercase;
-}
-
-.status-badge--overlay {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  box-shadow: 0 2px 8px rgba(46, 26, 61, 0.25);
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--on-anchor);
-}
-
-.status-dot--pulse {
-  animation: pulse 1.6s ease-out infinite;
-}
-
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
   70% { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0); }
@@ -494,11 +464,6 @@ select {
 .paw-trail__step.current .paw-trail__icon {
   opacity: 1;
   filter: none;
-}
-
-@keyframes paw-step {
-  from { transform: scale(1.15) rotate(-8deg); }
-  to { transform: scale(1.3) rotate(8deg); }
 }
 
 .paw-trail__label {
@@ -1153,24 +1118,6 @@ select {
 }
 
 /* ---- Status badges: state at a glance, urgency that breathes --------------- */
-.status-badge {
-  border-radius: 999px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-}
-.status-badge::before {
-  content: '';
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-  margin-right: 6px;
-  vertical-align: 1px;
-}
-.status-badge--open::before {
-  animation: pulse-dot 1.8s ease-out infinite;
-}
 
 /* ---- Paw trail: the rescue's heartbeat ------------------------------------- */
 .paw-trail {
@@ -1443,7 +1390,6 @@ select {
    ============================================================================ */
 
 /* ---- Status color families (tints for card surfaces, solids for rings) ---- */
-
 
 /* ---- §pins: the case IS the pin --------------------------------------------
    Photo pin = circular photo + status ring + pointer tip. Sizes chosen so a
@@ -1908,20 +1854,6 @@ select {
 .chip-row .chip--urgency-high.active { background: var(--lav-tint); border-color: var(--urg-high); color: var(--urg-high); }
 .chip-row .chip--urgency-critical.active { background: var(--crit-tint); border-color: var(--urg-critical); color: var(--urg-critical); }
 
-/* Urgency badge — feed card + case detail, same shape as .status-badge
-   minus the pulsing dot (urgency isn't "live" the way pipeline status is). */
-.urgency-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: var(--on-anchor);
-  border-radius: 999px;
-  padding: 4px 11px;
-  text-transform: uppercase;
-}
-
 /* Legal / long-form doc pages */
 .doc-page h2 { font-family: var(--font-head); font-size: 20px; margin: 22px 0 8px; }
 .doc-page h3 { font-size: 16px; margin: 16px 0 6px; }
@@ -2025,8 +1957,6 @@ select {
    shadows, a whisper of paper grain, and motion with a little human weight.
    Appended last so it wins over the flat baseline it replaces.
    ============================================================================ */
-
-
 
 /* Paper grain — a barely-there tactile texture on the app background. This is
    the "human fingerprint" the research kept naming; kept at ~3% so it reads as
@@ -2256,7 +2186,6 @@ h1, h2 {
   color: var(--text);
 }
 
-
 /* ---- Ink-draw motion: strokes DRAW in, they never merely fade ------------ */
 @keyframes ink-draw {
   from { clip-path: inset(0 100% 0 0); opacity: 0.4; }
@@ -2322,7 +2251,6 @@ h1, h2 {
    as a bare px/hex — see the PR description for the full list.
    ============================================================================ */
 
-
 .auth-page {
   display: flex;
   flex-direction: column;
@@ -2358,17 +2286,12 @@ h1, h2 {
 }
 
 .auth-card__logo {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--anchor);
-  border-radius: var(--r-card);
-  color: var(--on-anchor);
 }
-.auth-card__logo svg { width: 24px; height: 24px; }
+.auth-card__logo svg { width: 100%; height: 100%; }
 
 .auth-card__wordmark {
   font-family: var(--font-head);

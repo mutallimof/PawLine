@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { ENABLED_LOCALES, getLocale, LOCALE_NAMES, setLocale, t, type LocaleCode } from '../i18n';
 import { updateProfile } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
-import { PawHeartMark } from './Icons';
+import { BrandMark } from './Logo';
 import splash1 from '../assets/onboarding/splash-1.webp';
 import splash2 from '../assets/onboarding/splash-2.webp';
 import splash3 from '../assets/onboarding/splash-3.webp';
@@ -86,7 +86,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
       <div className="onboarding__frame">
         <header className="onboarding__top">
           <span className="onboarding__brand">
-            <PawHeartMark className="onboarding__mark" />
+            <BrandMark className="onboarding__mark" />
             {t('app.name')}
           </span>
           <LanguageSelect />

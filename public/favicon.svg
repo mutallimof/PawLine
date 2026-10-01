@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#E85D4A"/>
-  <ellipse cx="32" cy="38" rx="13" ry="10" fill="#fff"/>
-  <circle cx="19" cy="26" r="5.5" fill="#fff"/>
-  <circle cx="27.5" cy="20.5" r="5.5" fill="#fff"/>
-  <circle cx="36.5" cy="20.5" r="5.5" fill="#fff"/>
-  <circle cx="45" cy="26" r="5.5" fill="#fff"/>
+  <!-- Stray's Call mark (v3 placeholder) — same artwork as src/components/Logo.tsx -->
+  <rect width="64" height="64" rx="15" fill="#2E1A3D"/>
+  <path d="M32 12c-12.2 0-22 8.1-22 18.2 0 5.6 3 10.6 7.8 14L15.5 53l11.2-5.6c1.7.4 3.5.6 5.3.6 12.2 0 22-8.1 22-18.2S44.2 12 32 12z" fill="#FFEDA8"/>
+  <g fill="#2E1A3D">
+    <ellipse cx="25.2" cy="24.6" rx="3.1" ry="3.7"/>
+    <ellipse cx="32" cy="22.4" rx="3.1" ry="3.7"/>
+    <ellipse cx="38.8" cy="24.6" rx="3.1" ry="3.7"/>
+    <path d="M32 28.6c-4.6 0-8.3 4.2-8.3 7.5 0 2.3 1.8 3.4 3.8 3.4 1.7 0 2.7-.9 4.5-.9s2.8.9 4.5.9c2 0 3.8-1.1 3.8-3.4 0-3.3-3.7-7.5-8.3-7.5z"/>
+  </g>
 </svg>

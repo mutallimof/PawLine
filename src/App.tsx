@@ -14,7 +14,7 @@ import { BottomNav, SideNav, ToastProvider, UnreadAlertsContext, useToast } from
 import { getLocale, subscribeLocale, t } from './i18n';
 import Onboarding, { shouldShowOnboarding } from './components/Onboarding';
 import { InkDefs } from './components/Ink';
-import { PawHeartMark } from './components/Icons';
+import { BrandMark } from './components/Logo';
 import { flushQueue } from './lib/offlineQueue';
 import { needsConsent } from './lib/consent';
 import { ConsentGate } from './components/legal';
@@ -91,7 +91,7 @@ function Shell() {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
-        <PawHeartMark className="app-loading__mark" />
+        <BrandMark className="app-loading__mark" />
       </div>
     );
   }

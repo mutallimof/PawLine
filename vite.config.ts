@@ -49,8 +49,8 @@ export default defineConfig({
         short_name: 'Stray’s Call',
         description:
           'Report injured stray animals, rescue them, and get them to a vet — together.',
-        theme_color: '#E85D4A',
-        background_color: '#FAF3EE',
+        theme_color: '#FBF5EA',
+        background_color: '#FBF5EA',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',

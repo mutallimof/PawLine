@@ -566,6 +566,9 @@ export const tr: Dict = {
   'case.arrivalTitle': 'Klinikte',
   'case.arrivalSub': 'Kurtarıcı hayvanı kliniğe teslim etti. Sen de bunun bir parçasıydın.',
   'status.inProgress': 'Devam ediyor',
+  // v3 status vocabulary (card badges): Rescued = resolved, Unclaimed = closed without a rescue.
+  'status.rescued': 'Kurtarıldı',
+  'status.unclaimed': 'Üstlenilmedi',
   'home.nearbyCases': 'Yakındaki vakalar',
   'case.detailTitle': 'Vaka detayı',
   'case.uploadedAgo': 'Yüklendi: {time}',

@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher, PasswordField, useToast } from '../components/ui';
-import { IconGoogle, PawHeartMark } from '../components/Icons';
+import { IconGoogle } from '../components/Icons';
+import { BrandMark } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 import { ConsentChecks } from '../components/legal';
@@ -136,7 +137,7 @@ export default function AuthPage() {
       <div className="auth-card">
         <div className="auth-card__brand">
           <div className="auth-card__logo" aria-hidden="true">
-            <PawHeartMark />
+            <BrandMark />
           </div>
           <span className="auth-card__wordmark">{t('app.name')}</span>
         </div>

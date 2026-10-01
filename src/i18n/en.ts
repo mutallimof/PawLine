@@ -564,6 +564,9 @@ export const en = {
   'case.arrivalTitle': 'At the clinic',
   'case.arrivalSub': 'The rescuer has handed the animal to the clinic. You were part of this.',
   'status.inProgress': 'In progress',
+  // v3 status vocabulary (card badges): Rescued = resolved, Unclaimed = closed without a rescue.
+  'status.rescued': 'Rescued',
+  'status.unclaimed': 'Unclaimed',
   'home.nearbyCases': 'Nearby cases',
   'case.detailTitle': 'Case detail',
   'case.uploadedAgo': 'Uploaded {time}',

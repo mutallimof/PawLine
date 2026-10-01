@@ -1,7 +1,7 @@
 /** Shared UI building blocks. */
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { isCaseLive, type CaseStatus, type CaseWithDetails, type UrgencyLevel, type Vet } from '../lib/types';
+import { type CaseStatus, type CaseWithDetails, type UrgencyLevel, type Vet } from '../lib/types';
 import {
   getLocale,
   LOCALE_NAMES,
@@ -18,42 +18,38 @@ import { distanceKm, formatDistance, type LatLng } from '../lib/geo';
 import { tierForXp, tierName } from '../lib/xp';
 import {
   animalEmoji,
+  IconAlert,
+  IconArchive,
   IconBack,
   IconBell,
   IconChatRound,
+  IconCheckCircle,
   IconChevronRight,
   IconClock,
   IconGrid,
   IconPin,
   IconPlus,
+  IconRoute,
   IconStethoscope,
   IconUser,
-  PawHeartMark,
 } from './Icons';
 import { CasePhoto } from './CasePhoto';
+import { BrandMark } from './Logo';
 
 // ---------------------------------------------------------------------------
 // Status
 // ---------------------------------------------------------------------------
-
-export const STATUS_COLOR: Record<CaseStatus, string> = {
-  open: 'var(--st-ongoing)',
-  accepted: 'var(--st-ongoing)',
-  vet_selected: 'var(--st-ongoing)',
-  vet_confirmed: 'var(--st-ongoing)',
-  en_route: 'var(--st-ongoing)',
-  resolved: 'var(--anchor)', // badge fill under white text — the bright green fails contrast
-  closed: 'var(--text-2)',
-};
 
 export function statusLabel(status: CaseStatus): string {
   return t(`status.${status}` as const);
 }
 
 /**
- * Figma v2: one status vocabulary. The seven DB statuses fold into four
- * groups shown on filter chips and card badges; the exact step still shows
- * on Case Detail (statusLabel) and in the paw trail.
+ * v3 status vocabulary (tabs = card badges). The seven DB statuses fold
+ * into four groups: Ongoing = open ("Needs rescue") + accepted / vet_selected
+ * / vet_confirmed / en_route ("In progress"), Rescued = resolved, Unclaimed =
+ * closed without a rescue. The exact step still shows on Case Detail
+ * (statusLabel) and in the paw trail.
  */
 export type StatusGroup = 'open' | 'progress' | 'done' | 'closed';
 export function statusGroup(status: CaseStatus): StatusGroup {
@@ -65,30 +61,32 @@ export function statusGroup(status: CaseStatus): StatusGroup {
 export function statusGroupLabel(group: StatusGroup): string {
   return group === 'open' ? t('status.open')
     : group === 'progress' ? t('status.inProgress')
-    : group === 'done' ? t('status.resolved')
-    : t('status.closed');
+    : group === 'done' ? t('status.rescued')
+    : t('status.unclaimed');
 }
+const STATUS_GROUP_ICON: Record<StatusGroup, () => ReactNode> = {
+  open: () => <IconClock size={14} />,
+  progress: () => <IconRoute size={14} />,
+  done: () => <IconCheckCircle size={14} />,
+  closed: () => <IconArchive size={14} />,
+};
+/** Tint + icon + label, so the status reads without relying on colour. */
 export function StatusGroupBadge({ status }: { status: CaseStatus }) {
   const g = statusGroup(status);
-  return <span className={`v2-badge v2-badge--${g}`}>{statusGroupLabel(g)}</span>;
+  return (
+    <span className={`v2-badge v2-badge--${g}`}>
+      {STATUS_GROUP_ICON[g]()}
+      {statusGroupLabel(g)}
+    </span>
+  );
 }
 
-export function StatusBadge({
-  status,
-  overlay = false,
-}: {
-  status: CaseStatus;
-  overlay?: boolean;
-}) {
-  // Pulses only while the case is live — never on resolved OR closed.
-  const live = isCaseLive(status);
+/** Critical urgency: red chip (with icon) on top of any status. */
+export function CriticalBadge() {
   return (
-    <span
-      className={`status-badge${overlay ? ' status-badge--overlay' : ''}`}
-      style={{ background: STATUS_COLOR[status] }}
-    >
-      <span className={`status-dot${live ? ' status-dot--pulse' : ''}`} />
-      {statusLabel(status)}
+    <span className="v2-badge v2-badge--urgency-critical">
+      <IconAlert size={14} />
+      {urgencyLabel('critical')}
     </span>
   );
 }
@@ -99,23 +97,8 @@ export function StatusBadge({
 // the reporter say it is", not "what stage is this case at".
 // ---------------------------------------------------------------------------
 
-export const URGENCY_COLOR: Record<UrgencyLevel, string> = {
-  low: 'var(--urg-low)',
-  medium: 'var(--urg-medium)',
-  high: 'var(--urg-high)',
-  critical: 'var(--urg-critical)',
-};
-
 export function urgencyLabel(level: UrgencyLevel): string {
   return t(`urgency.${level}` as const);
-}
-
-export function UrgencyBadge({ level }: { level: UrgencyLevel }) {
-  return (
-    <span className="urgency-badge" style={{ background: URGENCY_COLOR[level] }}>
-      {urgencyLabel(level)}
-    </span>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -249,9 +232,10 @@ export function CaseCard({
     : null;
   const place = [caseData.address_hint, distance].filter(Boolean).join(' · ');
   const escalated = caseData.status === 'open' && !!caseData.escalated_at;
+  const critical = caseData.urgency === 'critical';
 
   return (
-    <Link to={`/case/${caseData.id}`} className="v2-card">
+    <Link to={`/case/${caseData.id}`} className={`v2-card${critical ? ' v2-card--critical' : ''}`}>
       <div className={`v2-card__photo${showPhoto ? '' : ' v2-card__photo--empty'}`}>
         {showPhoto ? (
           <CasePhoto
@@ -266,11 +250,10 @@ export function CaseCard({
       </div>
       <div className="v2-card__body">
         <div className="v2-card__badges">
+          {critical && <CriticalBadge />}
           <StatusGroupBadge status={caseData.status} />
-          {(caseData.urgency === 'high' || caseData.urgency === 'critical') && (
-            <span className={`v2-badge v2-badge--urgency-${caseData.urgency}`}>
-              {urgencyLabel(caseData.urgency)}
-            </span>
+          {caseData.urgency === 'high' && (
+            <span className="v2-badge v2-badge--urgency-high">{urgencyLabel('high')}</span>
           )}
         </div>
         <h3 className="v2-card__title">{caseTitle(caseData)}</h3>
@@ -425,7 +408,7 @@ export function SideNav({ unreadAlerts }: { unreadAlerts: number }) {
   return (
     <aside className="side-nav" aria-label="Main">
       <div className="side-nav__brand" onClick={() => navigate('/')} role="button" tabIndex={0}>
-        <PawHeartMark className="side-nav__mark" />
+        <BrandMark className="side-nav__mark" />
         <span className="side-nav__name">{t('app.name')}</span>
       </div>
 

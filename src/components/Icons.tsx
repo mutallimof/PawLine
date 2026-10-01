@@ -196,20 +196,6 @@ export const VetTag = () => (
   </span>
 );
 
-/** The design's brand mark: a paw whose main pad carries a heart. Filled, currentColor. */
-export const PawHeartMark = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 28 28" fill="currentColor" aria-hidden="true">
-    <ellipse cx="5" cy="11.2" rx="2.9" ry="3.4" transform="rotate(-18 5 11.2)" />
-    <ellipse cx="10.4" cy="5.4" rx="3" ry="3.6" transform="rotate(-6 10.4 5.4)" />
-    <ellipse cx="17.6" cy="5.4" rx="3" ry="3.6" transform="rotate(6 17.6 5.4)" />
-    <ellipse cx="23" cy="11.2" rx="2.9" ry="3.4" transform="rotate(18 23 11.2)" />
-    <path
-      fillRule="evenodd"
-      d="M14 11.6c5.4 0 9.6 4.9 9.6 9.3 0 3.6-2.6 5.6-5.6 5.6-1.6 0-2.8-.6-4-.6s-2.4.6-4 .6c-3 0-5.6-2-5.6-5.6 0-4.4 4.2-9.3 9.6-9.3Zm0 7.1c-.8-1.5-3.6-1.4-3.6.8 0 1.8 2.2 3.3 3.6 4.3 1.4-1 3.6-2.5 3.6-4.3 0-2.2-2.8-2.3-3.6-.8Z"
-    />
-  </svg>
-);
-
 /**
  * Empty-state paw — a clean single-weight outline on a soft lavender disc.
  * Deliberately crisp (no ink filter) and muted: it marks the empty list
@@ -259,6 +245,35 @@ export const IconCamera = ({ size }: IconProps) => (
   <svg {...base(size)}>
     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
     <circle cx="12" cy="13" r="4" />
+  </svg>
+);
+
+/* Status-badge icons (v3): the icon + label carry the status, so badges
+   read without relying on colour. */
+export const IconRoute = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="m3 11 19-9-9 19-2-8-8-2z" />
+  </svg>
+);
+
+export const IconCheckCircle = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m8.5 12 2.5 2.5 4.5-5" />
+  </svg>
+);
+
+export const IconArchive = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="3" y="4" width="18" height="4" rx="1" />
+    <path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4" />
+  </svg>
+);
+
+export const IconAlert = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+    <path d="M12 9v4M12 17h.01" />
   </svg>
 );
 

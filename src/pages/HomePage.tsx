@@ -14,7 +14,8 @@ import { SponsorStrip } from '../components/extras';
 import { distanceKm, geoErrorKind, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import { PawTrailInk } from '../components/Ink';
-import { EmptyPaw, IconChevronRight, IconFilter, IconMap, IconStethoscope, PawHeartMark } from '../components/Icons';
+import { EmptyPaw, IconChevronRight, IconFilter, IconMap, IconStethoscope } from '../components/Icons';
+import { BrandMark } from '../components/Logo';
 
 type View = 'map' | 'feed';
 /** Figma v2 chips: Active (default) · Needs rescue · At the vet · All. */
@@ -98,7 +99,7 @@ export default function HomePage() {
       <div className="home-header">
         <div className="home-top">
           <Link to="/" className="home-brand">
-            <span className="home-brand__tile" aria-hidden="true"><PawHeartMark /></span>
+            <span className="home-brand__tile" aria-hidden="true"><BrandMark /></span>
             <span className="home-brand__name">{t('app.name')}</span>
           </Link>
           <AlertsBell />

@@ -566,6 +566,9 @@ export const ru: Dict = {
   'case.arrivalTitle': 'В клинике',
   'case.arrivalSub': 'Спасатель передал животное в клинику. Вы стали частью этого.',
   'status.inProgress': 'В процессе',
+  // v3 status vocabulary (card badges): Rescued = resolved, Unclaimed = closed without a rescue.
+  'status.rescued': 'Спасён',
+  'status.unclaimed': 'Не взят',
   'home.nearbyCases': 'Случаи рядом',
   'case.detailTitle': 'Детали случая',
   'case.uploadedAgo': 'Загружено: {time}',
