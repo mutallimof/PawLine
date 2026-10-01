@@ -1255,31 +1255,35 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .vet-setup > .btn--primary { width: 100%; }
 
 /* ==== Legal & doc pages ==================================================== */
-.doc-page .doc-updated { margin: 0 0 12px; font-size: 11.5px; color: var(--text-2); opacity: 1; }
-.doc-page .doc-intro { margin: 0 0 14px; font-size: 13.6px; color: var(--text-2); line-height: 1.6; }
+/* Long reading: white section cards, Geologica section titles, 15/24 body
+   in the primary plum (secondary plum only for the date and intro). */
+.doc-page .doc-updated { margin: 0 0 10px; font-size: var(--fs-label); color: var(--text-2); opacity: 1; }
+.doc-page .doc-intro { margin: 0 0 16px; font-size: 15px; color: var(--text-2); line-height: 24px; }
 .doc-section {
   margin-bottom: 12px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--surface-2);
+  padding: 16px 18px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--hair);
 }
 .doc-page .doc-section h2 {
-  margin: 0 0 6px;
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 500;
+  margin: 0 0 8px;
+  font-family: var(--font-head);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 22px;
   letter-spacing: -0.01em;
   color: var(--text);
 }
 .doc-page .doc-section p,
-.doc-page .doc-section li { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
-.doc-page .doc-section ul { margin: 0; padding-left: 18px; }
-.doc-page .doc-section li + li { margin-top: 4px; }
+.doc-page .doc-section li { margin: 0; font-size: 15px; line-height: 24px; color: var(--text); }
+.doc-page .doc-section ul { margin: 0; padding-left: 20px; }
+.doc-page .doc-section li + li { margin-top: 6px; }
 .doc-page .doc-section p + ul,
-.doc-page .doc-section ul + p { margin-top: 6px; }
+.doc-page .doc-section ul + p { margin-top: 8px; }
 .doc-page .platform-stats { margin: 0; }
-.doc-page .card { background: var(--surface-2); border: none; box-shadow: none; border-radius: 16px; transform: none; }
-.platform-stats__value { color: var(--text); font-weight: 500; }
+.doc-page .card { background: var(--surface); border: none; box-shadow: inset 0 0 0 1px var(--hair); border-radius: var(--r-card); transform: none; }
+.platform-stats__value { color: var(--text); }
 
 /* ==== States: empty, error, loading, 404 ================================== */
 .empty-state {
