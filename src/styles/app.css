@@ -1342,17 +1342,17 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .consent-check {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 13.5px;
-  line-height: 1.4;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 22px;
   color: var(--text);
   cursor: pointer;
 }
 .consent-check input {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   margin: 0;
   flex-shrink: 0;
   accent-color: var(--anchor);
 }
-.consent-check a { color: var(--text); font-weight: 500; }
+.consent-check a { color: var(--text); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }

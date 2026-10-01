@@ -1897,13 +1897,13 @@ select {
   background: var(--surface);
   width: 100%;
   max-width: 460px;
-  border-radius: var(--r-card) var(--r-card) 0 0;
-  padding: 26px 22px calc(22px + var(--safe-bottom));
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  padding: 28px 22px calc(22px + var(--safe-bottom));
   box-shadow: var(--shadow-lift);
   animation: sheet-up var(--t-med) both;
 }
 @media (min-width: 640px) {
-  .modal-sheet { border-radius: var(--r-card); }
+  .modal-sheet { border-radius: var(--r-sheet); }
 }
 @keyframes sheet-up {
   from { transform: translateY(24px); opacity: 0.6; }
@@ -1912,20 +1912,24 @@ select {
 .modal-sheet__icon { font-size: 44px; text-align: center; }
 .modal-sheet__title {
   font-family: var(--font-head);
-  font-size: 22px;
+  font-size: var(--fs-h1);
+  font-weight: 750;
+  line-height: 32px;
+  letter-spacing: -0.015em;
   text-align: center;
+  text-wrap: balance;
   margin: 8px 0 6px;
 }
 .modal-sheet__intro {
   color: var(--text-2);
-  font-size: 14.5px;
+  font-size: 15px;
   text-align: center;
-  margin: 0 0 14px;
-  line-height: 1.5;
+  margin: 0 0 16px;
+  line-height: 22px;
 }
 .modal-sheet .btn { width: 100%; }
 .modal-sheet__fineprint {
-  font-size: 12.5px;
+  font-size: var(--fs-label);
   color: var(--text-2);
   line-height: 1.5;
   margin: 6px 0 16px;
