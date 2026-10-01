@@ -5,13 +5,7 @@
    Mobile-first throughout; the app is designed for one thumb on a phone.
    ============================================================================ */
 
-/* ---- 1. Design tokens ---------------------------------------------------- */
-
-/* Cyrillic companion to DM Sans. Only Onest's Cyrillic file is declared (the
-   package's own CSS would also pull in and precache its Latin files, which
-   DM Sans already covers), and unicode-range limits it to Cyrillic glyphs.
-   size-adjust matches Onest's x-height (527) to DM Sans's (504), so Russian
-   lowercase sits at the same height as Latin in mixed text. */
+/* ---- 1. Design tokens: all in tokens.css (loaded first) ------------------- */
 
 /* ---- 2. Base ------------------------------------------------------------- */
 * {
@@ -1496,7 +1490,7 @@ select {
 .pin-cluster:hover { transform: translate(-50%, -50%) scale(1.08); }
 .pin-cluster--open { border-color: var(--st-ongoing); color: var(--text); }
 
-/* Vet pin — unmistakably different: white rounded square, coral cross */
+/* Vet pin — unmistakably different: white rounded square, plum cross */
 .pin-vet {
   width: 34px;
   height: 34px;
@@ -1977,8 +1971,7 @@ body {
   background-attachment: fixed, fixed, fixed;
 }
 
-/* Display type: Fraunces wants a heavier optical presence — its character
-   lives in the higher weights and a touch of negative tracking at size. */
+/* Display type: the heading face with a touch of negative tracking at size. */
 .page-title,
 .modal-sheet__title,
 .side-nav__name {
@@ -2026,7 +2019,6 @@ body {
   .case-card:hover { box-shadow: var(--shadow-lift); }
 }
 
-/* Buttons: keep the coral gradient but give it inked depth + a warmer press. */
 
 /* Empty states now host an ink scene; center and warm it. */
 .empty-state .ink-scene { display: block; margin: 0 auto 6px; }
@@ -2165,15 +2157,15 @@ body {
 }
 
 /* ============================================================================
-   17. DESIGN SOUL LAYER — Direction A: "The Hand That Helps"
+   17. Headings, the quiet voice, ink marks and celebrations
    ----------------------------------------------------------------------------
-   Imperfection is not styling here; it is the trust argument, drawn. A human
-   made every mark, and a human is what this app promises will come. Warmth
-   from craft (ink, texture, weight, wobble), never from cuteness.
-   Appended last so it wins.
+   What remains of the v1 "Direction A" layer after v3: heading tracking,
+   the italic reassurance line, the hand-drawn paw marks (Ink.tsx) and the
+   arrival / resolution moments. The paper grain, wobbly cards and stamp
+   buttons were removed in v3.
    ============================================================================ */
 
-/* ---- Fraunces, given its hand-cut character (opsz/SOFT/WONK axes) --------- */
+/* ---- Heading tracking ------------------------------------------------------ */
 .page-title,
 .modal-sheet__title,
 .fullscreen-msg h1,
@@ -2182,7 +2174,7 @@ h1, h2 {
   letter-spacing: -0.015em;
 }
 .page-title {
-  font-weight: 900;              /* the heavy end is where Fraunces sings */
+  font-weight: 800;
   font-size: clamp(26px, 7vw, 34px);
   line-height: 1.05;
 }
@@ -2644,7 +2636,7 @@ h1, h2 {
 }
 .admin-hidden-row:first-of-type { border-top: none; }
 
-/* Growth charts: one series each, --coral on --card (validated >= 3:1).
+/* Growth charts: one series each, --anchor on --surface (well over 3:1).
    Bars are 4px-rounded at the data end only, anchored to one baseline, with a
    2px gap. Each column is a full-height button so the hit target is the whole
    slot, not just the (possibly zero-height) bar. */
@@ -2759,7 +2751,7 @@ h1, h2 {
 }
 
 /* The composer's `.chat-composer button` rule makes every button a 44px
-   coral circle (the send button) — undo that for the Reopen pill. Same
+   plum circle (the send button) — undo that for the Reopen pill. Same
    specificity, declared later, so it wins. */
 .chat-composer--closed button.chat-reopen {
   width: auto;
