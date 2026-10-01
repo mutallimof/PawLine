@@ -1591,11 +1591,13 @@ select {
   color: var(--onb-ink);
   animation: page-enter var(--t-med) both;
 }
+/* v3 slides (class names kept from v2): --green = the plum slide with a
+   lemon button, --light = the cream slide, --lavender = the lavender slide. */
 .onboarding--green {
-  --onb-top: var(--anchor);           /* sampled — no Figma variable */
-  --onb-hill: #3a2450;          /* sampled */
+  --onb-top: var(--anchor);
+  --onb-hill: var(--anchor);
   --onb-ink: var(--on-anchor);
-  --onb-body: var(--on-anchor); /* sampled #f1f4f0 over the green */
+  --onb-body: var(--on-anchor);
   --onb-cta-bg: var(--lemon);
   --onb-cta-ink: var(--text);
   --onb-title: 41;              /* design px */
@@ -1604,20 +1606,21 @@ select {
 .onboarding--light {
   --onb-top: var(--bg);
   --onb-hill: var(--bg);
-  --onb-ink: var(--text);           /* sampled deep green — no Figma variable */
-  --onb-body: var(--text-2);          /* sampled */
+  --onb-ink: var(--text);
+  --onb-body: var(--text-2);
   --onb-cta-bg: var(--anchor);
   --onb-cta-ink: var(--on-anchor);
   --onb-title: 48;
   --onb-title-lh: 1.08;
 }
 .onboarding--lavender {
-  --onb-top: var(--lav);           /* sampled — a shade under the --lavender token */
-  --onb-hill: #a59cd3;          /* sampled */
+  /* Plum type on lavender (7.2:1) — white on lavender would be 2.2:1. */
+  --onb-top: var(--lav);
+  --onb-hill: var(--lav);
   --onb-ink: var(--text);
   --onb-body: var(--text);
   --onb-cta-bg: var(--anchor);
-  --onb-cta-ink: var(--text);
+  --onb-cta-ink: var(--on-anchor);
   --onb-title: 45;
   --onb-title-lh: 1.03;
 }
@@ -1684,13 +1687,21 @@ select {
    ever has to scroll. The image files carry 560px of edge-repeated
    background on each side, so `cover` shows exactly the design's crop at
    full size and fills the sides seamlessly when the band shrinks. */
+/* v3: the splash artwork has its own background baked in (green, white,
+   violet), so it is shown as a framed photo card on the C1 slide rather
+   than bleeding edge to edge. Replace the files with C1 exports (or
+   transparent backgrounds) to drop the frame. */
 .onboarding__art {
   position: relative;
   flex: 0 1 auto;
-  width: 100%;
+  width: calc(100% - 2 * max(16px, calc(20 * var(--u))));
+  margin: calc(8 * var(--u)) auto calc(12 * var(--u));
   aspect-ratio: 853 / 961;
   min-height: 160px;
-  background: linear-gradient(var(--onb-top), var(--onb-hill));
+  border-radius: var(--r-sheet);
+  overflow: hidden;
+  background: var(--surface-2);
+  box-shadow: var(--shadow-soft);
 }
 .onboarding__art img {
   position: absolute;
