@@ -189,9 +189,10 @@ select {
 
 .field__label {
   display: block;
-  font-size: 13px;
-  font-weight: 800;
-  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 20px;
+  margin-bottom: 8px;
   color: var(--text);
 }
 
@@ -199,9 +200,10 @@ select {
 .field textarea,
 .field select {
   width: 100%;
-  border: 1.5px solid var(--line);
+  min-height: 52px;
+  border: 1px solid var(--line);
   border-radius: var(--r-input);
-  padding: 12px 14px;
+  padding: 13px 16px;
   background: var(--surface);
   color: var(--text);
 }
@@ -369,18 +371,19 @@ select {
 }
 
 .chip {
-  border: 1.5px solid var(--line);
-  background: var(--surface);
-  border-radius: 999px;
-  padding: 9px 16px;
-  font-size: 14px;
-  font-weight: 700;
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: var(--r-pill);
+  min-height: 40px;
+  padding: 9px 14px;
+  font-size: var(--fs-small);
+  font-weight: 600;
   color: var(--text-2);
 }
 
 .chip.active {
-  border-color: var(--anchor);
-  background: var(--lav-tint);
+  border-color: var(--lav);
+  background: var(--lav);
   color: var(--text);
 }
 
@@ -1831,22 +1834,18 @@ select {
 /* Chip rows (structured report fields) */
 .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-row .chip {
-  cursor: pointer; border: 1.5px solid var(--line); background: var(--surface);
-  color: var(--text-2); font-weight: 700; font-size: 13px;
-  padding: 8px 13px; border-radius: 999px; transition: all var(--t-fast);
+  cursor: pointer; border: 1px solid var(--line); background: transparent;
+  color: var(--text-2); font-weight: 600; font-size: var(--fs-small);
+  min-height: 40px; padding: 9px 14px; border-radius: var(--r-pill); transition: all var(--t-fast);
 }
 .chip-row .chip.active {
-  background: var(--lav-tint); border-color: var(--anchor); color: var(--text);
+  background: var(--lav); border-color: var(--lav); color: var(--text);
 }
 
-/* Urgency selector chips tint to their own level color when picked, rather
-   than the generic coral active state — same colors as .urgency-badge.
-   Prefixed with .chip-row to match (not lose to) .chip-row .chip.active
-   above on specificity. */
-.chip-row .chip--urgency-low.active { background: var(--surface-2); border-color: var(--urg-low); color: var(--urg-low); }
-.chip-row .chip--urgency-medium.active { background: var(--surface-2); border-color: var(--urg-medium); color: var(--text); }
-.chip-row .chip--urgency-high.active { background: var(--lav-tint); border-color: var(--urg-high); color: var(--urg-high); }
-.chip-row .chip--urgency-critical.active { background: var(--crit-tint); border-color: var(--urg-critical); color: var(--urg-critical); }
+/* Urgency picker: Low / Medium / High use the normal lavender "on" state;
+   only Critical turns red when picked. Prefixed with .chip-row to match
+   (not lose to) .chip-row .chip.active on specificity. */
+.chip-row .chip--urgency-critical.active { background: var(--crit-tint); border-color: var(--crit); color: var(--crit); }
 
 /* Legal / long-form doc pages */
 .doc-page h2 { font-family: var(--font-head); font-size: 20px; margin: 22px 0 8px; }
