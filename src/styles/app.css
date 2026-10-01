@@ -1008,20 +1008,21 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   justify-content: center;
   background: var(--anchor);
   color: var(--on-anchor);
-  font-size: 32px;
-  font-weight: 500;
+  font-family: var(--font-head);
+  font-size: 30px;
+  font-weight: 750;
 }
 .profile__avatar img { width: 100%; height: 100%; object-fit: cover; }
 .profile__id-text { min-width: 0; }
-.profile__name { margin: 0; font-size: 22px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; }
-.profile__role { margin-top: 2px; font-size: 13.5px; font-weight: 500; color: var(--text); }
-.profile__since { margin-top: 2px; font-size: 12px; color: var(--text-2); }
+.profile__name { margin: 0; font-family: var(--font-head); font-size: var(--fs-h1); font-weight: 750; line-height: 32px; letter-spacing: -0.015em; }
+.profile__role { margin-top: 2px; font-size: var(--fs-small); font-weight: 600; color: var(--text); }
+.profile__since { margin-top: 2px; font-size: var(--fs-label); color: var(--text-2); }
 .profile__stats { margin: 20px 0 8px; }
 .profile__stat--helped { color: var(--text); }
 .profile__stat--active { color: var(--text); }
-.profile__stat--reported { color: var(--text); } /* Dull Lavender, darkened to 4.9:1 */
+.profile__stat--reported { color: var(--text); }
 .profile__section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.profile__view-all { font-size: 13px; font-weight: 500; color: var(--text); text-decoration: none; }
+.profile__view-all { font-size: var(--fs-small); font-weight: 600; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .profile__menu { margin-top: 16px; }
 .v2-row__title,
 .v2-row__sub { display: block; }
@@ -1029,26 +1030,26 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 /* ==== Settings (Figma 97:4) =============================================== */
 .settings .v2-label:first-of-type { margin-top: 4px; }
 .settings .v2-group { margin-bottom: 8px; }
-.settings__help { margin: 0 0 12px; font-size: 13px; color: var(--text-2); line-height: 1.45; }
+.settings__help { margin: 0 0 12px; font-size: var(--fs-small); color: var(--text-2); line-height: 20px; }
 .settings__check { color: var(--text); display: flex; }
 .settings__form { display: grid; gap: 14px; }
-.v2-field { display: grid; gap: 6px; }
-.v2-field__label { font-size: 13px; font-weight: 500; color: var(--text); }
+.v2-field { display: grid; gap: 8px; }
+.v2-field__label { font-size: 15px; font-weight: 650; color: var(--text); }
 .v2-field input {
-  height: 48px;
+  height: 52px;
   padding: 0 16px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--r-input);
   background: var(--surface);
   font: inherit;
   font-size: 15px;
   color: var(--text);
 }
-.v2-field input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.v2-field input:focus { outline: none; border-color: var(--anchor); box-shadow: var(--shadow-focus); }
 .v2-switch {
   position: relative;
-  width: 44px;
-  height: 26px;
+  width: 46px;
+  height: 28px;
   flex-shrink: 0;
   border-radius: 999px;
   background: var(--control-off);
@@ -1059,8 +1060,8 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: var(--surface);
   box-shadow: 0 1px 2px rgba(46, 26, 61, 0.25);
