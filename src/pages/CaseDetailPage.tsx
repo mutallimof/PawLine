@@ -43,6 +43,7 @@ import { CaseLocationMap, EnRouteMap } from '../components/maps';
 import {
   AlertsBell,
   caseTitle,
+  CriticalBadge,
   PawTrail,
   ScreenHeader,
   statusGroup,
@@ -56,7 +57,7 @@ import { IconArrowUpRight, IconCamera, IconPin, IconStethoscope } from '../compo
 import { hasKey, t } from '../i18n';
 import { SafetyAck, hasAcceptedSafety } from '../components/legal';
 import { Paw } from '../components/Ink';
-import type { DuplicateFlag, VetRating } from '../lib/types';
+import { isCaseLive, type DuplicateFlag, type VetRating } from '../lib/types';
 import { timeAgo } from '../lib/time';
 import { getCurrentPosition } from '../lib/geo';
 
@@ -300,7 +301,15 @@ export default function CaseDetailPage() {
             {statusLabel(caseData.status)}
           </span>
           <span className="v2-tag">{t(`animal.${caseData.animal}` as const)}</span>
-          <span className="v2-tag">{urgencyLabel(caseData.urgency)}</span>
+          {/* Critical is red only while the case still needs help; after it
+              is rescued or closed, a neutral note says it was critical. */}
+          {caseData.urgency === 'critical' && isCaseLive(caseData.status) ? (
+            <CriticalBadge />
+          ) : caseData.urgency === 'critical' ? (
+            <span className="v2-tag">{t('case.wasCritical')}</span>
+          ) : (
+            <span className="v2-tag">{urgencyLabel(caseData.urgency)}</span>
+          )}
         </div>
         <h2 className="case-detail__title">{caseTitle(caseData)}</h2>
         <p className="case-detail__meta">

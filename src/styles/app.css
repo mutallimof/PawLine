@@ -77,6 +77,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   font-weight: 700;
   line-height: 20px;
   letter-spacing: -0.005em;
+  text-transform: none;
   color: var(--text);
 }
 .v2-h2 {
@@ -653,7 +654,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 /* ==== Case Detail (Figma 42:422) ========================================== */
 .case-detail { padding-top: 22px; }
 .case-detail__map-card {
-  border-radius: 22px;
+  border-radius: var(--r-card);
   background: linear-gradient(158deg, var(--lav-tint) 0%, var(--surface) 100%);
   box-shadow: var(--shadow-soft);
   margin-bottom: 12px;
@@ -662,42 +663,47 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .case-detail__map-directions {
   border: none;
   box-shadow: none;
-  padding: 7.5px 12px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 8px 12px;
+  font-size: var(--fs-label);
+  font-weight: 600;
   gap: 6px;
 }
 .case-detail__map-pill { background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--text); left: 13px; bottom: 12px; }
-.case-detail__map-pill svg { width: 13px; height: 13px; color: var(--text); flex-shrink: 0; }
+.case-detail__map-pill svg { width: 14px; height: 14px; color: var(--text); flex-shrink: 0; }
 .case-detail__map-pill span { overflow: hidden; text-overflow: ellipsis; }
-.case-detail__map-directions { background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--text); font-size: 11.5px; gap: 4px; top: 13px; right: 13px; }
+.case-detail__map-directions { background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--text); font-size: var(--fs-label); gap: 4px; top: 13px; right: 13px; }
 .case-detail__map-directions svg { width: 12px; height: 12px; }
 .case-detail__map-legend { gap: 16px; margin-bottom: 12px; }
-.case-detail__map-legend-item { font-size: 11.5px; color: var(--text-2); gap: 6px; }
+.case-detail__map-legend-item { font-size: var(--fs-label); color: var(--text-2); gap: 6px; }
 .case-detail__map-legend-dot--case { background: var(--anchor); }
-.case-detail__map-legend-dot--vet { background: var(--anchor); }
+.case-detail__map-legend-dot--vet { background: var(--st-rescued); }
 
 .case-detail__head { margin-bottom: 12px; }
 .case-detail__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.case-detail__status { border: 1px solid currentColor; padding: 0 13px; }
+.case-detail__status { padding: 0 12px; }
 .case-detail__status--open { background: var(--st-open-bg); color: var(--text); }
 .case-detail__status--progress { background: var(--st-progress-bg); color: var(--text); }
 .case-detail__status--done { background: var(--st-done-bg); color: var(--text); }
 .case-detail__status--closed { background: var(--st-closed-bg); color: var(--text); }
 .case-detail__title {
-  margin: 6px 0 10px;
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  margin: 4px 0 6px;
+  font-family: var(--font-head);
+  font-size: var(--fs-h1);
+  font-weight: 750;
+  line-height: 32px;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
-.case-detail__meta { margin: 0 0 12px; font-size: 15px; color: var(--text-2); letter-spacing: -0.01em; }
+.case-detail__meta { margin: 0 0 14px; font-size: var(--fs-small); color: var(--text-2); }
 .case-detail__quote {
-  padding-left: 12px;
-  border-left: 3px solid var(--lav);
-  font-size: 13px;
-  line-height: 1.61;
-  color: var(--text-2);
+  padding: 12px 14px;
+  border-left: none;
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--lav), inset 0 0 0 1px var(--hair);
+  font-size: var(--fs-body);
+  line-height: 24px;
+  color: var(--text);
 }
 
 /* Rescue progress — same steps/logic, Figma circles and track */
@@ -731,8 +737,8 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--lav) 45%, transparent);
 }
 .case-detail__trail .paw-trail__label {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
   color: var(--text-2);
@@ -747,65 +753,64 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 14px;
+  padding: 16px;
   margin-bottom: 14px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  box-shadow: var(--shadow-soft);
+  background: var(--surface);
+  border: none;
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card), inset 0 0 0 1px var(--hair);
 }
 .case-detail__rescuer { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
 .case-detail__initials {
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--r-pill);
   background: var(--lav);
-  color: var(--on-anchor);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
   flex-shrink: 0;
 }
 .case-detail__rescuer-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.case-detail__rescuer-name { font-size: 14.5px; font-weight: 500; }
-.case-detail__rescuer-sub { font-size: 12px; color: var(--text-2); }
+.case-detail__rescuer-name { font-size: 15px; font-weight: 650; }
+.case-detail__rescuer-sub { font-size: var(--fs-label); color: var(--text-2); }
 .case-detail__dest {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   color: var(--text-2);
   text-decoration: none;
 }
 .case-detail__dest svg { width: 13px; height: 13px; color: var(--text); flex-shrink: 0; }
-.case-detail__track .map-wrap { border-radius: 13px; overflow: hidden; }
-.case-detail__track-note { margin: 6px 0 0; font-size: 11.5px; color: var(--text-2); }
+.case-detail__track .map-wrap { border-radius: var(--r-btn); overflow: hidden; }
+.case-detail__track-note { margin: 6px 0 0; font-size: var(--fs-label); color: var(--text-2); }
 
 /* Photo evidence */
-.case-detail__photo { border-radius: 20px; overflow: hidden; margin-bottom: 8px; }
-.case-detail__photo-note { margin: 0 0 16px; font-size: 11.5px; color: var(--text-2); }
+.case-detail__photo { border-radius: var(--r-card); overflow: hidden; margin-bottom: 8px; }
+.case-detail__photo-note { margin: 0 0 16px; font-size: var(--fs-label); color: var(--text-2); }
 
 /* Condition card */
 .case-detail__kv {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
   margin: 0 0 8px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--lav-tint);
+  padding: 16px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--hair);
 }
 .case-detail__kv > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .case-detail__kv dt {
-  font-size: 10.5px;
+  font-size: var(--fs-label);
   font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--text-2);
 }
-.case-detail__kv dd { margin: 0; font-size: 13px; font-weight: 500; text-align: right; color: var(--text); }
+.case-detail__kv dd { margin: 0; font-size: var(--fs-small); font-weight: 650; text-align: right; color: var(--text); }
 .case-detail__kv-urgency--high,
 .case-detail__kv-urgency--critical { color: var(--text) !important; }
 
@@ -823,14 +828,15 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   border: 2px solid var(--surface);
 }
 .case-detail__timeline-item:last-child::before { background: var(--anchor); }
-.case-detail__timeline-time { font-size: 12.5px; font-weight: 500; color: var(--text); }
-.case-detail__timeline-text { font-size: 12.5px; color: var(--text-2); }
+.case-detail__timeline-time { font-size: var(--fs-label); font-weight: 650; color: var(--text); }
+.case-detail__timeline-text { font-size: var(--fs-small); line-height: 20px; color: var(--text-2); }
 
 /* Bottom actions */
 .case-detail__actions-stack { gap: 10px; margin-top: 20px; }
+/* "Watching" (pressed) — a sky highlight on the outline button. */
 .case-detail__actions-stack .btn--secondary[aria-pressed='true'] {
-  background: var(--st-done-bg);
-  border-color: var(--st-done-bg);
+  background: var(--sky);
+  box-shadow: none;
   color: var(--text);
 }
 .case-detail__report-link button {
@@ -839,17 +845,18 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   border: none;
   background: none;
   box-shadow: none;
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: 600;
   color: var(--text-2);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
+/* Destructive (drop a rescue, delete): red text on the red tint. */
 .btn--danger {
-  min-height: 48px;
-  background: var(--st-open-bg);
-  border: 1px solid var(--st-open-bg);
-  color: var(--text);
+  min-height: 52px;
+  background: var(--crit-tint);
+  border: none;
+  color: var(--crit);
   box-shadow: none;
 }
 .btn--success {

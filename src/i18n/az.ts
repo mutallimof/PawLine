@@ -486,6 +486,7 @@ export const az: Dict = {
   'urgency.medium': 'Orta',
   'urgency.high': 'Yüksək',
   'urgency.critical': 'Kritik',
+  'case.wasCritical': 'Kritik idi', // shown on a rescued / closed case that was reported critical
   'report.confirmLocation': 'Nişan heyvanın dəqiq yerindədir? Onu tənzimləmədiniz.',
   'report.confirmLocationYes': 'Bəli, düzdür',
   'report.confirmLocationNo': 'Düzəliş edim',

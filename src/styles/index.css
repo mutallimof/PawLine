@@ -796,10 +796,10 @@ select {
 }
 
 .banner {
-  border-radius: var(--r-input);
-  padding: 12px 14px;
-  font-size: 14px;
-  font-weight: 700;
+  border-radius: var(--r-btn);
+  padding: 14px 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
   margin-bottom: 14px;
 }
 
@@ -813,9 +813,12 @@ select {
   color: var(--text);
 }
 
+/* Attention, not danger (load errors, possible duplicates): a lavender
+   tint with a plum edge. Red stays for Critical and destructive actions. */
 .banner--warn {
-  background: var(--crit-tint);
-  color: var(--crit);
+  background: var(--lav-tint);
+  color: var(--text);
+  box-shadow: inset 3px 0 0 var(--anchor);
 }
 
 .toast {

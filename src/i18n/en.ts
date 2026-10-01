@@ -484,6 +484,7 @@ export const en = {
   'urgency.medium': 'Medium',
   'urgency.high': 'High',
   'urgency.critical': 'Critical',
+  'case.wasCritical': 'Was critical', // shown on a rescued / closed case that was reported critical
   'report.confirmLocation': 'Is the pin on the animal’s exact spot? You didn’t adjust it.',
   'report.confirmLocationYes': 'Yes, it’s correct',
   'report.confirmLocationNo': 'Let me fix it',

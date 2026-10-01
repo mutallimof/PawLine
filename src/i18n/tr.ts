@@ -486,6 +486,7 @@ export const tr: Dict = {
   'urgency.medium': 'Orta',
   'urgency.high': 'Yüksek',
   'urgency.critical': 'Kritik',
+  'case.wasCritical': 'Kritikti', // shown on a rescued / closed case that was reported critical
   'report.confirmLocation': 'Pin hayvanın tam yerinde mi? Onu ayarlamadınız.',
   'report.confirmLocationYes': 'Evet, doğru',
   'report.confirmLocationNo': 'Düzelteyim',

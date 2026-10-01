@@ -486,6 +486,7 @@ export const ru: Dict = {
   'urgency.medium': 'Средняя',
   'urgency.high': 'Высокая',
   'urgency.critical': 'Критическая',
+  'case.wasCritical': 'Был критическим', // shown on a rescued / closed case that was reported critical
   'report.confirmLocation': 'Метка точно на месте животного? Вы её не корректировали.',
   'report.confirmLocationYes': 'Да, верно',
   'report.confirmLocationNo': 'Дайте исправить',
