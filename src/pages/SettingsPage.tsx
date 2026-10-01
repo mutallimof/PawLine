@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GroupRow, ScreenHeader, useToast } from '../components/ui';
+import { supabase } from '../lib/supabase';
 import {
   deleteMyAccount,
   exportMyData,
@@ -311,6 +312,7 @@ function SettingsSection({ section, profile, userId }: { section: Section; profi
           </div>
         </div>
       )}
+      {section === 'personal' && <EmailSection />}
 
       {section === 'notifications' && (
         <>
@@ -406,5 +408,92 @@ function SettingsSection({ section, profile, userId }: { section: Section; profi
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Settings → Personal information → Email. Email/password accounts only:
+ * updateUser({ email }) starts Supabase's confirmation flow. With "Secure
+ * email change" on (Supabase's default) a link goes to BOTH the current and
+ * the new address, and the email changes only after both are opened; until
+ * then Supabase keeps the new address in user.new_email, which this shows
+ * as pending. The links return here (the origin must be in the project's
+ * allowed redirect URLs). Google-only accounts take their email from Google.
+ */
+function EmailSection() {
+  const { user } = useAuth();
+  const toast = useToast();
+  const [next, setNext] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+
+  const providers: string[] =
+    (user?.app_metadata?.providers as string[] | undefined) ??
+    (user?.app_metadata?.provider ? [user.app_metadata.provider as string] : []);
+  const current = user?.email ?? '';
+  const pending = sentTo ?? user?.new_email ?? null;
+
+  if (!providers.includes('email') || !current) {
+    return (
+      <div className="v2-group">
+        <div className="v2-group__body settings__help" style={{ margin: 0 }}>{t('emailChange.google')}</div>
+      </div>
+    );
+  }
+
+  const save = async () => {
+    const email = next.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast(t('emailChange.invalid'));
+    if (email === current.toLowerCase()) return toast(t('emailChange.same'));
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser(
+        { email },
+        { emailRedirectTo: `${window.location.origin}/settings/personal` }
+      );
+      if (error) {
+        toast(error.code === 'email_exists' ? t('emailChange.taken') : error.message);
+        return;
+      }
+      setSentTo(email);
+      setNext('');
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="v2-label">{t('auth.email')}</div>
+      <div className="v2-group">
+        <div className="v2-group__body settings__form">
+          <div className="v2-field">
+            <span className="v2-field__label">{t('emailChange.current')}</span>
+            <span className="settings__value">{current}</span>
+          </div>
+          {pending && (
+            <div className="banner banner--info" role="status">
+              {t('emailChange.pending', { old: current, next: pending })}
+            </div>
+          )}
+          <label className="v2-field">
+            <span className="v2-field__label">{t('emailChange.new')}</span>
+            <input
+              type="email"
+              value={next}
+              onChange={(e) => setNext(e.target.value)}
+              maxLength={254}
+              autoComplete="email"
+              inputMode="email"
+            />
+          </label>
+          <button type="button" className="btn btn--secondary" disabled={busy || !next.trim()} onClick={() => void save()}>
+            {busy ? t('common.loading') : t('emailChange.save')}
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
