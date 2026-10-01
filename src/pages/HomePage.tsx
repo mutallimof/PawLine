@@ -1,7 +1,8 @@
 /**
  * Home — the case board. Two views of the same live data:
- *  - Map: color-coded case pins + vet pins.
- *  - Feed: photo-forward cards, nearest info first if location is known.
+ *  - Feed (default): photo-forward cards.
+ *  - Map: case pins + vet pins — a toggle on phones, always beside the feed
+ *    on desktop.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -14,13 +15,25 @@ import { SponsorStrip } from '../components/extras';
 import { distanceKm, geoErrorKind, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import { PawTrailInk } from '../components/Ink';
-import { EmptyPaw, IconChevronRight, IconFilter, IconMap, IconStethoscope } from '../components/Icons';
+import { EmptyPaw, IconChevronRight, IconFilter, IconList, IconMap, IconStethoscope } from '../components/Icons';
 import { BrandMark } from '../components/Logo';
 
 type View = 'map' | 'feed';
-/** Figma v2 chips: Active (default) · Needs rescue · At the vet · All. */
-type Filter = 'active' | 'open' | 'resolved' | 'all';
-const FILTERS: Filter[] = ['active', 'open', 'resolved', 'all'];
+/** v3 tabs = the card-badge vocabulary: Ongoing (default: open + in
+ *  progress) · Rescued (resolved) · Unclaimed (closed without a rescue) · All. */
+type Filter = 'ongoing' | 'rescued' | 'unclaimed' | 'all';
+const FILTERS: Filter[] = ['ongoing', 'rescued', 'unclaimed', 'all'];
+const inTab = (f: Filter, status: CaseStatus): boolean =>
+  f === 'ongoing' ? isCaseLive(status)
+    : f === 'rescued' ? status === 'resolved'
+    : f === 'unclaimed' ? status === 'closed'
+    : true;
+const TAB_LABEL: Record<Filter, () => string> = {
+  ongoing: () => t('home.tab.ongoing'),
+  rescued: () => t('home.tab.rescued'),
+  unclaimed: () => t('home.tab.unclaimed'),
+  all: () => t('home.filter.all'),
+};
 
 const ANIMAL_TYPES: AnimalType[] = ['dog', 'cat', 'other'];
 const STATUS_TYPES: CaseStatus[] = [
@@ -31,9 +44,9 @@ const RADIUS_OPTIONS = [5, 15, 30, 50] as const;
 export default function HomePage() {
   const { cases, loading, error, reload } = useCases();
   const [vets, setVets] = useState<Vet[]>([]);
-  // Figma's home is the card list; the map is one tap away (search row).
+  // The feed is the default view; the map is one tap away (List | Map).
   const [view, setView] = useState<View>('feed');
-  const [filter, setFilter] = useState<Filter>('active');
+  const [filter, setFilter] = useState<Filter>('ongoing');
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [searchFocus, setSearchFocus] = useState<LatLng | null>(null);
   const toast = useToast();
@@ -58,15 +71,10 @@ export default function HomePage() {
     getCurrentPosition().then(setUserLocation).catch(() => {});
   }, []);
 
-  const filtered = useMemo(() => {
+  // Group G filters (radius / animal / finer status) apply under every tab,
+  // so the tab counts below match what each tab will actually show.
+  const refined = useMemo(() => {
     let list = cases;
-    // "Active" = live only (Needs rescue + In progress); "At the vet" =
-    // resolved only. Closed cases show under "All" (and in history).
-    if (filter === 'active') list = cases.filter((c) => isCaseLive(c.status));
-    else if (filter === 'open') list = cases.filter((c) => c.status === 'open');
-    else if (filter === 'resolved') list = cases.filter((c) => c.status === 'resolved');
-
-    // Group G: radius / animal type / (finer) status, on top of the tab above.
     if (radiusKm && userLocation) {
       list = list.filter((c) => distanceKm(userLocation, { lat: c.lat, lng: c.lng }) <= radiusKm);
     }
@@ -76,7 +84,21 @@ export default function HomePage() {
     if (statusFilter.length > 0) {
       list = list.filter((c) => statusFilter.includes(c.status));
     }
+    return list;
+  }, [cases, radiusKm, userLocation, animalFilter, statusFilter]);
 
+  const tabCounts = useMemo(() => {
+    const n: Record<Filter, number> = { ongoing: 0, rescued: 0, unclaimed: 0, all: refined.length };
+    for (const c of refined) {
+      if (inTab('ongoing', c.status)) n.ongoing += 1;
+      else if (c.status === 'resolved') n.rescued += 1;
+      else if (c.status === 'closed') n.unclaimed += 1;
+    }
+    return n;
+  }, [refined]);
+
+  const filtered = useMemo(() => {
+    const list = refined.filter((c) => inTab(filter, c.status));
     // Escalated-and-still-open cases have waited longest — they lead the feed.
     return [...list].sort((a, b) => {
       const ae = a.status === 'open' && a.escalated_at ? 1 : 0;
@@ -84,7 +106,7 @@ export default function HomePage() {
       if (ae !== be) return be - ae;
       return b.created_at.localeCompare(a.created_at);
     });
-  }, [cases, filter, radiusKm, userLocation, animalFilter, statusFilter]);
+  }, [refined, filter]);
 
   // "N vet clinics nearby" banner: within 25km if we know where the user is
   // (matches the Filters panel's own distance semantics), otherwise every
@@ -104,37 +126,8 @@ export default function HomePage() {
           </Link>
           <AlertsBell />
         </div>
+        <h1 className="home-title">{t('home.nearbyCases')}</h1>
         <p className="home-sub">{t('app.tagline')}</p>
-
-        <div className="v2-chips home-chips" role="group" aria-label={t('home.filterStatus')}>
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              className={`v2-chip${filter === f ? ' active' : ''}`}
-              aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
-            >
-              {f === 'active' ? t('home.filter.active')
-                : f === 'open' ? t('status.open')
-                : f === 'resolved' ? t('status.resolved')
-                : t('home.filter.all')}
-            </button>
-          ))}
-        </div>
-
-        {nearbyVetCount > 0 && (
-          <Link to="/vets" className="home-vet-banner">
-            <span className="home-vet-banner__icon" aria-hidden="true">
-              <IconStethoscope size={19} />
-            </span>
-            <span className="home-vet-banner__text">
-              <span className="home-vet-banner__title">{t('home.vetsNearby', { n: nearbyVetCount })}</span>
-              <span className="home-vet-banner__sub">{t('home.vetsNearbyHint')}</span>
-            </span>
-            <span className="home-vet-banner__chevron" aria-hidden="true"><IconChevronRight /></span>
-          </Link>
-        )}
 
         <div className="home-tools">
           <div className="home-tools__search">
@@ -148,16 +141,24 @@ export default function HomePage() {
               bias={userLocation}
             />
           </div>
-          {/* Map/feed toggle only exists on phones — desktop shows both. */}
-          <button
-            type="button"
-            className="home-tools__btn home-view-toggle"
-            aria-pressed={view === 'map'}
-            aria-label={t('home.map')}
-            onClick={() => setView((v) => (v === 'map' ? 'feed' : 'map'))}
-          >
-            <IconMap />
-          </button>
+        </div>
+
+        <div className="v2-chips home-tabs" role="group" aria-label={t('home.filterStatus')}>
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              className={`v2-chip home-tab${filter === f ? ' active' : ''}`}
+              aria-pressed={filter === f}
+              onClick={() => setFilter(f)}
+            >
+              {TAB_LABEL[f]()}
+              <span className="home-tab__count">{tabCounts[f]}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="home-controls">
           {/* Group G: radius / animal type / status, behind one button. */}
           <button
             type="button"
@@ -168,6 +169,15 @@ export default function HomePage() {
             <IconFilter />
             {t('home.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
           </button>
+          {/* List | Map only exists on phones — desktop shows both. */}
+          <div className="home-view" role="group" aria-label={t('home.view')}>
+            <button type="button" aria-pressed={view === 'feed'} onClick={() => setView('feed')}>
+              <IconList size={16} /> {t('home.feed')}
+            </button>
+            <button type="button" aria-pressed={view === 'map'} onClick={() => setView('map')}>
+              <IconMap size={16} /> {t('home.map')}
+            </button>
+          </div>
         </div>
 
         {showFilters && (
@@ -245,13 +255,25 @@ export default function HomePage() {
             </div>
           </div>
         )}
+
+        {nearbyVetCount > 0 && (
+          <Link to="/vets" className="home-vet-banner">
+            <span className="home-vet-banner__icon" aria-hidden="true">
+              <IconStethoscope size={19} />
+            </span>
+            <span className="home-vet-banner__text">
+              <span className="home-vet-banner__title">{t('home.vetsNearby', { n: nearbyVetCount })}</span>
+              <span className="home-vet-banner__sub">{t('home.vetsNearbyHint')}</span>
+            </span>
+            <span className="home-vet-banner__chevron" aria-hidden="true"><IconChevronRight /></span>
+          </Link>
+        )}
       </div>
 
       {/* Both views always render; .home-layout--map/--feed shows one on
           phones, the desktop split view shows both side by side. */}
       <div className={`home-layout home-layout--${view}`}>
         <div className="home-feed">
-          <h2 className="home-h1">{t('home.nearbyCases')}</h2>
           {loading && (
             <div aria-hidden="true">
               <div style={{ padding: '18px 0 22px' }}>

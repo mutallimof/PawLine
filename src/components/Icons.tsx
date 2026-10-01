@@ -38,6 +38,13 @@ export const IconMap = ({ size }: IconProps) => (
   </svg>
 );
 
+export const IconList = ({ size }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M9 6h12M9 12h12M9 18h12" />
+    <path d="M4 6h.01M4 12h.01M4 18h.01" />
+  </svg>
+);
+
 export const IconPlus = ({ size }: IconProps) => (
   <svg {...base(size)} strokeWidth={2.5}>
     <path d="M12 5v14M5 12h14" />

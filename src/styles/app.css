@@ -448,8 +448,10 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   .side-nav__foot { font-size: var(--fs-label); opacity: 1; }
 }
 
-/* ==== Home (Figma "Home Screen V2" 95:2) ================================== */
-.home-header { padding: 30px var(--gutter) 8px; }
+/* ==== Home ================================================================== */
+/* Header: logo row · display title · search · tabs · filters + List|Map ·
+   vet banner. Feed is the default view; on desktop feed | sticky map. */
+.home-header { padding: 18px var(--gutter) 4px; }
 .home-top {
   display: flex;
   align-items: center;
@@ -464,132 +466,167 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   text-decoration: none;
 }
 .home-brand__tile {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   display: flex;
 }
 .home-brand__tile svg { width: 100%; height: 100%; }
 .home-brand__name {
-  font-family: var(--font-body);
-  font-size: 21px;
-  font-weight: 500;
+  font-family: var(--font-head);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.home-title {
+  margin: 18px 0 2px;
+  font-family: var(--font-head);
+  font-size: var(--fs-display);
+  font-weight: 800;
+  line-height: 38px;
   letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
 }
 .home-sub {
-  margin: 10px 0 10px;
-  font-size: 13.6px;
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 22px;
   color: var(--text-2);
 }
-.home-chips { padding-top: 8px; padding-bottom: 2px; margin-bottom: 10px; }
 
-.home-vet-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 14px 12px;
-  margin: 0 0 10px;
-  border-radius: 16px;
-  background: var(--lav-tint);
-  border: none;
-  box-shadow: none;
-  color: var(--text);
-  text-decoration: none;
-}
-.home-vet-banner__icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  background: var(--lav);
-  color: var(--on-anchor);
-}
-.home-vet-banner__title { font-size: 13.5px; font-weight: 500; color: var(--text); }
-.home-vet-banner__sub { font-size: 11.4px; color: var(--text-2); }
-.home-vet-banner__chevron { color: var(--lav); display: flex; }
-.home-vet-banner__chevron svg { width: 16px; height: 16px; }
-
-.home-tools {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-}
+/* Search */
+.home-tools { display: flex; margin-bottom: 14px; }
 .home-tools__search { flex: 1; min-width: 0; }
 .home-tools__search:empty { display: none; }
 .home-tools .loc-search { margin: 0; }
 .home-tools .loc-search input {
-  height: 36px;
-  padding: 0 14px 0 38px;
+  height: 48px;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 0 16px 0 44px;
   border: none;
-  border-radius: 11px;
-  background: var(--surface-2) no-repeat 14px 50% / 16px
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23241F1A' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
-  font-size: 13px;
-  box-shadow: none;
+  border-radius: var(--r-input);
+  background: var(--surface) no-repeat 16px 50% / 18px
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235E4D6E' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 15px;
+  color: var(--text);
+}
+.home-tools .loc-search input:focus { box-shadow: inset 0 0 0 1.5px var(--anchor), var(--shadow-focus); }
+
+/* Tabs: Ongoing · Rescued · Unclaimed · All, each with its count. */
+.home-tabs { padding-block: 2px; margin-bottom: 12px; }
+.home-tab { display: inline-flex; align-items: center; gap: 7px; }
+.home-tab__count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.home-tab.active .home-tab__count { background: var(--surface); }
+
+/* Filters button + List | Map */
+.home-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 .home-tools__btn {
-  height: 36px;
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   padding: 0 14px;
   border: none;
-  border-radius: 11px;
-  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
 }
-.home-tools__btn svg { width: 19px; height: 19px; }
-.home-tools__filter { margin-left: auto; }
-.home-tools__btn.active,
-.home-tools__btn[aria-pressed='true'] {
-  background: var(--st-done-bg);
-  color: var(--text);
+.home-tools__btn svg { width: 18px; height: 18px; }
+.home-tools__btn.active { background: var(--lav-tint); box-shadow: none; }
+.home-view {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--hair);
 }
-.home-filters { margin: 10px 0 0; }
+.home-view button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.home-view button[aria-pressed='true'] { background: var(--anchor); color: var(--on-anchor); }
+
+.home-filters { margin: 12px 0 0; }
 .home-filters .v2-label:first-child { margin-top: 0; }
-.home-filters__note { margin: 8px 0 0; font-size: 12px; color: var(--text-2); }
+.home-filters__note { margin: 8px 0 0; font-size: var(--fs-label); color: var(--text-2); }
 .v2-chips--wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
-.v2-chip--light { background: var(--surface); padding: 8px 14px 9px; }
-.v2-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.v2-chip--light { background: var(--surface); }
 
-.home-h1 {
-  margin: 14px 0 12px;
-  font-family: var(--font-body);
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+/* "N vet clinics nearby" — a sky-tinted highlight, not a button. */
+.home-vet-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-radius: var(--r-card);
+  background: var(--sky);
   color: var(--text);
+  text-decoration: none;
 }
-.home-feed { padding: 0 var(--gutter); }
-.home-map { padding: 0 var(--gutter); }
+.home-vet-banner__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.home-vet-banner__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.home-vet-banner__title { font-size: 15px; font-weight: 650; line-height: 20px; }
+.home-vet-banner__sub { font-size: var(--fs-label); line-height: 18px; color: var(--text); }
+.home-vet-banner__chevron { color: var(--text); display: flex; flex-shrink: 0; }
+.home-vet-banner__chevron svg { width: 18px; height: 18px; }
+
+.home-feed { padding: 16px var(--gutter) 0; }
+.home-map { padding: 16px var(--gutter) 0; }
 
 @media (min-width: 1024px) {
-  .home-header { padding: 22px 28px 8px; }
-  .home-feed { padding: 0 20px 24px 28px; }
-  .home-map { padding: 14px 28px 24px 8px; }
+  .home-header { padding: 26px 28px 8px; }
+  /* The sidebar already carries the logo and Alerts. */
+  .home-top { display: none; }
+  .home-title { margin-top: 4px; }
+  .home-view { display: none; }   /* both panes are visible — nothing to toggle */
+  .home-feed { padding: 16px 20px 32px 28px; }
+  .home-map { padding: 16px 28px 24px 8px; }
 }
-/* Figma puts the map icon inside the search field. When the search is
-   present (Maps key configured) the phone-only map toggle overlaps its right
-   end; without it the toggle stands alone. */
-.home-tools__search:not(:empty) + .home-view-toggle {
-  margin-left: -56px;
-  background: transparent;
-  padding: 0 12px;
-}
-.home-tools__search:not(:empty) + .home-view-toggle[aria-pressed='true'] { color: var(--text); }
-.home-tools .loc-search input { padding-right: 44px; }
-@media (min-width: 1024px) {
-  .home-tools .home-view-toggle { display: none; }
-  .home-tools .loc-search input { padding-right: 14px; }
-}
-.home-tools__search:not(:empty) + .home-view-toggle { position: relative; z-index: 2; }
-.home-tools .loc-search input { min-height: 36px; box-sizing: border-box; }
-.home-tools__btn { min-height: 36px; box-sizing: border-box; }
 
 /* ==== Case Detail (Figma 42:422) ========================================== */
 .case-detail { padding-top: 22px; }

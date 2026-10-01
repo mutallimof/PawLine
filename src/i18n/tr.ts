@@ -32,6 +32,11 @@ export const tr: Dict = {
   'home.feed': 'Akış',
   'home.filter.all': 'Tümü',
   'home.filter.active': 'Aktif',
+  // v3 Home tabs: Ongoing = open + in progress, Rescued = resolved, Unclaimed = closed without a rescue.
+  'home.tab.ongoing': 'Süren',
+  'home.tab.rescued': 'Kurtarılan',
+  'home.tab.unclaimed': 'Üstlenilmeyen',
+  'home.view': 'Görünüm',
   'home.filter.resolved': 'Bitti',
   'home.empty': 'Burada henüz vaka yok. Umarız öyle kalır — ama zor durumda bir hayvan görürseniz bildirin.',
   'home.distanceAway': '{km} km uzakta',

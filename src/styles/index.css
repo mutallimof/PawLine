@@ -1305,27 +1305,20 @@ select {
   .home-header {
     max-width: none;
   }
-  .home-header .segmented {
-    max-width: 420px;
-  }
-  .home-view-toggle {
-    display: none; /* both panes are visible — nothing to toggle */
-  }
   .home-layout {
     display: grid;
-    grid-template-columns: minmax(360px, 440px) 1fr;
+    grid-template-columns: minmax(380px, 460px) 1fr;
     gap: 0;
-    height: calc(100dvh - 138px);
+    align-items: start;
   }
   .home-layout--map .home-feed,
   .home-layout--feed .home-map {
     display: block; /* undo the phone-only hiding */
   }
-  .home-feed {
-    overflow-y: auto;
-  }
   .home-map {
-    position: relative;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -2412,62 +2405,6 @@ h1, h2 {
 }
 .auth-card__guest {
   text-decoration: underline; /* matches the design's "Continue as guest" */
-}
-
-/* ============================================================================
-   19. HOME SCREEN — docs/DESIGN_TOKENS.md tokens (design/home)
-   ----------------------------------------------------------------------------
-   Scoped to .home-feed / .home-vet-banner so CaseCard's other callers
-   (ProfilePage, the vet dashboard) and .case-card--compact itself elsewhere
-   are untouched. Status-tinted card backgrounds and the status-badge pill's
-   own colors are existing behavior and are NOT changed here — only the
-   photo size/inset, card height, and description length come from the
-   design; layout/spacing only, per instruction.
-   ============================================================================ */
-.home-feed .case-card--compact {
-  align-items: center;
-  padding: var(--space-xs);
-  min-height: 160px;
-}
-.home-feed .case-card--compact .case-card__photo {
-  width: 140px;
-  min-width: 140px;
-  height: 140px;
-  border-radius: var(--r-input);
-  align-self: center;
-}
-.home-feed .case-card--compact .case-card__body {
-  padding: 0 0 0 var(--space-sm);
-  gap: var(--space-2xs);
-}
-.home-feed .case-card--compact .case-card__desc {
-  -webkit-line-clamp: 2;
-}
-.home-feed .case-card--compact .case-card__meta {
-  font-size: var(--fs-label);
-}
-
-/* "3 vet clinics nearby" banner */
-.home-vet-banner {
-  margin-top: var(--space-sm);
-}
-.home-vet-banner__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.home-vet-banner__text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.home-vet-banner__chevron {
-  font-size: var(--fs-body);
-  flex-shrink: 0;
 }
 
 /* ============================================================================

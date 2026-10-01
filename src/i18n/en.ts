@@ -30,6 +30,11 @@ export const en = {
   'home.feed': 'Feed',
   'home.filter.all': 'All',
   'home.filter.active': 'Active',
+  // v3 Home tabs: Ongoing = open + in progress, Rescued = resolved, Unclaimed = closed without a rescue.
+  'home.tab.ongoing': 'Ongoing',
+  'home.tab.rescued': 'Rescued',
+  'home.tab.unclaimed': 'Unclaimed',
+  'home.view': 'View',
   'home.filter.resolved': 'Done',
   'home.empty': 'No cases here yet. Hopefully it stays that way — but if you spot an animal in trouble, report it.',
   'home.distanceAway': '{km} km away',

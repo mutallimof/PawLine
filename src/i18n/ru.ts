@@ -32,6 +32,11 @@ export const ru: Dict = {
   'home.feed': 'Лента',
   'home.filter.all': 'Все',
   'home.filter.active': 'Активные',
+  // v3 Home tabs: Ongoing = open + in progress, Rescued = resolved, Unclaimed = closed without a rescue.
+  'home.tab.ongoing': 'Текущие',
+  'home.tab.rescued': 'Спасённые',
+  'home.tab.unclaimed': 'Невзятые',
+  'home.view': 'Вид',
   'home.filter.resolved': 'Решено',
   'home.empty': 'Здесь пока нет случаев. Надеемся, так и останется — но если увидите животное в беде, сообщите об этом.',
   'home.distanceAway': 'в {km} км',
