@@ -1120,12 +1120,13 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .alert-row--unread { background: color-mix(in srgb, var(--lav-tint) 35%, var(--surface)); }
 
 /* ==== Vets: list, picker, clinic page ===================================== */
-.v2-sub { margin: -4px 0 14px; font-size: 13.6px; color: var(--text-2); }
-.vet-card { min-height: 0; padding: 14px; gap: 14px; }
+.v2-sub { margin: -4px 0 14px; font-size: var(--fs-small); line-height: 20px; color: var(--text-2); }
+/* A clinic card is a row (tile · details), unlike the photo-on-top case card. */
+.vet-card { flex-direction: row; align-items: flex-start; min-height: 0; padding: 16px; gap: 14px; }
 .vet-card__tile {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-sm);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1139,13 +1140,14 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .vet-card__badge { align-self: flex-start; }
 .vet-card__rating span:first-child { color: var(--text); }
 .vet-card__action { display: flex; justify-content: flex-end; margin-top: 4px; }
-.vet-card--muted { opacity: 0.62; }
+/* Closed now: a quieter card, text kept at full contrast (no opacity). */
+.vet-card--muted { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--hair); }
 
 .vet-page__hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; margin: 4px 0 18px; }
 .vet-page__tile {
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1153,21 +1155,21 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   color: var(--text);
   margin-bottom: 6px;
 }
-.vet-page__name { margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
-.vet-page__addr { margin: 0 0 4px; font-size: 13.6px; color: var(--text-2); }
+.vet-page__name { margin: 0; font-family: var(--font-head); font-size: var(--fs-h1); font-weight: 750; line-height: 32px; letter-spacing: -0.015em; text-wrap: balance; }
+.vet-page__addr { margin: 0 0 4px; font-size: var(--fs-small); color: var(--text-2); }
 .vet-page__kv dd a { color: var(--text); text-decoration: none; }
 .vet-page .vet-hours {
   margin: 12px 0 0;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--surface-2);
+  padding: 16px;
+  border-radius: var(--r-card);
+  background: var(--surface);
   text-align: left;
 }
 .vet-page__actions { display: grid; gap: 10px; margin-top: 20px; }
-.vet-page .vet-hours { width: 100%; max-width: none; box-sizing: border-box; border: none; box-shadow: none; }
-.vet-page .vet-hours__label { font-size: 10.5px; font-weight: 500; letter-spacing: 0.05em; color: var(--text-2); }
+.vet-page .vet-hours { width: 100%; max-width: none; box-sizing: border-box; border: none; box-shadow: inset 0 0 0 1px var(--hair); }
+.vet-page .vet-hours__label { font-size: var(--fs-label); font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text-2); }
 .vet-page .vet-hours__value { justify-content: flex-start; text-align: left; }
-.vet-page .vet-hours__range { font-size: 18px; font-weight: 500; }
+.vet-page .vet-hours__range { font-family: var(--font-head); font-size: var(--fs-h3); font-weight: 700; }
 
 /* ==== Report (derived: Sign-in inputs, Case Detail photo + map, tag chips) = */
 .report .field__label {

@@ -48,6 +48,8 @@ export const ru: Dict = {
   'home.filterStatus': 'Статус',
   'home.filterClear': 'Сбросить фильтры',
   'home.vetsNearby': 'Рядом {n} ветклиник',
+  'home.vetsNearbyOne': 'Рядом {n} ветклиника',  // plural forms picked by Intl.PluralRules
+  'home.vetsNearbyFew': 'Рядом {n} ветклиники',
   'home.vetsNearbyHint': 'Нажмите, чтобы увидеть маршрут и часы работы',
 
   // Report flow

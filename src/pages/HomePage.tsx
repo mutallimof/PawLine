@@ -13,7 +13,7 @@ import { CasesMap, LocationSearch } from '../components/maps';
 import { AlertsBell, CaseCard, useToast } from '../components/ui';
 import { SponsorStrip } from '../components/extras';
 import { distanceKm, geoErrorKind, getCurrentPosition, type LatLng } from '../lib/geo';
-import { t } from '../i18n';
+import { getLocale, t } from '../i18n';
 import { PawTrailInk } from '../components/Ink';
 import { EmptyPaw, IconChevronRight, IconFilter, IconList, IconMap, IconStethoscope } from '../components/Icons';
 import { BrandMark } from '../components/Logo';
@@ -40,6 +40,14 @@ const STATUS_TYPES: CaseStatus[] = [
   'open', 'accepted', 'vet_selected', 'vet_confirmed', 'en_route', 'resolved',
 ];
 const RADIUS_OPTIONS = [5, 15, 30, 50] as const;
+
+/** "1 vet clinic" / "2 vet clinics" — and Russian's one / few / many. */
+function vetsNearbyKey(n: number) {
+  const form = new Intl.PluralRules(getLocale()).select(n);
+  return form === 'one' ? 'home.vetsNearbyOne' as const
+    : form === 'few' ? 'home.vetsNearbyFew' as const
+    : 'home.vetsNearby' as const;
+}
 
 export default function HomePage() {
   const { cases, loading, error, reload } = useCases();
@@ -295,7 +303,7 @@ export default function HomePage() {
               <IconStethoscope size={19} />
             </span>
             <span className="home-vet-banner__text">
-              <span className="home-vet-banner__title">{t('home.vetsNearby', { n: nearbyVetCount })}</span>
+              <span className="home-vet-banner__title">{t(vetsNearbyKey(nearbyVetCount), { n: nearbyVetCount })}</span>
               <span className="home-vet-banner__sub">{t('home.vetsNearbyHint')}</span>
             </span>
             <span className="home-vet-banner__chevron" aria-hidden="true"><IconChevronRight /></span>

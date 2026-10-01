@@ -48,6 +48,8 @@ export const tr: Dict = {
   'home.filterStatus': 'Durum',
   'home.filterClear': 'Filtreleri temizle',
   'home.vetsNearby': 'Yakında {n} veteriner kliniği',
+  'home.vetsNearbyOne': 'Yakında {n} veteriner kliniği',  // plural forms picked by Intl.PluralRules
+  'home.vetsNearbyFew': 'Yakında {n} veteriner kliniği',
   'home.vetsNearbyHint': 'Yol tarifi ve çalışma saatleri için dokunun',
 
   // Report flow

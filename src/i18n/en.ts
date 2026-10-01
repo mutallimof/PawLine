@@ -46,6 +46,8 @@ export const en = {
   'home.filterStatus': 'Status',
   'home.filterClear': 'Clear filters',
   'home.vetsNearby': '{n} vet clinics nearby',
+  'home.vetsNearbyOne': '{n} vet clinic nearby',  // plural forms picked by Intl.PluralRules
+  'home.vetsNearbyFew': '{n} vet clinics nearby',
   'home.vetsNearbyHint': 'Tap to see directions & hours',
 
   // Report flow
