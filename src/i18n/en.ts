@@ -35,6 +35,8 @@ export const en = {
   'home.tab.rescued': 'Rescued',
   'home.tab.unclaimed': 'Unclaimed',
   'home.view': 'View',
+  'home.sortedNear': 'Sorted near: {place}',
+  'home.sortedNearClear': 'Clear the place sort',
   'home.filter.resolved': 'Done',
   'home.empty': 'No cases here yet. Hopefully it stays that way — but if you spot an animal in trouble, report it.',
   'home.distanceAway': '{km} km away',

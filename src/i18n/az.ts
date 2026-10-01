@@ -37,6 +37,8 @@ export const az: Dict = {
   'home.tab.rescued': 'Xilas edildi',
   'home.tab.unclaimed': 'Götürülmədi',
   'home.view': 'Görünüş',
+  'home.sortedNear': 'Yaxınlığa görə: {place}',
+  'home.sortedNearClear': 'Yer sıralamasını sıfırla',
   'home.filter.resolved': 'Bitib',
   'home.empty': 'Burada hələ hadisə yoxdur. Ümid edək ki, belə də qalacaq — amma çətinlikdə olan heyvan görsəniz, bildirin.',
   'home.distanceAway': '{km} km uzaqda',
