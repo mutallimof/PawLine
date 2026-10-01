@@ -1313,29 +1313,19 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .fullscreen-msg p { font-size: 15px; line-height: 22px; color: var(--text-2); }
 .fullscreen-msg .btn { min-width: 220px; }
 
-/* ==== Admin — tokens only (colours, type, radii); layout unchanged ======== */
-.admin .chip-row .chip {
-  border: none;
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--text-2);
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: none;
-}
-.admin .chip-row .chip.active { background: var(--anchor); color: var(--on-anchor); }
+/* ==== Admin — colours, type, radii only; layout unchanged ================ */
+/* Filter chips are the shared v3 chips (outline off, lavender on). */
 .admin .card,
 .admin .impact-stat {
-  background: var(--surface-2);
+  background: var(--surface);
   border: none;
-  border-radius: 16px;
-  box-shadow: none;
+  border-radius: var(--r-card);
+  box-shadow: inset 0 0 0 1px var(--hair);
   transform: none;
 }
-.admin .impact-stat__value { color: var(--text); font-weight: 500; }
+.admin .impact-stat__value { color: var(--text); font-family: var(--font-head); font-weight: 750; }
 .admin .impact-stat__label { color: var(--text-2); }
-.admin .list-row { background: var(--surface-2); border-radius: 16px; box-shadow: none; }
-.admin .section-label { color: var(--text-2); }
+.admin .list-row { background: var(--surface); border-radius: var(--r-btn); box-shadow: inset 0 0 0 1px var(--hair); }
 
 /* ==== Consent (034) ======================================================== */
 .consent-checks { display: grid; gap: 10px; margin: 14px 0 16px; text-align: left; }
