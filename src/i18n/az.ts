@@ -33,9 +33,9 @@ export const az: Dict = {
   'home.filter.all': 'Hamısı',
   'home.filter.active': 'Aktiv',
   // v3 Home tabs: Ongoing = open + in progress, Rescued = resolved, Unclaimed = closed without a rescue.
-  'home.tab.ongoing': 'Davam edən',
-  'home.tab.rescued': 'Xilas edilən',
-  'home.tab.unclaimed': 'Götürülməyən',
+  'home.tab.ongoing': 'Davam edir',
+  'home.tab.rescued': 'Xilas edildi',
+  'home.tab.unclaimed': 'Götürülmədi',
   'home.view': 'Görünüş',
   'home.filter.resolved': 'Bitib',
   'home.empty': 'Burada hələ hadisə yoxdur. Ümid edək ki, belə də qalacaq — amma çətinlikdə olan heyvan görsəniz, bildirin.',

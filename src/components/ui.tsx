@@ -1,7 +1,7 @@
 /** Shared UI building blocks. */
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { type CaseStatus, type CaseWithDetails, type UrgencyLevel, type Vet } from '../lib/types';
+import { isCaseLive, type CaseStatus, type CaseWithDetails, type UrgencyLevel, type Vet } from '../lib/types';
 import {
   getLocale,
   LOCALE_NAMES,
@@ -232,7 +232,10 @@ export function CaseCard({
     : null;
   const place = [caseData.address_hint, distance].filter(Boolean).join(' · ');
   const escalated = caseData.status === 'open' && !!caseData.escalated_at;
-  const critical = caseData.urgency === 'critical';
+  // Critical / High are about a case that still needs help: once it is
+  // rescued or closed unclaimed, no red outline or chip on the card.
+  const live = isCaseLive(caseData.status);
+  const critical = live && caseData.urgency === 'critical';
 
   return (
     <Link to={`/case/${caseData.id}`} className={`v2-card${critical ? ' v2-card--critical' : ''}`}>
@@ -252,7 +255,7 @@ export function CaseCard({
         <div className="v2-card__badges">
           {critical && <CriticalBadge />}
           <StatusGroupBadge status={caseData.status} />
-          {caseData.urgency === 'high' && (
+          {live && caseData.urgency === 'high' && (
             <span className="v2-badge v2-badge--urgency-high">{urgencyLabel('high')}</span>
           )}
         </div>

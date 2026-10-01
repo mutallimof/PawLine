@@ -4,7 +4,7 @@
  *  - Map: case pins + vet pins — a toggle on phones, always beside the feed
  *    on desktop.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCases } from '../hooks/useRealtime';
 import { fetchVets } from '../lib/api';
@@ -50,6 +50,22 @@ export default function HomePage() {
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [searchFocus, setSearchFocus] = useState<LatLng | null>(null);
   const toast = useToast();
+
+  // The tab row fades its right edge only when it really scrolls (long
+  // labels on narrow phones); when the tabs fit, no fade.
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [tabsOverflow, setTabsOverflow] = useState(false);
+  useLayoutEffect(() => {
+    const el = tabsRef.current;
+    if (el) setTabsOverflow(el.scrollWidth > el.clientWidth + 1);
+  });
+  useEffect(() => {
+    const el = tabsRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => setTabsOverflow(el.scrollWidth > el.clientWidth + 1));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Group G: additional feed filters, layered on top of the all/active/
   // resolved tabs above — e.g. "active" already means "not resolved", but a
@@ -143,14 +159,31 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="v2-chips home-tabs" role="group" aria-label={t('home.filterStatus')}>
+        <div
+          ref={tabsRef}
+          className={`v2-chips home-tabs${tabsOverflow ? ' home-tabs--scroll' : ''}`}
+          role="group"
+          aria-label={t('home.filterStatus')}
+        >
           {FILTERS.map((f) => (
             <button
               key={f}
               type="button"
               className={`v2-chip home-tab${filter === f ? ' active' : ''}`}
               aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
+              onClick={(e) => {
+                setFilter(f);
+                // A tab half under the scroll fade comes fully into view,
+                // clear of the 28px fade on the right edge.
+                const btn = e.currentTarget;
+                const row = btn.parentElement;
+                if (row) {
+                  const right = btn.offsetLeft + btn.offsetWidth + 32 - row.clientWidth;
+                  const left = btn.offsetLeft - 20;
+                  if (row.scrollLeft < right) row.scrollTo({ left: right });
+                  else if (row.scrollLeft > left) row.scrollTo({ left: Math.max(0, left) });
+                }
+              }}
             >
               {TAB_LABEL[f]()}
               <span className="home-tab__count">{tabCounts[f]}</span>

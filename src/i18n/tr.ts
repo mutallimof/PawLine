@@ -34,8 +34,8 @@ export const tr: Dict = {
   'home.filter.active': 'Aktif',
   // v3 Home tabs: Ongoing = open + in progress, Rescued = resolved, Unclaimed = closed without a rescue.
   'home.tab.ongoing': 'Süren',
-  'home.tab.rescued': 'Kurtarılan',
-  'home.tab.unclaimed': 'Üstlenilmeyen',
+  'home.tab.rescued': 'Kurtarıldı',
+  'home.tab.unclaimed': 'Üstlenilmedi',
   'home.view': 'Görünüm',
   'home.filter.resolved': 'Bitti',
   'home.empty': 'Burada henüz vaka yok. Umarız öyle kalır — ama zor durumda bir hayvan görürseniz bildirin.',

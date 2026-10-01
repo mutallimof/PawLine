@@ -451,7 +451,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 /* ==== Home ================================================================== */
 /* Header: logo row · display title · search · tabs · filters + List|Map ·
    vet banner. Feed is the default view; on desktop feed | sticky map. */
-.home-header { padding: 18px var(--gutter) 4px; }
+.home-header { padding: 12px var(--gutter) 0; }
 .home-top {
   display: flex;
   align-items: center;
@@ -477,17 +477,20 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   font-weight: 800;
   letter-spacing: -0.015em;
 }
+/* Phones: a compact title so the first card starts in the first screen;
+   the full display size and the tagline return on desktop. */
 .home-title {
-  margin: 18px 0 2px;
+  margin: 12px 0 12px;
   font-family: var(--font-head);
-  font-size: var(--fs-display);
+  font-size: 24px;
   font-weight: 800;
-  line-height: 38px;
+  line-height: 30px;
   letter-spacing: -0.02em;
   color: var(--text);
   text-wrap: balance;
 }
 .home-sub {
+  display: none;
   margin: 0 0 16px;
   font-size: 15px;
   line-height: 22px;
@@ -495,13 +498,13 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 }
 
 /* Search */
-.home-tools { display: flex; margin-bottom: 14px; }
+.home-tools { display: flex; margin-bottom: 10px; }
 .home-tools__search { flex: 1; min-width: 0; }
 .home-tools__search:empty { display: none; }
 .home-tools .loc-search { margin: 0; }
 .home-tools .loc-search input {
-  height: 48px;
-  min-height: 48px;
+  height: 44px;
+  min-height: 44px;
   box-sizing: border-box;
   padding: 0 16px 0 44px;
   border: none;
@@ -515,7 +518,15 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .home-tools .loc-search input:focus { box-shadow: inset 0 0 0 1.5px var(--anchor), var(--shadow-focus); }
 
 /* Tabs: Ongoing · Rescued · Unclaimed · All, each with its count. */
-.home-tabs { padding-block: 2px; margin-bottom: 12px; }
+.home-tabs { padding-block: 2px; margin-bottom: 10px; }
+/* Only when the row is wider than the screen (set by HomePage): the right
+   edge fades so the scroll reads, and the end padding lets the last tab
+   clear the fade once scrolled. */
+.home-tabs--scroll {
+  padding-inline-end: 32px;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
 .home-tab { display: inline-flex; align-items: center; gap: 7px; }
 .home-tab__count {
   min-width: 22px;
@@ -530,6 +541,13 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   font-variant-numeric: tabular-nums;
 }
 .home-tab.active .home-tab__count { background: var(--surface); }
+/* Phones: no counts and slightly tighter chips, so EN/TR fit at 390px;
+   longer labels (AZ) scroll under the edge fade. */
+@media (max-width: 599px) {
+  .home-tabs { gap: 4px; }
+  .home-tab { padding-inline: 9px; }
+  .home-tab__count { display: none; }
+}
 
 /* Filters button + List | Map */
 .home-controls {
@@ -591,8 +609,8 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 14px 0 0;
-  padding: 14px 16px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
   border-radius: var(--r-card);
   background: var(--sky);
   color: var(--text);
@@ -615,14 +633,18 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .home-vet-banner__chevron { color: var(--text); display: flex; flex-shrink: 0; }
 .home-vet-banner__chevron svg { width: 18px; height: 18px; }
 
-.home-feed { padding: 16px var(--gutter) 0; }
+/* Clear the floating nav: bar 68 + its 12 offset + safe area + air. */
+.home-feed { padding: 14px var(--gutter) calc(68px + 12px + var(--safe-bottom) + 32px); }
 .home-map { padding: 16px var(--gutter) 0; }
 
 @media (min-width: 1024px) {
   .home-header { padding: 26px 28px 8px; }
   /* The sidebar already carries the logo and Alerts. */
   .home-top { display: none; }
-  .home-title { margin-top: 4px; }
+  .home-title { margin: 4px 0 2px; font-size: var(--fs-display); line-height: 38px; }
+  .home-sub { display: block; }
+  .home-tools { margin-bottom: 14px; }
+  .home-tools .loc-search input { height: 48px; min-height: 48px; }
   .home-view { display: none; }   /* both panes are visible — nothing to toggle */
   .home-feed { padding: 16px 20px 32px 28px; }
   .home-map { padding: 16px 28px 24px 8px; }
