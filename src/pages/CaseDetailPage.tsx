@@ -441,7 +441,7 @@ export default function CaseDetailPage() {
                       border: 'none',
                       cursor: 'pointer',
                       padding: 0,
-                      color: n <= ratingValue ? 'var(--coral)' : 'var(--line)',
+                      color: n <= ratingValue ? 'var(--anchor)' : 'var(--line)',
                     }}
                   >
                     ★

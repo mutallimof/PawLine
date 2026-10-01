@@ -145,7 +145,7 @@ export function ReportButton({
         className={small ? undefined : 'btn btn--ghost btn--small'}
         style={
           small
-            ? { marginLeft: 8, fontSize: 11, color: 'var(--ink-soft)' }
+            ? { marginLeft: 8, fontSize: 11, color: 'var(--text-2)' }
             : { alignSelf: 'flex-end' }
         }
         title={t('mod.report')}

@@ -81,7 +81,7 @@ export default function VetsPage() {
       {noLocation && <div className="banner banner--info">{t('vetsBrowse.noLocation')}</div>}
 
       {view === 'map' ? (
-        <div style={{ margin: '0 calc(-1 * var(--v2-gutter))' }}>
+        <div style={{ margin: '0 calc(-1 * var(--gutter))' }}>
           <CasesMap
             cases={[]}
             vets={vets}

@@ -289,7 +289,7 @@ export default function AdminPage() {
               {r.target_case && (
                 <Link
                   to={`/case/${r.target_case}`}
-                  style={{ fontWeight: 800, color: 'var(--coral-deep)', fontSize: 13 }}
+                  style={{ fontWeight: 800, color: 'var(--text)', fontSize: 13 }}
                 >
                   → /case/{r.target_case.slice(0, 8)}…
                 </Link>

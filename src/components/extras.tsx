@@ -45,7 +45,7 @@ export function SponsorStrip() {
               {s.logo_url ? (
                 <img src={s.logo_url} alt={s.name} style={{ height: 28, maxWidth: 110, objectFit: 'contain' }} />
               ) : (
-                <span style={{ fontWeight: 800, fontSize: 13, color: 'var(--ink-soft)' }}>{s.name}</span>
+                <span style={{ fontWeight: 800, fontSize: 13, color: 'var(--text-2)' }}>{s.name}</span>
               )}
             </a>
           ))}

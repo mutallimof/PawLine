@@ -586,7 +586,7 @@ export function PinDropMap({
       {failed ? (
         <MapUnavailable height={height} />
       ) : (
-        <div className="map-wrap" style={{ height, borderRadius: 'var(--radius)' }}>
+        <div className="map-wrap" style={{ height, borderRadius: 'var(--r-card)' }}>
           <div ref={ref} style={{ width: '100%', height: '100%' }} />
           {!map && <div className="map-skeleton" aria-hidden="true" />}
           <div className="center-pin">📍</div>
@@ -644,7 +644,7 @@ export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
 
   if (failed) return <MapUnavailable height={190} />;
   return (
-    <div className="map-wrap" style={{ height: 190, borderRadius: 'var(--radius-lg)' }}>
+    <div className="map-wrap" style={{ height: 190, borderRadius: 'var(--r-card)' }}>
       <div ref={ref} style={{ width: '100%', height: '100%' }} />
       {!map && <div className="map-skeleton" aria-hidden="true" />}
     </div>
@@ -705,7 +705,7 @@ export function EnRouteMap({
 
   if (failed) return <MapUnavailable height={220} />;
   return (
-    <div className="map-wrap" style={{ height: 220, borderRadius: 'var(--radius)' }}>
+    <div className="map-wrap" style={{ height: 220, borderRadius: 'var(--r-card)' }}>
       <div ref={ref} style={{ width: '100%', height: '100%' }} />
       {!map && <div className="map-skeleton" aria-hidden="true" />}
     </div>

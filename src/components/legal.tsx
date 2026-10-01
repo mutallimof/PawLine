@@ -438,7 +438,7 @@ export function SafetyAck({
 
         <Link
           to="/safety"
-          style={{ display: 'block', textAlign: 'center', marginTop: 12, fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}
+          style={{ display: 'block', textAlign: 'center', marginTop: 12, fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}
         >
           {t('safety.readFull')}
         </Link>

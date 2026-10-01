@@ -37,13 +37,13 @@ import { CasePhoto } from './CasePhoto';
 // ---------------------------------------------------------------------------
 
 export const STATUS_COLOR: Record<CaseStatus, string> = {
-  open: 'var(--status-open)',
-  accepted: 'var(--status-progress)',
-  vet_selected: 'var(--status-progress)',
-  vet_confirmed: 'var(--status-progress)',
-  en_route: 'var(--status-enroute)',
-  resolved: 'var(--brand-fill)', // badge fill under white text — the bright green fails contrast
-  closed: 'var(--ink-soft)',
+  open: 'var(--st-ongoing)',
+  accepted: 'var(--st-ongoing)',
+  vet_selected: 'var(--st-ongoing)',
+  vet_confirmed: 'var(--st-ongoing)',
+  en_route: 'var(--st-ongoing)',
+  resolved: 'var(--anchor)', // badge fill under white text — the bright green fails contrast
+  closed: 'var(--text-2)',
 };
 
 export function statusLabel(status: CaseStatus): string {
@@ -100,10 +100,10 @@ export function StatusBadge({
 // ---------------------------------------------------------------------------
 
 export const URGENCY_COLOR: Record<UrgencyLevel, string> = {
-  low: 'var(--urgency-low)',
-  medium: 'var(--urgency-medium)',
-  high: 'var(--urgency-high)',
-  critical: 'var(--urgency-critical)',
+  low: 'var(--urg-low)',
+  medium: 'var(--urg-medium)',
+  high: 'var(--urg-high)',
+  critical: 'var(--urg-critical)',
 };
 
 export function urgencyLabel(level: UrgencyLevel): string {
