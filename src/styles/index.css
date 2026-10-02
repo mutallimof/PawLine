@@ -1295,35 +1295,13 @@ select {
     padding-bottom: 48px;
   }
 
-  /* Home becomes a real board: scrolling feed | sticky live map. */
+  /* Home uses the full width; List | Map picks one view, as on phones. */
   .app-main .page--flush {
     max-width: none;
     padding-bottom: 0;
   }
   .home-header {
     max-width: none;
-  }
-  .home-layout {
-    display: grid;
-    grid-template-columns: minmax(380px, 460px) 1fr;
-    gap: 0;
-    align-items: start;
-  }
-  .home-layout--map .home-feed,
-  .home-layout--feed .home-map {
-    display: block; /* undo the phone-only hiding */
-  }
-  .home-map {
-    position: sticky;
-    top: 0;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .home-map .map-wrap {
-    flex: 1;
-    height: auto !important;
   }
 }
 

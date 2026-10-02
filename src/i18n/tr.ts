@@ -394,6 +394,7 @@ export const tr: Dict = {
   'auth.showPassword': 'Şifreyi göster',
   'auth.hidePassword': 'Şifreyi gizle',
   'map.noKey': 'Harita kullanılamıyor — Google Maps anahtarı henüz ayarlanmadı.',
+  'map.loadFailed': 'Harita yüklenemedi. Bağlantınızı kontrol edip sayfayı yenileyin.',
   'map.accuracy': 'Konum yaklaşık {m} m hassasiyetinde — pini hassaslaştırmak için haritayı sürükleyin.',
   'report.cameraHint': 'Fotoğraflar kamerayla anlık çekilir; böylece kurtarıcılar bildirimin gerçek olduğunu bilir.',
   'camera.close': 'Kamerayı kapat',

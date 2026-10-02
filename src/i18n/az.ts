@@ -394,6 +394,7 @@ export const az: Dict = {
   'auth.showPassword': 'Şifrəni göstər',
   'auth.hidePassword': 'Şifrəni gizlət',
   'map.noKey': 'Xəritə əlçatan deyil — Google Maps açarı hələ qurulmayıb.',
+  'map.loadFailed': 'Xəritə yüklənmədi. İnternet bağlantınızı yoxlayın və səhifəni yeniləyin.',
   'map.accuracy': 'Yer təxminən {m} m dəqiqliklədir — nişanı dəqiqləşdirmək üçün xəritəni sürüşdürün.',
   'report.cameraHint': 'Fotolar kamera ilə canlı çəkilir ki, xilasedicilər bildirişin real olduğunu bilsin.',
   'camera.close': 'Kameranı bağla',

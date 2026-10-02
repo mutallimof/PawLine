@@ -392,6 +392,7 @@ export const en = {
   'auth.showPassword': 'Show password',
   'auth.hidePassword': 'Hide password',
   'map.noKey': 'Map unavailable — the Google Maps key isn’t configured yet.',
+  'map.loadFailed': 'The map couldn’t load. Check your connection and reload the page.',
   'map.accuracy': 'Location accurate to about {m} m — drag the map to fine-tune the pin.',
   'report.cameraHint': 'Photos are taken live with your camera, so rescuers know the report is real.',
   'camera.close': 'Close camera',

@@ -44,7 +44,7 @@ function useGoogleMap(
   options: google.maps.MapOptions
 ) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [failed, setFailed] = useState(!GMAPS_KEY);
+  const [failed, setFailed] = useState<false | 'no-key' | 'load'>(GMAPS_KEY ? false : 'no-key');
   const optionsRef = useRef(options);
 
   useEffect(() => {
@@ -56,7 +56,10 @@ function useGoogleMap(
         if (cancelled || !ref.current) return;
         setMap(new Map(ref.current, { ...BASE_MAP_OPTIONS, ...optionsRef.current }));
       })
-      .catch(() => setFailed(true));
+      .catch((e) => {
+        console.warn('Google Maps failed to load', e);
+        if (!cancelled) setFailed('load');
+      });
     return () => {
       cancelled = true;
     };
@@ -66,10 +69,10 @@ function useGoogleMap(
   return { map, failed };
 }
 
-function MapUnavailable({ height }: { height?: number | string }) {
+function MapUnavailable({ height, reason = 'no-key' }: { height?: number | string; reason?: 'no-key' | 'load' }) {
   return (
-    <div className="map-missing" style={{ height: height ?? '100%' }}>
-      🗺️ {t('map.noKey')}
+    <div className="map-missing" style={{ height: height ?? '100%' }} role="status">
+      🗺️ {reason === 'load' ? t('map.loadFailed') : t('map.noKey')}
     </div>
   );
 }
@@ -466,7 +469,7 @@ export function CasesMap({
     }
   }, [map, focus]);
 
-  if (failed) return <MapUnavailable />;
+  if (failed) return <MapUnavailable reason={failed} />;
 
   return (
     <div className="map-wrap">
@@ -589,7 +592,7 @@ export function PinDropMap({
     <div>
       <LocationSearch onSelect={jumpTo} bias={value} />
       {failed ? (
-        <MapUnavailable height={height} />
+        <MapUnavailable height={height} reason={failed} />
       ) : (
         <div className="map-wrap" style={{ height, borderRadius: 'var(--r-card)' }}>
           <div ref={ref} style={{ width: '100%', height: '100%' }} />
@@ -648,7 +651,7 @@ export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
     };
   }, [map, caseData, sensitive]);
 
-  if (failed) return <MapUnavailable height={190} />;
+  if (failed) return <MapUnavailable height={190} reason={failed} />;
   return (
     <div className="map-wrap" style={{ height: 190, borderRadius: 'var(--r-card)' }}>
       <div ref={ref} style={{ width: '100%', height: '100%' }} />
@@ -710,7 +713,7 @@ export function EnRouteMap({
     };
   }, [map, caseData, rescuer, sensitive]);
 
-  if (failed) return <MapUnavailable height={220} />;
+  if (failed) return <MapUnavailable height={220} reason={failed} />;
   return (
     <div className="map-wrap" style={{ height: 220, borderRadius: 'var(--r-card)' }}>
       <div ref={ref} style={{ width: '100%', height: '100%' }} />

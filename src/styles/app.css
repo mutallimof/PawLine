@@ -674,9 +674,20 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   .home-sub { display: block; }
   .home-tools { margin-bottom: 14px; }
   .home-tools .loc-search input { height: 48px; min-height: 48px; }
-  .home-view { display: none; }   /* both panes are visible — nothing to toggle */
-  .home-feed { padding: 16px 20px 32px 28px; }
-  .home-map { padding: 16px 28px 24px 8px; }
+  /* Same List | Map switch as phones; the feed uses the full width. */
+  .home-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    align-items: start;
+    padding: 16px 28px 32px;
+  }
+  .home-feed > * { grid-column: 1 / -1; }   /* skeletons, banners, sponsors */
+  .home-feed > .case-card { grid-column: auto; margin-bottom: 0; }
+  .home-map { padding: 16px 28px 24px; }
+  /* A definite height: the map's own div is height:100%, which resolves to
+     0 against an auto height — that was the blank desktop map. */
+  .home-map .map-wrap { height: max(420px, calc(100dvh - 300px)); }
 }
 
 /* ==== Case Detail (Figma 42:422) ========================================== */

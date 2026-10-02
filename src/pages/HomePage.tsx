@@ -49,11 +49,36 @@ function vetsNearbyKey(n: number) {
     : 'home.vetsNearby' as const;
 }
 
+const HOME_VIEW_KEY = 'pawline-home-view';
+function readHomeView(): View {
+  try {
+    return sessionStorage.getItem(HOME_VIEW_KEY) === 'map' ? 'map' : 'feed';
+  } catch {
+    return 'feed';
+  }
+}
+
 export default function HomePage() {
   const { cases, loading, error, reload } = useCases();
   const [vets, setVets] = useState<Vet[]>([]);
-  // The feed is the default view; the map is one tap away (List | Map).
-  const [view, setView] = useState<View>('feed');
+  // The feed is the default view on every screen size; the map is one tap
+  // away (List | Map). The choice survives leaving Home and coming back
+  // (this tab's session only).
+  const [view, setViewState] = useState<View>(readHomeView);
+  const setView = (v: View) => {
+    setViewState(v);
+    try {
+      sessionStorage.setItem(HOME_VIEW_KEY, v);
+    } catch {
+      /* storage blocked — the choice lasts until Home unmounts */
+    }
+  };
+  // Mount the map only once it has been chosen (no Maps load for people who
+  // never open it), then keep it mounted so switching back is instant.
+  const [mapOpened, setMapOpened] = useState(view === 'map');
+  useEffect(() => {
+    if (view === 'map') setMapOpened(true);
+  }, [view]);
   const [filter, setFilter] = useState<Filter>('ongoing');
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [searchFocus, setSearchFocus] = useState<LatLng | null>(null);
@@ -217,7 +242,6 @@ export default function HomePage() {
             <IconFilter />
             {t('home.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
           </button>
-          {/* List | Map only exists on phones — desktop shows both. */}
           <div className="home-view" role="group" aria-label={t('home.view')}>
             <button type="button" aria-pressed={view === 'feed'} onClick={() => setView('feed')}>
               <IconList size={16} /> {t('home.feed')}
@@ -332,8 +356,7 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Both views always render; .home-layout--map/--feed shows one on
-          phones, the desktop split view shows both side by side. */}
+      {/* One view at a time on every screen size (.home-layout--map/--feed). */}
       <div className={`home-layout home-layout--${view}`}>
         <div className="home-feed">
           {loading && (
@@ -368,17 +391,19 @@ export default function HomePage() {
         </div>
 
         <div className="home-map">
-          <CasesMap
-            cases={filtered}
-            vets={vets}
-            userLocation={userLocation}
-            focus={searchFocus}
-            onRequestLocation={() =>
-              getCurrentPosition()
-                .then(setUserLocation)
-                .catch((e) => toast(t(`geo.${geoErrorKind(e)}` as const)))
-            }
-          />
+          {mapOpened && (
+            <CasesMap
+              cases={filtered}
+              vets={vets}
+              userLocation={userLocation}
+              focus={searchFocus}
+              onRequestLocation={() =>
+                getCurrentPosition()
+                  .then(setUserLocation)
+                  .catch((e) => toast(t(`geo.${geoErrorKind(e)}` as const)))
+              }
+            />
+          )}
         </div>
       </div>
     </div>

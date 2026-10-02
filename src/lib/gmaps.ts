@@ -18,9 +18,20 @@ export const GMAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | un
 
 let pending: Promise<typeof google> | null = null;
 
+const READY_CALLBACK = '__straysCallMapsReady';
+
+/**
+ * Resolves once the API is READY, not merely once the script has loaded:
+ * with `loading=async` the script's onload can fire before Google has
+ * attached google.maps.importLibrary, and calling it then threw
+ * "importLibrary is not a function" — which showed the "no key" placeholder
+ * on a cold first load. Google's `callback` parameter fires only when the
+ * API is usable, and the fast path checks importLibrary itself rather than
+ * the google.maps namespace (which exists before it is ready).
+ */
 export function loadGoogleMaps(): Promise<typeof google> {
   if (!GMAPS_KEY) return Promise.reject(new Error('missing-key'));
-  if (window.google?.maps) return Promise.resolve(window.google);
+  if (typeof window.google?.maps?.importLibrary === 'function') return Promise.resolve(window.google);
   if (pending) return pending;
 
   pending = new Promise((resolve, reject) => {
@@ -30,10 +41,11 @@ export function loadGoogleMaps(): Promise<typeof google> {
       v: 'weekly',
       loading: 'async',
       language: getLocale(),
+      callback: READY_CALLBACK,
     });
+    (window as unknown as Record<string, unknown>)[READY_CALLBACK] = () => resolve(window.google);
     script.src = `https://maps.googleapis.com/maps/api/js?${params}`;
     script.async = true;
-    script.onload = () => resolve(window.google);
     script.onerror = () => {
       pending = null;
       reject(new Error('gmaps-load-failed'));

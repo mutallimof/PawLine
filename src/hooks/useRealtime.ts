@@ -54,21 +54,50 @@ function uniqueTopic(base: string): string {
  * the list therefore silently kills live updates for everything else on that
  * channel, which is exactly how case status stopped updating in place.
  *
- * This helper subscribes and REPORTS a channel that fails to establish,
- * instead of leaving it silently dead: `.subscribe()` with no callback
- * swallows CHANNEL_ERROR entirely, which is why the above went unnoticed —
- * the affected screens simply stopped updating, with nothing logged anywhere.
+ * This helper subscribes and REPORTS a channel that is really dead, instead
+ * of leaving it silently dead: `.subscribe()` with no callback swallows
+ * CHANNEL_ERROR entirely, which is why the above went unnoticed — the
+ * affected screens simply stopped updating, with nothing logged anywhere.
+ *
+ * What counts as "really dead": realtime-js recovers from ordinary drops by
+ * itself — the socket reconnects with backoff, errored channels rejoin when
+ * it reopens, and a join that errors or times out schedules a rejoin; each
+ * successful rejoin fires SUBSCRIBED again. So a CHANNEL_ERROR / TIMED_OUT
+ * ("transport failure") on its own is normal on mobile (iOS Safari drops
+ * sockets in the background) and is NOT reported. Reported are:
+ *   - a binding mismatch (an unpublished table) — realtime-js unsubscribes
+ *     and never retries, and it is a bug in our code: reported at once;
+ *   - a channel that fails REPORT_AFTER times in a row, while the device is
+ *     online and the page visible, without a SUBSCRIBED in between: once.
  */
+const REPORT_AFTER = 5;
+
 function subscribeReporting(channel: RealtimeChannel, label: string): RealtimeChannel {
+  let failures = 0;
+  let reported = false;
   return channel.subscribe((status, err) => {
-    if (
-      status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR ||
-      status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT
-    ) {
-      captureError(
-        new Error(`PawLine: realtime channel "${label}" ${status}: ${err?.message ?? 'no detail'}`)
-      );
+    if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+      failures = 0;
+      return;
     }
+    if (
+      status !== REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR &&
+      status !== REALTIME_SUBSCRIBE_STATES.TIMED_OUT
+    ) {
+      return;
+    }
+    const detail = err?.message ?? 'no detail';
+    const permanent = /mismatch between server and client bindings/i.test(detail);
+    // Offline or backgrounded: expected, and realtime-js will rejoin.
+    if (!permanent && (!navigator.onLine || document.visibilityState === 'hidden')) return;
+    failures += 1;
+    if (reported || (!permanent && failures < REPORT_AFTER)) return;
+    reported = true;
+    captureError(
+      new Error(
+        `PawLine: realtime channel "${label}" ${status}${permanent ? '' : ` ×${failures}`}: ${detail}`
+      )
+    );
   });
 }
 
