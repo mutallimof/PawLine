@@ -15,7 +15,8 @@ import { TERMS_VERSION } from '../lib/consent';
 import { DEFAULT_CENTER, distanceKm, getCurrentPosition, type LatLng } from '../lib/geo';
 import { t } from '../i18n';
 import type { AnimalType, CaseWithDetails, InjuryType, SpotType, UrgencyLevel } from '../lib/types';
-import { INJURY_TYPES, SPOT_TYPES, URGENCY_LEVELS } from '../lib/types';
+import { INJURY_TYPES, SPOT_TYPES, URGENCY_LEVELS, type CaseNeed } from '../lib/types';
+import { NeedsPicker } from '../components/CaseNeeds';
 import { animalEmoji, IconCamera } from '../components/Icons';
 
 export default function ReportPage() {
@@ -44,6 +45,7 @@ export default function ReportPage() {
   const [addressHint, setAddressHint] = useState('');
   const [injuryType, setInjuryType] = useState<InjuryType | null>(null);
   const [spotType, setSpotType] = useState<SpotType | null>(null);
+  const [needs, setNeeds] = useState<CaseNeed[]>([]);
   // Defaults to 'medium', not null — unlike injury/spot, urgency always
   // has some value; pre-selecting saves a mandatory tap while staying
   // adjustable.
@@ -181,6 +183,7 @@ export default function ReportPage() {
       injuryType,
       spotType,
       urgency,
+      needs,
       photos: photos.map((p) => p.file),
       termsVersion: isRegistered ? null : TERMS_VERSION,
     };
@@ -377,6 +380,11 @@ export default function ReportPage() {
             {t(`spot.${k}` as const)}
           </button>
         ))}
+      </div>
+
+      <span className="field__label">{t('need.reportLabel')}</span>
+      <div style={{ marginBottom: 16 }}>
+        <NeedsPicker value={needs} onChange={setNeeds} />
       </div>
 
       <span className="field__label">{t('report.location')}</span>

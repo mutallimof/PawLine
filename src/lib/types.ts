@@ -176,7 +176,16 @@ export interface RescueCase {
    * migration is applied, which the UI treats as open.
    */
   chat_closed_at?: string | null;
+  /**
+   * What would help on the ground (migration 041). Public; set on the report
+   * form, changed later only through set_case_needs(). Undefined until 041.
+   */
+  needs?: CaseNeed[];
 }
+
+/** Migration 041 — a fixed list, so each viewer reads it in their language. */
+export type CaseNeed = 'water' | 'food' | 'carrier' | 'blanket' | 'first_aid' | 'transport';
+export const CASE_NEEDS: CaseNeed[] = ['water', 'food', 'carrier', 'blanket', 'first_aid', 'transport'];
 
 export type InjuryType = 'limping' | 'bleeding' | 'hit_by_car' | 'weak' | 'skin' | 'trapped' | 'unknown';
 export type SpotType = 'street' | 'park' | 'dumpster' | 'building' | 'courtyard' | 'roadside';

@@ -59,7 +59,15 @@ import { SafetyAck, hasAcceptedSafety } from '../components/legal';
 import { Paw } from '../components/Ink';
 import { isCaseLive, type DuplicateFlag, type VetRating } from '../lib/types';
 import { timeAgo } from '../lib/time';
-import { getCurrentPosition } from '../lib/geo';
+import { distanceKm, formatDistance, getCurrentPosition } from '../lib/geo';
+import { CaseNeeds } from '../components/CaseNeeds';
+
+/**
+ * Rough ETA without a routing API: straight-line distance at an assumed
+ * 20 km/h — city driving with lights and a road that is never straight. It
+ * is labelled as an estimate in the UI.
+ */
+const ETA_ASSUMED_KMH = 20;
 
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -514,6 +522,21 @@ export default function CaseDetailPage() {
                     {t('case.lastKnown')} · {timeAgo(rescuerLocation.at)}
                   </p>
                 )}
+                {/* ETA — rescuerLocation is non-null only for participants
+                    (036 RLS on case_rescuer_locations), so nobody else
+                    sees this. */}
+                {rescuerLocation && caseData.status === 'en_route' && (() => {
+                  const km = distanceKm(rescuerLocation, caseData.vet);
+                  const min = Math.max(1, Math.round((km / ETA_ASSUMED_KMH) * 60));
+                  return (
+                    <p className="case-detail__eta">
+                      <strong>{t('eta.minutes', { n: min })}</strong>
+                      {' · '}
+                      {t('eta.distance', { distance: formatDistance(km) })}
+                      <span className="case-detail__eta-note">{t('eta.note', { speed: ETA_ASSUMED_KMH })}</span>
+                    </p>
+                  );
+                })()}
               </div>
             )}
           </div>
@@ -761,6 +784,8 @@ export default function CaseDetailPage() {
           </div>
         )}
       </dl>
+
+      <CaseNeeds caseData={caseData} onSaved={reload} />
 
       {/* Event log — hidden once the case is finished (task 4) */}
       {!finished && <h2 className="v2-h2">{t('case.timeline')}</h2>}
