@@ -557,7 +557,7 @@ export const en = {
   'case.notHerePrompt': 'Report that this animal is no longer here or has already been helped? A few reports from different people will close the case.',
   'case.notHereThanks': 'Thanks — that helps keep the map accurate.',
   'case.closedCommunity': 'Closed: the community reported this animal is no longer here or already helped.',
-  'case.closedExpired': 'Archived: this case was open for 24 hours without a rescuer. The animal may still be in the area.',
+  'case.closedExpired': 'Archived: this case was open for 48 hours without a rescuer. The animal may still be in the area.',
   'safety.title': 'Before you help — please read',
   'safety.body': 'Stray’s Call connects people; it is not a rescue service, veterinary service, or emergency responder. An injured or frightened animal can bite or scratch, and some carry disease. Approach slowly and calmly, keep children and pets back, use a towel or blanket and gloves if you can, and don’t put yourself in traffic or danger. If you’re unsure or the animal is aggressive, wait for someone experienced or contact a local organization. You accept these risks yourself.',
   'safety.agree': 'I understand and accept these risks',

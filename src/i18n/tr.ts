@@ -559,7 +559,7 @@ export const tr: Dict = {
   'case.notHerePrompt': 'Bu hayvanın artık burada olmadığını veya zaten yardım edildiğini bildirmek ister misiniz? Farklı kişilerden birkaç bildirim vakayı kapatır.',
   'case.notHereThanks': 'Teşekkürler — bu, haritayı doğru tutmaya yardımcı olur.',
   'case.closedCommunity': 'Kapatıldı: topluluk bu hayvanın artık burada olmadığını veya yardım edildiğini bildirdi.',
-  'case.closedExpired': 'Arşivlendi: bu vaka 24 saat kurtarıcı olmadan açık kaldı. Hayvan hâlâ bölgede olabilir.',
+  'case.closedExpired': 'Arşivlendi: bu vaka 48 saat kurtarıcı olmadan açık kaldı. Hayvan hâlâ bölgede olabilir.',
   'safety.title': 'Yardım etmeden önce — lütfen okuyun',
   'safety.body': 'Stray’s Call insanları birbirine bağlar; bir kurtarma, veterinerlik veya acil müdahale hizmeti değildir. Yaralı veya korkmuş bir hayvan ısırabilir veya tırmalayabilir, bazıları hastalık taşır. Yavaş ve sakin yaklaşın, çocukları ve evcil hayvanları uzak tutun, mümkünse havlu veya eldiven kullanın, kendinizi trafiğe veya tehlikeye atmayın. Emin değilseniz veya hayvan saldırgansa, deneyimli birini bekleyin. Bu riskleri kendiniz kabul edersiniz.',
   'safety.agree': 'Bu riskleri anlıyorum ve kabul ediyorum',

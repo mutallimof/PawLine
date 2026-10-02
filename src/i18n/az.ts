@@ -559,7 +559,7 @@ export const az: Dict = {
   'case.notHerePrompt': 'Bu heyvanın artıq burada olmadığını və ya kömək edildiyini bildirmək istəyirsiniz? Müxtəlif insanlardan bir neçə bildiriş hadisəni bağlayacaq.',
   'case.notHereThanks': 'Təşəkkürlər — bu, xəritəni dəqiq saxlamağa kömək edir.',
   'case.closedCommunity': 'Bağlandı: icma bu heyvanın artıq burada olmadığını və ya kömək edildiyini bildirdi.',
-  'case.closedExpired': 'Arxivləndi: bu hadisə 24 saat xilasedici olmadan açıq qaldı. Heyvan hələ də ərazidə ola bilər.',
+  'case.closedExpired': 'Arxivləndi: bu hadisə 48 saat xilasedici olmadan açıq qaldı. Heyvan hələ də ərazidə ola bilər.',
   'safety.title': 'Kömək etməzdən əvvəl — zəhmət olmasa oxuyun',
   'safety.body': 'Stray’s Call insanları birləşdirir; o, xilasetmə, baytarlıq və ya təcili yardım xidməti deyil. Yaralı və ya qorxmuş heyvan dişləyə və ya cırmaqlaya bilər, bəziləri xəstəlik daşıyır. Yavaş və sakit yaxınlaşın, uşaqları və ev heyvanlarını uzaq tutun, mümkünsə dəsmal və ya əlcək istifadə edin, özünüzü nəqliyyat və ya təhlükə altına salmayın. Əmin deyilsinizsə və ya heyvan aqressivdirsə, təcrübəli birini gözləyin. Bu riskləri özünüz qəbul edirsiniz.',
   'safety.agree': 'Bu riskləri başa düşürəm və qəbul edirəm',
