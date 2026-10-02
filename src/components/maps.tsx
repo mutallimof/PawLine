@@ -31,6 +31,7 @@ import {
 import { BASE_MAP_OPTIONS, GMAPS_KEY, loadGoogleMaps } from '../lib/gmaps';
 import { t } from '../i18n';
 import { IconCrosshair, animalEmoji } from './Icons';
+import { startsBlurred, useSensitiveMode, type SensitiveMode } from '../lib/sensitive';
 
 const CLUSTER_PX = 56;   // pins closer than this merge into a cluster
 const DENSITY_LIMIT = 60; // above this many visible singles → compact dots
@@ -141,17 +142,18 @@ function pinEmojiFallback(c: CaseWithDetails): HTMLElement {
   return span;
 }
 
-// Not wrapped in <CasePhoto>: this is a 46px circular Leaflet marker built
-// as a raw DOM node, not a React tree, and CasePhoto's reveal affordance
-// (icon + title + CTA pill) has no room to render legibly at that size.
-// The full-size photo opened from here still blurs if the case is critical.
-function photoPinEl(c: CaseWithDetails, onClick: () => void): HTMLElement {
+// Not wrapped in <CasePhoto>: this is a 46px circular marker built as a raw
+// DOM node, not a React tree, and CasePhoto's reveal affordance has no room
+// at that size. It follows the same Settings → Sensitive content rule
+// (lib/sensitive.ts) but stays blurred — tapping the pin opens the case,
+// where the full-size photo can be revealed.
+function photoPinEl(c: CaseWithDetails, onClick: () => void, mode: SensitiveMode): HTMLElement {
   const photo = c.photos?.find((p) => p.kind === 'report') ?? c.photos?.[0];
   const el = document.createElement('button');
   el.type = 'button';
   el.className = `pin-photo pin-photo--${statusClass(c)}${
     c.status === 'open' && c.escalated_at ? ' pin-photo--escalated' : ''
-  }`;
+  }${photo?.url && startsBlurred(mode, c.urgency) ? ' pin-photo--blurred' : ''}`;
   el.setAttribute('aria-label', `${t(`animal.${c.animal}` as const)} — ${t(`status.${c.status}` as const)}`);
   if (photo?.url) {
     const img = document.createElement('img');
@@ -376,8 +378,9 @@ export function CasesMap({
     zoom: DEFAULT_ZOOM,
   });
   const markers = useRef<HtmlMarkerInstance[]>([]);
-  const dataRef = useRef({ cases, vets });
-  dataRef.current = { cases, vets };
+  const sensitive = useSensitiveMode();
+  const dataRef = useRef({ cases, vets, sensitive });
+  dataRef.current = { cases, vets, sensitive };
 
   // Rebuild all pins (data changed, or zoom/pan changed the clustering).
   const rebuild = useRef(() => {});
@@ -404,7 +407,7 @@ export function CasesMap({
         const c = cl.cases[0];
         const el = dense
           ? dotPinEl(c, () => navigate(`/case/${c.id}`))
-          : photoPinEl(c, () => navigate(`/case/${c.id}`));
+          : photoPinEl(c, () => navigate(`/case/${c.id}`), dataRef.current.sensitive);
         const m = new Marker({ lat: c.lat, lng: c.lng }, el);
         m.setMap(map);
         markers.current.push(m);
@@ -445,10 +448,10 @@ export function CasesMap({
     };
   }, [map]);
 
-  // Data changed → rebuild without waiting for the next idle.
+  // Data (or the sensitive-content setting) changed → rebuild now.
   useEffect(() => {
     rebuild.current();
-  }, [cases, vets, map]);
+  }, [cases, vets, map, sensitive]);
 
   useEffect(() => {
     if (map && userLocation) {
@@ -627,6 +630,7 @@ export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
     zoom: 15,
   });
   const markers = useRef<HtmlMarkerInstance[]>([]);
+  const sensitive = useSensitiveMode();
 
   useEffect(() => {
     if (!map) return;
@@ -634,7 +638,7 @@ export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
     const Marker = getMarkerClass(g);
     const m = new Marker(
       { lat: caseData.lat, lng: caseData.lng },
-      photoPinEl(caseData, () => {})
+      photoPinEl(caseData, () => {}, sensitive)
     );
     m.setMap(map);
     markers.current = [m];
@@ -642,7 +646,7 @@ export function CaseLocationMap({ caseData }: { caseData: CaseWithDetails }) {
       markers.current.forEach((mk) => mk.setMap(null));
       markers.current = [];
     };
-  }, [map, caseData]);
+  }, [map, caseData, sensitive]);
 
   if (failed) return <MapUnavailable height={190} />;
   return (
@@ -670,6 +674,7 @@ export function EnRouteMap({
     zoom: 13,
   });
   const markers = useRef<HtmlMarkerInstance[]>([]);
+  const sensitive = useSensitiveMode();
 
   useEffect(() => {
     if (!map) return;
@@ -686,7 +691,7 @@ export function EnRouteMap({
       bounds.extend(new g.maps.LatLng(p.lat, p.lng));
     };
 
-    add({ lat: caseData.lat, lng: caseData.lng }, photoPinEl(caseData, () => {}));
+    add({ lat: caseData.lat, lng: caseData.lng }, photoPinEl(caseData, () => {}, sensitive));
     if (caseData.vet) {
       add({ lat: caseData.vet.lat, lng: caseData.vet.lng },
         vetPinEl(caseData.vet.clinic_name, () => {}));
@@ -703,7 +708,7 @@ export function EnRouteMap({
       markers.current.forEach((m) => m.setMap(null));
       markers.current = [];
     };
-  }, [map, caseData, rescuer]);
+  }, [map, caseData, rescuer, sensitive]);
 
   if (failed) return <MapUnavailable height={220} />;
   return (

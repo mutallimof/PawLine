@@ -18,6 +18,7 @@ import {
   fetchNotifications,
   fetchRescuerLocation,
   purgeCachedCasePhotos,
+  reconcilePhotoCache,
 } from '../lib/api';
 import type {
   AppNotification,
@@ -132,9 +133,9 @@ function useRefetch(fn: () => Promise<void>, delayMs = 250) {
 /**
  * Migration 018 (A2): if this change just made a case hidden, tell this
  * tab's own service worker to drop any cached copies of its photos —
- * reaches every currently-open tab watching this case/the feed, not just
- * the admin's device that clicked "hide" (adminHideCase() covers that one
- * directly). Not gated on payload.old (Postgres only guarantees `old`
+ * reaches every currently-open tab of the app, whatever screen it is on
+ * (see usePhotoCacheGuard), not just the admin's device that clicked
+ * "hide" (adminHideCase() covers that one directly). Not gated on payload.old (Postgres only guarantees `old`
  * carries every column with REPLICA IDENTITY FULL, which cases doesn't
  * have) — purging an already-hidden or already-purged case is a harmless
  * no-op, so checking `new.hidden` alone is enough.
@@ -143,6 +144,39 @@ function purgeIfHidden(payload: { new?: { id?: string; case_id?: string; hidden?
   // case_signals rows carry case_id; `cases` rows (pre-036 fallback) carry id.
   const id = payload.new?.case_id ?? payload.new?.id;
   if (payload.new?.hidden && id) purgeCachedCasePhotos(id);
+}
+
+const RECONCILE_EVERY_MS = 5 * 60_000;
+
+/**
+ * App-wide photo cache guard, mounted once in App so it runs on every screen
+ * (Profile, Rescue history, Clinic dashboard included — not only where the
+ * feed or a case page happens to be open):
+ *   - one realtime listener purges a case's cached photos the moment it is
+ *     hidden;
+ *   - reconcilePhotoCache() at start and when the tab comes back (at most
+ *     every 5 minutes) purges photos of cases the server no longer returns,
+ *     covering devices that were closed or offline at the time.
+ */
+export function usePhotoCacheGuard() {
+  useEffect(() => {
+    let last = 0;
+    const reconcile = () => {
+      if (Date.now() - last < RECONCILE_EVERY_MS) return;
+      last = Date.now();
+      void reconcilePhotoCache().catch(() => {});
+    };
+    reconcile();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') reconcile();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    const unsubscribe = subscribeCaseChanges('photo-purge', null, purgeIfHidden);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      unsubscribe();
+    };
+  }, []);
 }
 
 // ---------------------------------------------------------------------------
@@ -172,10 +206,7 @@ export function useCases() {
     // it never delivered anything and took this whole channel down with it.
     // A case's photos are written while it is being created, so the `cases`
     // INSERT this channel already watches brings the row in with them.
-    return subscribeCaseChanges('cases-list', null, (payload) => {
-      purgeIfHidden(payload);
-      refetch();
-    });
+    return subscribeCaseChanges('cases-list', null, refetch);
   }, [load, refetch]);
 
   return { cases, loading, error, reload: load };
@@ -211,10 +242,7 @@ export function useCase(caseId: string | undefined) {
     // channel, which is what stopped status from updating live for BOTH the
     // acting user and the observer. Delivery photos are covered by the acting
     // client's own reload().
-    const unsubscribeCase = subscribeCaseChanges(`case-${caseId}`, caseId, (payload) => {
-      purgeIfHidden(payload);
-      refetch();
-    });
+    const unsubscribeCase = subscribeCaseChanges(`case-${caseId}`, caseId, refetch);
     const events = subscribeReporting(
       supabase
         .channel(uniqueTopic(`case-events-${caseId}`))

@@ -8,8 +8,8 @@
  *
  * Renders differently depending on who's looking:
  *  - Anyone:            photos, paw-trail progress, timeline, case chat, watch.
- *                       Once resolved/closed: only delivery photos + chat remain
- *                       of those (task 4).
+ *                       Once resolved/closed: photos + chat remain of those
+ *                       (task 4).
  *  - Registered user:   "I'll rescue this animal" while the case is open.
  *  - The active rescuer: choose vet → depart → (drop at any point).
  *  - The selected vet:  confirm/decline the incoming animal, post updates,
@@ -155,11 +155,14 @@ export default function CaseDetailPage() {
   const isVet = !!user && caseData.vet_id === user.id;
   // Task 4: once a case is over — resolved (safe at the vet) or closed
   // (expired / flagged "not here") — the in-progress sections stop being
-  // useful and are hidden: the paw trail, the timeline, the original report
-  // photos and Watch. The vet's delivery photos STAY: on a resolved case
-  // they are the proof of arrival.
+  // useful and are hidden: the paw trail, the timeline and Watch. Photos
+  // STAY — the report photos, and the vet's delivery photos, which on a
+  // resolved case are the proof of arrival.
   const finished = caseData.status === 'resolved' || caseData.status === 'closed';
-  const reportPhotos = finished ? [] : caseData.photos.filter((p) => p.kind === 'report');
+  // Report photos stay on finished cases too — every other screen (feed,
+  // history, clinic dashboard, map) shows them, and the only photo
+  // visibility rule is the server's (hidden case → no rows, no signed URL).
+  const reportPhotos = caseData.photos.filter((p) => p.kind === 'report');
   const deliveryPhotos = caseData.photos.filter((p) => p.kind === 'delivery');
   // The assigned vet can keep adding photos after the case is over — the
   // "healed and safe" update followers want. Same path as the delivery photo

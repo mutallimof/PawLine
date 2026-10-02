@@ -9,7 +9,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { useNotifications } from './hooks/useRealtime';
+import { useNotifications, usePhotoCacheGuard } from './hooks/useRealtime';
 import { BottomNav, SideNav, ToastProvider, UnreadAlertsContext, useToast } from './components/ui';
 import { getLocale, subscribeLocale, t } from './i18n';
 import Onboarding, { shouldShowOnboarding } from './components/Onboarding';
@@ -55,6 +55,8 @@ function Shell() {
     !!user && !isGuest && !!profile && needsConsent(profile) &&
     !['/terms', '/privacy'].includes(location.pathname);
   const { unread } = useNotifications(user?.id);
+  // Cached case photos follow the server's visibility on every screen.
+  usePhotoCacheGuard();
   const [online, setOnline] = useState(navigator.onLine);
   const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
   // Re-render the whole tree when the language changes so every t() call

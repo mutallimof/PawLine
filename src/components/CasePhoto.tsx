@@ -15,7 +15,7 @@
  */
 import { useState } from 'react';
 import { t } from '../i18n';
-import { useSensitiveMode } from '../lib/sensitive';
+import { startsBlurred as blurredFor, useSensitiveMode } from '../lib/sensitive';
 import type { UrgencyLevel } from '../lib/types';
 
 export function CasePhoto({
@@ -34,7 +34,7 @@ export function CasePhoto({
   urgency: UrgencyLevel;
 }) {
   const mode = useSensitiveMode();
-  const startsBlurred = mode === 'all' || (mode === 'critical' && urgency === 'critical');
+  const startsBlurred = blurredFor(mode, urgency);
   // null = the viewer hasn't tapped: follow the setting (live).
   const [choice, setRevealed] = useState<boolean | null>(null);
   const revealed = choice ?? !startsBlurred;

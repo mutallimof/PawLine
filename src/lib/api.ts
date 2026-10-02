@@ -215,6 +215,38 @@ export async function resolvePhotoUrls(cases: CaseWithDetails[]): Promise<void> 
  * short signed-URL expiry, which is what actually bounds a closed
  * device's access.
  */
+/**
+ * Drop cached photos of cases this session can no longer see. Asks the
+ * service worker which case ids it holds photos for, asks the server which
+ * of those it still returns (RLS leaves hidden cases out; deleted ones are
+ * gone) and purges the rest. Any failure — no worker, no answer, offline,
+ * a query error — purges NOTHING: a wrong "missing" must never be guessed.
+ */
+export async function reconcilePhotoCache(): Promise<void> {
+  const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker?.controller : null;
+  if (!sw) return;
+  const cached = await new Promise<string[] | null>((resolve) => {
+    const channel = new MessageChannel();
+    const timer = window.setTimeout(() => resolve(null), 3000);
+    channel.port1.onmessage = (e) => {
+      window.clearTimeout(timer);
+      const ids = (e.data as { caseIds?: unknown })?.caseIds;
+      resolve(Array.isArray(ids) ? ids.filter((x): x is string => typeof x === 'string') : null);
+    };
+    sw.postMessage({ type: 'list-cached-case-ids' }, [channel.port2]);
+  });
+  if (!cached || cached.length === 0) return;
+
+  const visible = new Set<string>();
+  for (let i = 0; i < cached.length; i += 100) {
+    const chunk = cached.slice(i, i + 100);
+    const { data, error } = await supabase.from('cases').select('id').in('id', chunk);
+    if (error || !Array.isArray(data)) return; // check failed → purge nothing
+    for (const row of data as { id: string }[]) visible.add(row.id.toLowerCase());
+  }
+  for (const id of cached) if (!visible.has(id)) purgeCachedCasePhotos(id);
+}
+
 export function purgeCachedCasePhotos(caseId: string): void {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'purge-case-photos', caseId });

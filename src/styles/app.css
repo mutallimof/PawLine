@@ -1453,3 +1453,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   justify-self: end; min-height: 44px; padding: 0 14px; border: 0; border-radius: var(--r-pill); cursor: pointer;
   background: rgba(255, 255, 255, 0.14); color: #fff; font: inherit; font-size: var(--fs-small); font-weight: 600;
 }
+
+/* Map photo pin under Settings → Sensitive content (same rule as CasePhoto).
+   Stays blurred on the map; the case page offers the reveal. */
+.pin-photo--blurred img { filter: blur(6px) saturate(0.6); transform: scale(1.15); }

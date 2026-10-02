@@ -50,6 +50,11 @@ function subscribe(onChange: () => void): () => void {
   };
 }
 
+/** Does a photo of a case with this urgency start blurred under `mode`? */
+export function startsBlurred(mode: SensitiveMode, urgency: string): boolean {
+  return mode === 'all' || (mode === 'critical' && urgency === 'critical');
+}
+
 /** The current mode, re-rendering when it changes (this tab or another). */
 export function useSensitiveMode(): SensitiveMode {
   return useSyncExternalStore(subscribe, getSensitiveMode, () => 'critical');

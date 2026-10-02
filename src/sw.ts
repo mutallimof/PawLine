@@ -70,12 +70,31 @@ registerRoute(
 // hide, and from every other open tab's useCases()/useCase() reacting to
 // the realtime UPDATE — so any tab that had this case's photos cached drops
 // them close to immediately, instead of waiting out the 7-day expiry above.
+//
+// Reconcile (api.ts reconcilePhotoCache()): the app asks which case ids this
+// cache holds photos for, checks them against what the server still returns
+// (hidden/deleted cases come back missing) and purges the rest — which
+// covers devices that were closed when the case was hidden.
 self.addEventListener('message', (event: ExtendableMessageEvent) => {
   const data = event.data as { type?: string; caseId?: string } | undefined;
   if (data?.type === 'purge-case-photos' && data.caseId) {
     event.waitUntil(purgeCasePhotoCache(data.caseId));
   }
+  if (data?.type === 'list-cached-case-ids' && event.ports[0]) {
+    const port = event.ports[0];
+    event.waitUntil(listCachedCaseIds().then((caseIds) => port.postMessage({ caseIds })));
+  }
 });
+
+async function listCachedCaseIds(): Promise<string[]> {
+  const cache = await caches.open('case-photos');
+  const ids = new Set<string>();
+  for (const req of await cache.keys()) {
+    const m = /\/case-photos\/([0-9a-f-]{36})\//i.exec(req.url);
+    if (m) ids.add(m[1].toLowerCase());
+  }
+  return [...ids];
+}
 
 async function purgeCasePhotoCache(caseId: string): Promise<void> {
   const cache = await caches.open('case-photos');
