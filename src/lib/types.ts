@@ -58,6 +58,12 @@ export interface Profile {
   home_lat?: number | null;
   home_lng?: number | null;
   notify_radius_km?: number;
+  /** Migration 040 — per-type notification switches, enforced server-side
+   *  (undefined before 040 is applied: treat as on). */
+  notify_new_cases?: boolean;
+  notify_case_updates?: boolean;
+  notify_messages?: boolean;
+  notify_rescue_requests?: boolean;
   /** Migration 014 (C5) — additive, nullable; older rows have none of these. */
   first_name?: string | null;
   last_name?: string | null;

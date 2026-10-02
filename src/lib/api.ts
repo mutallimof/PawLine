@@ -456,6 +456,21 @@ export function isGuestConsentError(e: unknown): boolean {
 }
 
 /** Call an RPC and throw a readable Error if it failed. */
+/** Migration 040: the caller's own per-type notification switches. The
+ *  server drops any notification the recipient switched off. */
+export const setNotificationPrefs = (p: {
+  newCases: boolean;
+  caseUpdates: boolean;
+  messages: boolean;
+  rescueRequests: boolean;
+}) =>
+  rpc('set_notification_prefs', {
+    p_new_cases: p.newCases,
+    p_case_updates: p.caseUpdates,
+    p_messages: p.messages,
+    p_rescue_requests: p.rescueRequests,
+  });
+
 async function rpc(fn: string, args: Record<string, unknown>): Promise<void> {
   const { error } = await supabase.rpc(fn, args);
   if (error) throw rpcError(error.message);

@@ -17,6 +17,7 @@ import {
   fetchProfile,
   unblockUser,
   updateProfile,
+  setNotificationPrefs,
 } from '../lib/api';
 import { disablePush, enablePush, getPushSubscription, pushSupported } from '../lib/push';
 import { getCurrentPosition } from '../lib/geo';
@@ -337,6 +338,7 @@ function SettingsSection({ section, profile, userId }: { section: Section; profi
               <span className={`v2-switch${pushOn ? ' on' : ''}`} aria-hidden="true" />
             </button>
           </div>
+          <NotificationTypes profile={profile} />
         </>
       )}
 
@@ -629,6 +631,76 @@ function EmailSection() {
           </button>
         </div>
       </div>
+    </>
+  );
+}
+
+type NotifKey = 'newCases' | 'caseUpdates' | 'messages' | 'rescueRequests';
+
+/**
+ * What to be notified about (migration 040). All on by default; enforced on
+ * the server, so a switched-off kind creates no in-app alert and no push.
+ * Rescue requests only matter to clinics, so only clinics see that switch.
+ */
+function NotificationTypes({ profile }: { profile: Profile }) {
+  const { refreshProfile } = useAuth();
+  const toast = useToast();
+  const fromProfile = (): Record<NotifKey, boolean> => ({
+    newCases: profile.notify_new_cases ?? true,
+    caseUpdates: profile.notify_case_updates ?? true,
+    messages: profile.notify_messages ?? true,
+    rescueRequests: profile.notify_rescue_requests ?? true,
+  });
+  const [prefs, setPrefs] = useState(fromProfile);
+  const [saving, setSaving] = useState<NotifKey | null>(null);
+
+  const toggle = async (key: NotifKey) => {
+    const next = { ...prefs, [key]: !prefs[key] };
+    setPrefs(next);
+    setSaving(key);
+    try {
+      await setNotificationPrefs(next);
+      await refreshProfile();
+    } catch (e) {
+      setPrefs(prefs); // put it back
+      toast(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const rows: { key: NotifKey; title: string; sub: string }[] = [
+    { key: 'newCases', title: t('notifTypes.newCases'), sub: t('notifTypes.newCasesSub') },
+    { key: 'caseUpdates', title: t('notifTypes.caseUpdates'), sub: t('notifTypes.caseUpdatesSub') },
+    { key: 'messages', title: t('notifTypes.messages'), sub: t('notifTypes.messagesSub') },
+  ];
+  if (profile.role === 'vet') {
+    rows.push({ key: 'rescueRequests', title: t('notifTypes.rescueRequests'), sub: t('notifTypes.rescueRequestsSub') });
+  }
+
+  return (
+    <>
+      <div className="v2-label">{t('notifTypes.title')}</div>
+      <div className="v2-group">
+        {rows.map((r) => (
+          <button
+            key={r.key}
+            type="button"
+            className="v2-row v2-row--sub"
+            role="switch"
+            aria-checked={prefs[r.key]}
+            disabled={saving !== null}
+            onClick={() => void toggle(r.key)}
+          >
+            <span className="v2-row__main">
+              <span className="v2-row__title">{r.title}</span>
+              <span className="v2-row__sub">{r.sub}</span>
+            </span>
+            <span className={`v2-switch${prefs[r.key] ? ' on' : ''}`} aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+      <p className="settings__help">{t('notifTypes.note')}</p>
     </>
   );
 }
