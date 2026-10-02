@@ -599,6 +599,34 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 }
 .home-view button[aria-pressed='true'] { background: var(--anchor); color: var(--on-anchor); }
 
+/* "Sorted near: <place> ✕" — a lavender chip while a searched place sorts
+   the list. */
+.home-sortnear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 4px 4px 4px 14px;
+  border-radius: var(--r-pill);
+  background: var(--lav-tint);
+  color: var(--text);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+.home-sortnear__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-sortnear__clear {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-size: 14px;
+}
+.home-sortnear__clear:hover { background: var(--surface); }
 .home-filters { margin: 12px 0 0; }
 .home-filters .v2-label:first-child { margin-top: 0; }
 .home-filters__note { margin: 8px 0 0; font-size: var(--fs-label); color: var(--text-2); }

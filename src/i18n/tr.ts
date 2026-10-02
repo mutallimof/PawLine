@@ -37,6 +37,8 @@ export const tr: Dict = {
   'home.tab.rescued': 'Kurtarıldı',
   'home.tab.unclaimed': 'Üstlenilmedi',
   'home.view': 'Görünüm',
+  'home.sortedNear': 'Yakınlığa göre: {place}',
+  'home.sortedNearClear': 'Yer sıralamasını kaldır',
   'home.filter.resolved': 'Bitti',
   'home.empty': 'Burada henüz vaka yok. Umarız öyle kalır — ama zor durumda bir hayvan görürseniz bildirin.',
   'home.distanceAway': '{km} km uzakta',

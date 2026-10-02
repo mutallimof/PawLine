@@ -254,11 +254,12 @@ export function LocationSearch({
   onSelect,
   bias,
 }: {
-  onSelect: (p: LatLng) => void;
+  /** `name` is the place's short name (for UI such as "Sorted near: …"). */
+  onSelect: (p: LatLng, name: string) => void;
   bias?: LatLng | null;
 }) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<{ label: string; lat: number; lng: number }[]>([]);
+  const [results, setResults] = useState<{ label: string; name: string; lat: number; lng: number }[]>([]);
   const [searched, setSearched] = useState(false);
   const biasRef = useRef(bias);
   biasRef.current = bias;
@@ -297,6 +298,7 @@ export function LocationSearch({
                 return [
                   {
                     label: [p.name, p.formatted_address].filter(Boolean).join(' — '),
+                    name: p.name || p.formatted_address || '',
                     lat: loc.lat(),
                     lng: loc.lng(),
                   },
@@ -331,7 +333,7 @@ export function LocationSearch({
               type="button"
               className="loc-search__result"
               onClick={() => {
-                onSelect({ lat: r.lat, lng: r.lng });
+                onSelect({ lat: r.lat, lng: r.lng }, r.name);
                 setQuery('');
                 setResults([]);
                 setSearched(false);

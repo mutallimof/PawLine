@@ -57,6 +57,9 @@ export default function HomePage() {
   const [filter, setFilter] = useState<Filter>('ongoing');
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [searchFocus, setSearchFocus] = useState<LatLng | null>(null);
+  // A searched place re-sorts the LIST by distance from it (nearest first);
+  // the chip under the controls clears it. Client-only.
+  const [sortNear, setSortNear] = useState<(LatLng & { name: string }) | null>(null);
   const toast = useToast();
 
   // The tab row fades its right edge only when it really scrolls (long
@@ -123,6 +126,10 @@ export default function HomePage() {
 
   const filtered = useMemo(() => {
     const list = refined.filter((c) => inTab(filter, c.status));
+    if (sortNear) {
+      const d = (c: (typeof list)[number]) => distanceKm(sortNear, { lat: c.lat, lng: c.lng });
+      return [...list].sort((a, b) => d(a) - d(b));
+    }
     // Escalated-and-still-open cases have waited longest — they lead the feed.
     return [...list].sort((a, b) => {
       const ae = a.status === 'open' && a.escalated_at ? 1 : 0;
@@ -130,7 +137,7 @@ export default function HomePage() {
       if (ae !== be) return be - ae;
       return b.created_at.localeCompare(a.created_at);
     });
-  }, [refined, filter]);
+  }, [refined, filter, sortNear]);
 
   // "N vet clinics nearby" banner: within 25km if we know where the user is
   // (matches the Filters panel's own distance semantics), otherwise every
@@ -155,12 +162,12 @@ export default function HomePage() {
 
         <div className="home-tools">
           <div className="home-tools__search">
-            {/* Picking a place focuses the map on it, as before — on phones
-                that means switching to the map view. */}
+            {/* Picking a place sorts the list by distance from it and
+                centres the map there; the current view stays as it is. */}
             <LocationSearch
-              onSelect={(p) => {
+              onSelect={(p, name) => {
                 setSearchFocus(p);
-                setView('map');
+                setSortNear({ ...p, name });
               }}
               bias={userLocation}
             />
@@ -220,6 +227,20 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+
+        {sortNear && (
+          <div className="home-sortnear">
+            <span className="home-sortnear__label">{t('home.sortedNear', { place: sortNear.name })}</span>
+            <button
+              type="button"
+              className="home-sortnear__clear"
+              aria-label={t('home.sortedNearClear')}
+              onClick={() => setSortNear(null)}
+            >
+              <span aria-hidden="true">✕</span>
+            </button>
+          </div>
+        )}
 
         {showFilters && (
           <div className="v2-group home-filters">
@@ -341,7 +362,7 @@ export default function HomePage() {
             </div>
           )}
           {filtered.map((c) => (
-            <CaseCard key={c.id} caseData={c} userLocation={userLocation} />
+            <CaseCard key={c.id} caseData={c} userLocation={sortNear ?? userLocation} />
           ))}
           <SponsorStrip />
         </div>

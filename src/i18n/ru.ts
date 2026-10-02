@@ -37,6 +37,8 @@ export const ru: Dict = {
   'home.tab.rescued': 'Спасённые',
   'home.tab.unclaimed': 'Невзятые',
   'home.view': 'Вид',
+  'home.sortedNear': 'Рядом с: {place}',
+  'home.sortedNearClear': 'Сбросить сортировку по месту',
   'home.filter.resolved': 'Решено',
   'home.empty': 'Здесь пока нет случаев. Надеемся, так и останется — но если увидите животное в беде, сообщите об этом.',
   'home.distanceAway': 'в {km} км',
