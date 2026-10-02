@@ -18,6 +18,7 @@ import type { AnimalType, CaseWithDetails, InjuryType, SpotType, UrgencyLevel } 
 import { INJURY_TYPES, SPOT_TYPES, URGENCY_LEVELS, type CaseNeed } from '../lib/types';
 import { NeedsPicker } from '../components/CaseNeeds';
 import { animalEmoji, IconCamera } from '../components/Icons';
+import { LiveCamera } from '../components/LiveCamera';
 
 export default function ReportPage() {
   const { user, isGuest } = useAuth();
@@ -35,7 +36,8 @@ export default function ReportPage() {
   const consentOk = isRegistered || (ageOk && termsOk);
   const navigate = useNavigate();
   const toast = useToast();
-  const fileInput = useRef<HTMLInputElement>(null);
+  // Live photos only: the in-app camera is the one way in (no file picker).
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   // One entry per photo: the file plus its preview object URL. Keeping them
   // paired means removal is a single splice and URLs are revoked exactly once.
@@ -103,22 +105,17 @@ export default function ReportPage() {
       .catch(() => {});
   }, []);
 
-  const addPhotos = async (files: FileList | null) => {
-    if (!files) return;
-    const room = Math.max(0, 5 - photos.length);
-    // Clean each photo now (re-encoded, location/EXIF removed): the preview
-    // shows exactly what will be uploaded, and a photo that can't be cleaned
-    // is refused here rather than failing the report at submit.
-    const added: { file: File; url: string }[] = [];
-    for (const original of Array.from(files).slice(0, room)) {
-      try {
-        const file = await cleanPhotoFile(original);
-        added.push({ file, url: URL.createObjectURL(file) });
-      } catch (e) {
-        toast(e instanceof PhotoPrivacyError ? e.message : t('common.error'));
-      }
+  // Each live shot is cleaned now (re-encoded, no metadata): the preview
+  // shows exactly what will be uploaded, and a shot that can't be cleaned is
+  // refused here (the camera stays on it) rather than failing at submit.
+  const addPhoto = async (shot: File) => {
+    try {
+      const file = await cleanPhotoFile(shot);
+      setPhotos((prev) => (prev.length >= 5 ? prev : [...prev, { file, url: URL.createObjectURL(file) }]));
+    } catch (e) {
+      toast(e instanceof PhotoPrivacyError ? e.message : t('common.error'));
+      throw e;
     }
-    setPhotos((prev) => [...prev, ...added].slice(0, 5));
   };
 
   const removePhoto = (index: number) => {
@@ -287,28 +284,21 @@ export default function ReportPage() {
           </div>
         ))}
         {photos.length < 5 && (
-          <button type="button" className="photo-add" onClick={() => fileInput.current?.click()}>
+          <button type="button" className="photo-add" onClick={() => setCameraOpen(true)}>
             <IconCamera size={22} />
             {t('report.addPhoto')}
           </button>
-        )}
-        <input
-          ref={fileInput}
-          type="file"
-          accept="image/*"
-          /* ANTI-FRAUD: `capture` opens the CAMERA directly on mobile
-             browsers instead of the photo library, so reports carry a live
-             photo taken on the spot. One shot per tap (no `multiple` — the
-             capture+multiple combo falls back to the gallery picker on some
-             Androids, which would defeat the purpose); tap "Add photo"
-             again for more. Deterrent, not foolproof: desktop browsers
-             ignore `capture` and show a file picker — acceptable, since
-             street reports are overwhelmingly mobile. */
-          capture="environment"
-          hidden
-          onChange={(e) => void addPhotos(e.target.files)}
-        />
+        )}
       </div>
+
+      {cameraOpen && photos.length < 5 && (
+        <LiveCamera
+          title={t('report.photos')}
+          remaining={5 - photos.length}
+          onCapture={addPhoto}
+          onClose={() => setCameraOpen(false)}
+        />
+      )}
 
       {/* Animal type */}
       <span className="field__label">{t('report.animalType')}</span>

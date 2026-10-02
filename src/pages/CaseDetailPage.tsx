@@ -61,6 +61,8 @@ import { isCaseLive, type DuplicateFlag, type VetRating } from '../lib/types';
 import { timeAgo } from '../lib/time';
 import { distanceKm, formatDistance, getCurrentPosition } from '../lib/geo';
 import { CaseNeeds } from '../components/CaseNeeds';
+import { LiveCamera } from '../components/LiveCamera';
+import { cleanPhotoFile } from '../lib/photos';
 
 /**
  * Rough ETA without a routing API: straight-line distance at an assumed
@@ -94,7 +96,8 @@ export default function CaseDetailPage() {
   const prevStatus = useRef<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [vetNote, setVetNote] = useState('');
-  const deliveryPhotoInput = useRef<HTMLInputElement>(null);
+  // Delivery / recovery photos are live shots only (no file picker).
+  const [deliveryCamera, setDeliveryCamera] = useState(false);
   // C2: vet rating on a resolved case (rescuer only, once per case).
   const [myRating, setMyRating] = useState<VetRating | null>(null);
   const [ratingValue, setRatingValue] = useState(0);
@@ -244,9 +247,12 @@ export default function CaseDetailPage() {
     }
   };
 
-  const onDeliveryPhoto = async (file: File) => {
+  // From the live camera. Same pipeline as report photos (cleanPhotoFile);
+  // rethrows so the camera stays on the shot when the upload fails.
+  const onDeliveryPhoto = async (shot: File) => {
     setBusy(true);
     try {
+      const file = await cleanPhotoFile(shot);
       await addDeliveryPhoto(caseData.id, file);
       // case_photos isn't in the realtime publication, so nothing would echo
       // this back — without the reload the photo the rescuer just uploaded
@@ -254,6 +260,7 @@ export default function CaseDetailPage() {
       await reload();
     } catch (e) {
       toast(e instanceof Error ? e.message : t('common.error'));
+      throw e;
     } finally {
       setBusy(false);
     }
@@ -642,7 +649,7 @@ export default function CaseDetailPage() {
               ✓ {t('case.confirmDelivery')}
             </button>
             {!isBanned && (
-              <button className="btn btn--ghost" onClick={() => deliveryPhotoInput.current?.click()}>
+              <button className="btn btn--ghost" onClick={() => setDeliveryCamera(true)}>
                 <IconCamera size={18} /> {t('case.confirmDeliveryNote')}
               </button>
             )}
@@ -673,23 +680,17 @@ export default function CaseDetailPage() {
             </button>
           </div>
         )}
-
-        {/* Vet delivery photo input (hidden) */}
-        <input
-          ref={deliveryPhotoInput}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          hidden
-          onChange={(e) => {
-            // Take the File first, then clear the input so a second recovery
-            // photo (or the same file again) still fires onChange.
-            const file = e.target.files?.[0];
-            e.target.value = '';
-            if (file) void onDeliveryPhoto(file);
-          }}
-        />
+
       </div>
+
+      {deliveryCamera && (
+        <LiveCamera
+          title={t('camera.deliveryTitle')}
+          remaining={1}
+          onCapture={onDeliveryPhoto}
+          onClose={() => setDeliveryCamera(false)}
+        />
+      )}
 
       {/* ==================================================================
           4. PHOTO
@@ -753,7 +754,7 @@ export default function CaseDetailPage() {
                   <button
                     className="btn btn--secondary"
                     disabled={busy}
-                    onClick={() => deliveryPhotoInput.current?.click()}
+                    onClick={() => setDeliveryCamera(true)}
                   >
                     <IconCamera size={18} /> {t('case.addRecoveryPhoto')}
                   </button>
