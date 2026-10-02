@@ -20,10 +20,11 @@ import { disablePush, enablePush, getPushSubscription, pushSupported } from '../
 import { getCurrentPosition } from '../lib/geo';
 import { ENABLED_LOCALES, getLocale, LOCALE_NATIVE, setLocale, t, type LocaleCode } from '../i18n';
 import { EmptyPaw, IconCheck } from '../components/Icons';
+import { getSensitiveMode, SENSITIVE_MODES, setSensitiveMode, useSensitiveMode } from '../lib/sensitive';
 import type { NewCasePref, Profile } from '../lib/types';
 
-type Section = 'personal' | 'notifications' | 'alerts' | 'location' | 'language' | 'blocked' | 'delete';
-const SECTIONS: Section[] = ['personal', 'notifications', 'alerts', 'location', 'language', 'blocked', 'delete'];
+type Section = 'personal' | 'notifications' | 'alerts' | 'location' | 'language' | 'blocked' | 'delete' | 'sensitive';
+const SECTIONS: Section[] = ['personal', 'notifications', 'alerts', 'location', 'language', 'blocked', 'delete', 'sensitive'];
 
 const LEGAL_LINKS = [
   ['/about', 'legal.about'],
@@ -43,6 +44,9 @@ export default function SettingsPage() {
   // !profile alone showed "Sign in" to someone who was already signed in.
   const isRegistered = !!user && !isGuest;
   const current = SECTIONS.includes(section as Section) ? (section as Section) : null;
+
+  // Device-only, so guests can use it too — rendered before the account gate.
+  if (current === 'sensitive') return <SensitiveContentSettings />;
 
   if (!isRegistered) {
     return (
@@ -136,6 +140,7 @@ function SettingsHome() {
       <div className="v2-label">{t('settings.groupPrivacy')}</div>
       <div className="v2-group">
         <GroupRow to="/settings/blocked" title={t('settings.blocked')} />
+        <GroupRow to="/settings/sensitive" title={t('sensitive.title')} value={t(`sensitive.${getSensitiveMode()}` as const)} />
       </div>
 
       <div className="v2-label">{t('settings.groupData')}</div>
@@ -280,6 +285,7 @@ function SettingsSection({ section, profile, userId }: { section: Section; profi
     language: t('profile.language'),
     blocked: t('settings.blocked'),
     delete: t('settings.deleteAccount'),
+    sensitive: t('sensitive.title'),
   };
 
   return (
@@ -405,6 +411,39 @@ function SettingsSection({ section, profile, userId }: { section: Section; profi
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Settings → Sensitive content. A device setting (this browser only), so it
+ * works for guests too; see lib/sensitive.ts.
+ */
+function SensitiveContentSettings() {
+  const mode = useSensitiveMode();
+  return (
+    <div className="page settings">
+      <ScreenHeader title={t('sensitive.title')} fallback="/settings" />
+      <p className="settings__help">{t('sensitive.intro')}</p>
+      <div className="v2-group" role="radiogroup" aria-label={t('sensitive.title')}>
+        {SENSITIVE_MODES.map((m) => (
+          <button
+            key={m}
+            type="button"
+            role="radio"
+            aria-checked={mode === m}
+            className="v2-row v2-row--sub"
+            onClick={() => setSensitiveMode(m)}
+          >
+            <span className="v2-row__main">
+              <span className="v2-row__title">{t(`sensitive.${m}` as const)}</span>
+              <span className="v2-row__sub">{t(`sensitive.${m}Sub` as const)}</span>
+            </span>
+            {mode === m && <span className="settings__check" aria-hidden="true"><IconCheck size={16} /></span>}
+          </button>
+        ))}
+      </div>
+      <p className="settings__help">{t('sensitive.deviceNote')}</p>
     </div>
   );
 }
