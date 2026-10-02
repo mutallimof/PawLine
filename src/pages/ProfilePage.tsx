@@ -1,8 +1,12 @@
 /**
  * Own profile (Figma v2 "Profile Page" 95:241): identity, three stats we
- * actually have, my latest cases and a menu. Language and notification
- * preferences live in Settings; the platform-wide numbers live on About.
- * RescueHistoryPage (/profile/history) is the full list behind "View all".
+ * actually have and a menu. Language and notification preferences live in
+ * Settings; the platform-wide numbers live on About.
+ *
+ * Case lists live in ONE place per account type, never on Profile itself:
+ * RescueHistoryPage (/profile/history, the "Rescue history" row) for users,
+ * the Clinic dashboard for clinics — which already lists the clinic's cases,
+ * so clinics don't get a Rescue history row as well.
  */
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -183,25 +187,15 @@ export default function ProfilePage() {
 
       {isVet && <VetVisibilityNotice />}
 
-      {myCases.length > 0 && (
-        <>
-          <div className="profile__section-head">
-            <h2 className="v2-h2">{t('profile.myCases')}</h2>
-            <Link to="/profile/history" className="profile__view-all">{t('profile.viewAll')}</Link>
-          </div>
-          {myCases.slice(0, 2).map((c) => (
-            <CaseCard key={c.id} caseData={c} userLocation={null} />
-          ))}
-        </>
-      )}
-
       <div className="v2-group profile__menu">
-        <GroupRow
-          to="/profile/history"
-          icon={<IconHistory />}
-          title={t('profile.history')}
-          sub={t('profile.historySub')}
-        />
+        {!isVet && (
+          <GroupRow
+            to="/profile/history"
+            icon={<IconHistory />}
+            title={t('profile.history')}
+            sub={t('profile.historySub')}
+          />
+        )}
         {isVet && (
           <>
             <GroupRow to="/vet-dashboard" icon={<IconStethoscope />} iconTone="brand" title={t('profile.vetDashboard')} />

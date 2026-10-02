@@ -1084,8 +1084,6 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .profile__stat--helped { color: var(--text); }
 .profile__stat--active { color: var(--text); }
 .profile__stat--reported { color: var(--text); }
-.profile__section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.profile__view-all { font-size: var(--fs-small); font-weight: 600; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .profile__menu { margin-top: 16px; }
 .v2-row__title,
 .v2-row__sub { display: block; }
