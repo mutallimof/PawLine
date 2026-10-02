@@ -7,7 +7,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { GroupRow, ScreenHeader, useToast } from '../components/ui';
+import { GroupRow, PasswordField, ScreenHeader, useToast } from '../components/ui';
+import { supabase } from '../lib/supabase';
+import { captchaOptions } from '../lib/turnstile';
 import {
   deleteMyAccount,
   exportMyData,
@@ -23,8 +25,8 @@ import { EmptyPaw, IconCheck } from '../components/Icons';
 import { getSensitiveMode, SENSITIVE_MODES, setSensitiveMode, useSensitiveMode } from '../lib/sensitive';
 import type { NewCasePref, Profile } from '../lib/types';
 
-type Section = 'personal' | 'notifications' | 'alerts' | 'location' | 'language' | 'blocked' | 'delete' | 'sensitive';
-const SECTIONS: Section[] = ['personal', 'notifications', 'alerts', 'location', 'language', 'blocked', 'delete', 'sensitive'];
+type Section = 'personal' | 'notifications' | 'alerts' | 'location' | 'language' | 'blocked' | 'delete' | 'sensitive' | 'security';
+const SECTIONS: Section[] = ['personal', 'notifications', 'alerts', 'location', 'language', 'blocked', 'delete', 'sensitive', 'security'];
 
 const LEGAL_LINKS = [
   ['/about', 'legal.about'],
@@ -119,6 +121,7 @@ function SettingsHome() {
       <div className="v2-label">{t('settings.account')}</div>
       <div className="v2-group">
         <GroupRow to="/settings/personal" title={t('settings.personal')} sub={t('settings.personalSub')} />
+        <GroupRow to="/settings/security" title={t('security.title')} sub={t('security.sub')} />
       </div>
 
       <div className="v2-label">{t('settings.notifications')}</div>
@@ -286,11 +289,14 @@ function SettingsSection({ section, profile, userId }: { section: Section; profi
     blocked: t('settings.blocked'),
     delete: t('settings.deleteAccount'),
     sensitive: t('sensitive.title'),
+    security: t('security.title'),
   };
 
   return (
     <div className="page settings">
       <ScreenHeader title={titles[section]} fallback="/settings" />
+
+      {section === 'security' && <PasswordSection />}
 
       {section === 'personal' && (
         <div className="v2-group">
@@ -444,6 +450,96 @@ function SensitiveContentSettings() {
         ))}
       </div>
       <p className="settings__help">{t('sensitive.deviceNote')}</p>
+    </div>
+  );
+}
+
+/**
+ * Settings → Password & security. Email/password accounts only: the current
+ * password is re-verified by signing in again (with a captcha token — Auth
+ * captcha is on), then updateUser({ password }). Because that sign-in makes
+ * the session brand new, it also satisfies Supabase's "Secure password
+ * change" (recent sign-in) when that option is on. Google-only accounts
+ * have no Stray's Call password, so they get a note instead.
+ */
+function PasswordSection() {
+  const { user } = useAuth();
+  const toast = useToast();
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [repeat, setRepeat] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const providers: string[] =
+    (user?.app_metadata?.providers as string[] | undefined) ??
+    (user?.app_metadata?.provider ? [user.app_metadata.provider as string] : []);
+  const hasPassword = providers.includes('email') && !!user?.email;
+
+  if (!hasPassword) {
+    return (
+      <div className="v2-group">
+        <div className="v2-group__body settings__help" style={{ margin: 0 }}>{t('security.google')}</div>
+      </div>
+    );
+  }
+
+  const save = async () => {
+    if (next.length < 6) return toast(t('auth.passwordTooShort'));
+    if (next !== repeat) return toast(t('auth.passwordMismatch'));
+    if (next === current) return toast(t('security.samePassword'));
+    setBusy(true);
+    try {
+      // 1. Re-verify the current password.
+      const { error: authErr } = await supabase.auth.signInWithPassword({
+        email: user!.email!,
+        password: current,
+        options: await captchaOptions(),
+      });
+      if (authErr) {
+        toast(authErr.message.toLowerCase().includes('invalid login') ? t('security.wrongCurrent') : authErr.message);
+        return;
+      }
+      // 2. Set the new one.
+      const { error } = await supabase.auth.updateUser({ password: next });
+      if (error) {
+        toast(error.code === 'same_password' ? t('security.samePassword') : error.message);
+        return;
+      }
+      setCurrent('');
+      setNext('');
+      setRepeat('');
+      setDone(true);
+      toast(t('security.done'));
+    } catch (e) {
+      toast(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="v2-group">
+      <div className="v2-group__body settings__form">
+        {done && <div className="banner banner--success" role="status">{t('security.done')}</div>}
+        <PasswordField label={t('security.current')} value={current} onChange={setCurrent} autoComplete="current-password" />
+        <PasswordField label={t('security.new')} value={next} onChange={setNext} autoComplete="new-password" />
+        <PasswordField
+          label={t('security.confirm')}
+          value={repeat}
+          onChange={setRepeat}
+          autoComplete="new-password"
+          onEnter={() => void save()}
+        />
+        <button
+          type="button"
+          className="btn btn--primary"
+          disabled={busy || !current || !next || !repeat}
+          onClick={() => void save()}
+        >
+          {busy ? t('common.loading') : t('security.save')}
+        </button>
+      </div>
     </div>
   );
 }
