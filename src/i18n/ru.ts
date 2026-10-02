@@ -127,6 +127,7 @@ export const ru: Dict = {
   'caseChat.placeholder': 'Написать сообщение…',
   'caseChat.signIn': 'Войдите, чтобы присоединиться к беседе.',
   'caseChat.empty': 'Сообщений пока нет. Поздоровайтесь и обсудите спасение.',
+  'caseChat.update': 'Обновление случая', // label read out for system cards (case events) in the chat
   'caseChat.pinned': 'Закреплено клиникой',
   'caseChat.deletedAccount': 'Удалённый аккаунт',
   'caseChat.pin': 'Закрепить сверху',

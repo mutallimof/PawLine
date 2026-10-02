@@ -4,7 +4,7 @@
  * bank details so people can chip in for treatment. Payments happen entirely
  * OUTSIDE the platform — this is information-sharing only, by design.
  */
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCase, useCaseChat } from '../hooks/useRealtime';
@@ -19,10 +19,18 @@ import {
 } from '../lib/api';
 import { caseTitle, ScreenHeader, statusLabel, useToast } from '../components/ui';
 import { ReportSheet } from '../components/Report';
-import { IconHelp, IconSend, VetTag } from '../components/Icons';
-import { t } from '../i18n';
+import {
+  IconCheckCircle,
+  IconClock,
+  IconHelp,
+  IconRoute,
+  IconSend,
+  IconStethoscope,
+  VetTag,
+} from '../components/Icons';
+import { hasKey, t } from '../i18n';
 import { clockTime, dayKey, dayLabel, formatDate } from '../lib/time';
-import type { CaseMessage } from '../lib/types';
+import type { CaseEvent, CaseMessage } from '../lib/types';
 
 /**
  * Whether this device has already been shown the "you can pin a message" hint.
@@ -51,8 +59,19 @@ export default function CaseChatPage() {
   // (sender_id is nullable only so a deleted author's messages survive, 037). So gate the
   // composer and the per-message actions, never the thread itself.
   const isRegistered = !!user && !isGuest;
-  const { caseData, reload: reloadCase } = useCase(id);
+  const { caseData, events, reload: reloadCase } = useCase(id);
   const { messages, loading } = useCaseChat(id);
+
+  // Messages and the case's events (case_events, already public) in one
+  // time-ordered thread; events render as small read-only system cards.
+  const timeline = useMemo(
+    () =>
+      [
+        ...messages.map((m) => ({ kind: 'msg' as const, at: m.created_at, m })),
+        ...events.map((e) => ({ kind: 'event' as const, at: e.created_at, e })),
+      ].sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime()),
+    [messages, events]
+  );
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -125,10 +144,10 @@ export default function CaseChatPage() {
     }
   };
 
-  // Keep the newest message in view.
+  // Keep the newest message or update in view.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [messages.length]);
+  }, [timeline.length]);
 
   // Migration 017: mark read whenever new messages land while it's open —
   // mirrors DmThreadPage's markConversationRead effect.
@@ -217,12 +236,23 @@ export default function CaseChatPage() {
         {!loading && messages.length === 0 && (
           <div className="empty-state">{t('caseChat.empty')}</div>
         )}
-        {messages.map((m, i) => {
+        {timeline.map((item, i) => {
+          const prev = timeline[i - 1];
+          const newDay = i === 0 || dayKey(prev.at) !== dayKey(item.at);
+          if (item.kind === 'event') {
+            return (
+              <Fragment key={`e${item.e.id}`}>
+                {newDay && <div className="chat-day">{dayLabel(item.at)}</div>}
+                <ChatEvent event={item.e} />
+              </Fragment>
+            );
+          }
+          const m = item.m;
           const mine = m.sender_id === user?.id;
-          const newDay = i === 0 || dayKey(messages[i - 1].created_at) !== dayKey(m.created_at);
           // Group E: the sender's name shows only on the first message of a
-          // run — consecutive messages from one person collapse together.
-          const isFirstOfRun = newDay || messages[i - 1].sender_id !== m.sender_id;
+          // run — consecutive messages from one person collapse together; a
+          // system card in between starts a new run.
+          const isFirstOfRun = newDay || prev.kind !== 'msg' || prev.m.sender_id !== m.sender_id;
           // Menu contents by viewer. Reporting is for other people's messages;
           // pinning is for the case's own vet, and only on their OWN message —
           // a clinic pins its condition/bank-details post, nothing else. Both
@@ -381,6 +411,28 @@ export default function CaseChatPage() {
           </Link>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * One case event as a read-only system card in the chat: an icon by kind,
+ * the localized pipeline text (free-text clinic updates verbatim, as on
+ * Case Detail), and the time.
+ */
+function ChatEvent({ event }: { event: CaseEvent }) {
+  const icon =
+    event.type === 'case_accepted' || event.type === 'case_en_route' ? <IconRoute size={15} />
+      : event.type === 'vet_requested' || event.type === 'vet_confirmed' || event.type === 'vet_declined'
+        ? <IconStethoscope size={15} />
+        : event.type === 'case_resolved' ? <IconCheckCircle size={15} />
+        : <IconClock size={15} />;
+  const text = hasKey(`event.${event.type}`) ? t(`event.${event.type}` as never) : event.note;
+  return (
+    <div className="chat-event" role="note" aria-label={`${t('caseChat.update')}: ${text}`}>
+      <span className="chat-event__icon" aria-hidden="true">{icon}</span>
+      <span className="chat-event__text">{text}</span>
+      <span className="chat-event__time">{clockTime(event.created_at)}</span>
     </div>
   );
 }

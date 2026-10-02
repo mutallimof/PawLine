@@ -945,6 +945,25 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
   font-weight: 600;
   color: var(--text-2);
 }
+/* Case events in the thread: small read-only system cards, centred, so they
+   read apart from people's messages. */
+.chat-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 14px auto 2px;
+  padding: 7px 12px;
+  border-radius: 18px; /* not a pill: long updates wrap to two lines */
+  background: var(--lav-tint);
+  color: var(--text);
+  font-size: var(--fs-label);
+  line-height: 18px;
+}
+.chat-event__icon { display: flex; flex-shrink: 0; }
+.chat-event__text { min-width: 0; font-weight: 600; }
+.chat-event__time { flex-shrink: 0; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .chat-msg { display: flex; flex-direction: column; align-items: flex-start; margin-top: 12px; }
 .chat-msg--mine { align-items: flex-end; }
 .chat-msg__meta {

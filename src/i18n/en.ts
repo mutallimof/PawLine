@@ -125,6 +125,7 @@ export const en = {
   'caseChat.placeholder': 'Write a message…',
   'caseChat.signIn': 'Sign in to join the conversation.',
   'caseChat.empty': 'No messages yet. Say hello and coordinate the rescue.',
+  'caseChat.update': 'Case update', // label read out for system cards (case events) in the chat
   'caseChat.pinned': 'Pinned by the clinic',
   'caseChat.deletedAccount': 'Deleted account',
   'caseChat.pin': 'Pin to top',
