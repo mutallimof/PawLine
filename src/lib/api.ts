@@ -52,15 +52,17 @@ import { reverseGeocode } from './gmaps';
  * terms_accepted_at and last_progress_at are server-only and the rescuer's
  * live location has moved to case_rescuer_locations.
  *
- * CASE_COLUMNS_LATER were added by 027/029/032; if a database predates any of
- * them the query is retried with the base list (see withCaseColumns).
+ * CASE_COLUMNS_LATER were added by 027/029/032 and CASE_COLUMNS_041 by 041;
+ * if a database predates any of them the query is retried with a shorter
+ * list (see withCaseColumns).
  */
 const CASE_COLUMNS_BASE =
   'id, reporter_id, guest_name, animal, description, lat, lng, address_hint, status, ' +
   'rescuer_id, vet_id, created_at, accepted_at, resolved_at, hidden, escalated_at, ' +
   'closed_reason, injury_type, spot_type, urgency';
 const CASE_COLUMNS_LATER = 'street_address, pinned_message_id, chat_closed_at';
-export const CASE_COLUMNS = `${CASE_COLUMNS_BASE}, ${CASE_COLUMNS_LATER}`;
+const CASE_COLUMNS_041 = 'needs';
+export const CASE_COLUMNS = `${CASE_COLUMNS_BASE}, ${CASE_COLUMNS_LATER}, ${CASE_COLUMNS_041}`;
 
 const CASE_EMBEDS = `
   photos:case_photos (*),
@@ -76,12 +78,14 @@ const CASE_EMBEDS = `
 type QueryResult = { data: unknown; error: { code?: string; message: string } | null };
 
 /**
- * Run a `cases` query with the full public column list, retrying with the
- * base list if the database is missing a later column (42703).
+ * Run a `cases` query with the full public column list, retrying with
+ * shorter lists if the database is missing a later column (42703): first
+ * without 041's, then the base list.
  */
 export async function withCaseColumns(run: (cols: string) => PromiseLike<QueryResult>): Promise<QueryResult> {
-  const res = await run(CASE_COLUMNS);
-  if (res.error?.code === '42703') return run(CASE_COLUMNS_BASE);
+  let res = await run(CASE_COLUMNS);
+  if (res.error?.code === '42703') res = await run(`${CASE_COLUMNS_BASE}, ${CASE_COLUMNS_LATER}`);
+  if (res.error?.code === '42703') res = await run(CASE_COLUMNS_BASE);
   return res;
 }
 
@@ -233,6 +237,8 @@ export interface NewCaseInput {
   injuryType: import('./types').InjuryType | null;
   spotType: import('./types').SpotType | null;
   urgency: import('./types').UrgencyLevel;
+  /** Optional (041). */
+  needs?: import('./types').CaseNeed[];
   photos: File[];
   /** Guests only (035): the Terms version they accepted on the report form. */
   termsVersion?: string | null;
@@ -324,15 +330,16 @@ export async function createCase(input: NewCaseInput): Promise<string> {
     ...row,
     street_address: streetAddress,
     ...(input.termsVersion ? { terms_version: input.termsVersion } : {}),
+    ...(input.needs?.length ? { needs: input.needs } : {}),
   };
   let { data, error } = await supabase.from('cases').insert(payload).select('id').single();
 
-  // Migration 029 / 035 not applied yet? PostgREST rejects the whole insert
-  // over an unknown column. Retry without it rather than let a pending
+  // Migration 029 / 035 / 041 not applied yet? PostgREST rejects the whole
+  // insert over an unknown column. Retry without it rather than let a pending
   // migration break report creation, which is the one flow this app exists
-  // for. Safe to delete once 029 and 035 are live everywhere.
-  for (let i = 0; i < 2 && error; i++) {
-    const unknown = (['street_address', 'terms_version'] as const).find(
+  // for. Safe to delete once 029, 035 and 041 are live everywhere.
+  for (let i = 0; i < 3 && error; i++) {
+    const unknown = (['street_address', 'terms_version', 'needs'] as const).find(
       (col) => col in payload && isUnknownColumnError(error!, col)
     );
     if (!unknown) break;
@@ -468,6 +475,17 @@ export const recordTermsAcceptance = (version: string) =>
   rpc('record_terms_acceptance', { p_version: version });
 
 export const dropCase = (caseId: string) => rpc('drop_case', { p_case: caseId });
+
+/** 041: reporter or current rescuer only — the server checks the caller. */
+export const setCaseNeeds = (caseId: string, needs: import('./types').CaseNeed[]) =>
+  rpc('set_case_needs', { p_case: caseId, p_needs: needs });
+
+/** Did this session create the case? (036; how a guest reporter is known.) */
+export async function isCaseCreator(caseId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_case_creator', { p_case: caseId });
+  if (error) return false;
+  return data === true;
+}
 
 export const selectVet = (caseId: string, vetId: string) =>
   rpc('select_vet', { p_case: caseId, p_vet: vetId });

@@ -788,6 +788,22 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -0.015em; }
 .case-detail__dest svg { width: 13px; height: 13px; color: var(--text); flex-shrink: 0; }
 .case-detail__track .map-wrap { border-radius: var(--r-btn); overflow: hidden; }
 .case-detail__track-note { margin: 6px 0 0; font-size: var(--fs-label); color: var(--text-2); }
+/* ETA under the en-route map (participants only). */
+.case-detail__eta { margin: 8px 0 0; font-size: var(--fs-small); color: var(--text); }
+.case-detail__eta strong { font-family: var(--font-head, inherit); font-weight: 700; }
+.case-detail__eta-note { display: block; margin-top: 2px; font-size: var(--fs-label); color: var(--text-2); }
+
+/* Needs (041) */
+.case-needs { margin: 20px 0 4px; }
+.case-needs__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.case-needs__edit {
+  min-height: 44px; padding: 0 4px; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: var(--fs-small); font-weight: 650; color: var(--anchor);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.case-needs__list { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; padding: 0; list-style: none; }
+.case-needs__actions { display: flex; gap: 10px; margin-top: 12px; }
+.case-needs__actions .btn { flex: 1; }
 
 /* Photo evidence */
 .case-detail__photo { border-radius: var(--r-card); overflow: hidden; margin-bottom: 8px; }
